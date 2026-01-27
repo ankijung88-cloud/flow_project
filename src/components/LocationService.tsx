@@ -17,6 +17,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const mapRef = useRef<any>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [stats, setStats] = useState({ within500m: 0, within1km: 0, within2km: 0 });
 
   // 사용자 위치 가져오기
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const nearestBooths = useMemo(() => {
     if (!userLocation) return [];
 
-    return nationalBooths
+    const boothsWithDist = nationalBooths
       .map((booth) => ({
         ...booth,
         distance: getDistance(
@@ -69,8 +70,16 @@ export default function LocationService({ onBack }: LocationServiceProps) {
           booth.longitude
         ),
       }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 10);
+      .sort((a, b) => a.distance - b.distance);
+
+    // 통계 업데이트
+    setStats({
+      within500m: boothsWithDist.filter(b => b.distance <= 500).length,
+      within1km: boothsWithDist.filter(b => b.distance <= 1000).length,
+      within2km: boothsWithDist.filter(b => b.distance <= 2000).length,
+    });
+
+    return boothsWithDist.slice(0, 10);
   }, [userLocation, nationalBooths]);
 
   // 지도 초기화
@@ -230,6 +239,28 @@ export default function LocationService({ onBack }: LocationServiceProps) {
                 className="w-full h-[400px] rounded-lg shadow-lg"
                 style={{ border: "2px solid #dbeafe" }}
               />
+
+              {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
+              <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[170px]">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">📍</span>
+                  <h4 className="text-sm font-bold text-gray-900 text-left">주변 현황</h4>
+                </div>
+                <div className="space-y-2 text-left">
+                  <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-blue-700">반경 500m</span>
+                    <span className="text-sm font-black text-blue-900">{stats.within500m}개</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-indigo-700">반경 1km</span>
+                    <span className="text-sm font-black text-indigo-900">{stats.within1km}개</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-purple-700">반경 2km</span>
+                    <span className="text-sm font-black text-purple-900">{stats.within2km}개</span>
+                  </div>
+                </div>
+              </div>
 
               {/* Custom Zoom Controls (Bottom Left) */}
               <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">

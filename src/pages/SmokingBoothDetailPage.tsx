@@ -71,8 +71,7 @@ export default function SmokingBoothDetailPage() {
         ...booth,
         distance: getDistance(userLocation.lat, userLocation.lng, booth.latitude, booth.longitude),
       }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 20);
+      .sort((a, b) => a.distance - b.distance);
   }, [userLocation, nationalBooths]);
 
   // 지도 초기화
@@ -300,6 +299,28 @@ export default function SmokingBoothDetailPage() {
                   <p className="text-green-100 text-sm">내 위치 기준 주변 흡연부스가 표시됩니다</p>
                 </div>
                 <div ref={mapContainerRef} className="w-full h-[500px]" />
+
+                {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
+                <div className="absolute top-[80px] left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-green-100 min-w-[180px]">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">📊</span>
+                    <h4 className="text-sm font-bold text-gray-900 text-left">주변 흡연구역</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                      <span className="text-[10px] font-bold text-green-700">반경 500m</span>
+                      <span className="text-sm font-black text-green-900">{stats.within500m}개</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
+                      <span className="text-[10px] font-bold text-emerald-700">반경 1km</span>
+                      <span className="text-sm font-black text-emerald-900">{stats.within1km}개</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-teal-50 rounded-lg">
+                      <span className="text-[10px] font-bold text-teal-700">반경 2km</span>
+                      <span className="text-sm font-black text-teal-900">{stats.within2km}개</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Custom Zoom Controls (Bottom Left) */}
                 <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">

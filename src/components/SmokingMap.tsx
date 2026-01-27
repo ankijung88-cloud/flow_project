@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+```
+import { useEffect, useRef, useState, useMemo } from "react";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { calculateDistance } from "../utils/pathfinding";
 import type { SmokingBooth } from "../services/smokingBoothService";
@@ -50,14 +51,14 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
       markerContent.style.cssText = 'position: relative; width: 32px; height: 32px; cursor: pointer;';
 
       markerContent.innerHTML = `
-        <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+  < div style = "position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;" >
           <div class="smoke-marker-ripple"></div>
           <div class="smoke-marker-ripple"></div>
           <div class="smoke-marker-ripple"></div>
           <div class="smoke-marker-ripple"></div>
           <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
-        </div>
-      `;
+        </div >
+  `;
 
       const customOverlay = new window.kakao.maps.CustomOverlay({
         position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
@@ -69,7 +70,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
       // 마커 클릭 시 정보창 표시
       const infowindow = new window.kakao.maps.InfoWindow({
-        content: `<div style="padding:8px;font-size:12px;font-weight:bold;white-space:nowrap;">${booth.name}</div>`,
+        content: `< div style = "padding:8px;font-size:12px;font-weight:bold;white-space:nowrap;" > ${ booth.name }</div > `,
       });
 
       markerContent.addEventListener('click', () => {
@@ -117,7 +118,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
           mapRef.current = map;
 
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
+            `${ import.meta.env.BASE_URL } image / user - marker.svg`,
             new window.kakao.maps.Size(40, 40)
           );
 
@@ -136,6 +137,30 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
     startApp();
   }, [nationalBooths]);
+
+  // 상시 통계 계산
+  const currentStats = useMemo(() => {
+    if (!mapRef.current) return nearbyInfo;
+
+    const center = mapRef.current.getCenter();
+    const lat = center.getLat();
+    const lng = center.getLng();
+
+    let w500 = 0, w1k = 0, w2k = 0;
+    nationalBooths.forEach(booth => {
+      const dist = calculateDistance({ lat, lng }, { lat: booth.latitude, lng: booth.longitude });
+      if (dist <= 500) w500++;
+      if (dist <= 1000) w1k++;
+      if (dist <= 2000) w2k++;
+    });
+
+    return {
+      destination: nearbyInfo?.destination || "현재 중심",
+      within500m: w500,
+      within1km: w1k,
+      within2km: w2k
+    };
+  }, [nearbyInfo, nationalBooths, mapRef.current]);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,7 +191,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
         // 목적지 라벨 표시
         const destLabel = new window.kakao.maps.InfoWindow({
-          content: `<div style="padding:8px 12px;font-size:14px;font-weight:bold;background:#ef4444;color:white;border-radius:8px;">${result.place_name}</div>`,
+          content: `< div style = "padding:8px 12px;font-size:14px;font-weight:bold;background:#ef4444;color:white;border-radius:8px;" > ${ result.place_name }</div > `,
           removable: false,
         });
         destLabel.open(mapRef.current, destMarker);
@@ -262,7 +287,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
           </p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <img src={`${import.meta.env.BASE_URL}image/smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
+              <img src={`${ import.meta.env.BASE_URL } image / smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
               <span className="text-[11px] font-medium text-gray-600">흡연부스</span>
             </div>
             <div className="flex items-center gap-2">
@@ -277,28 +302,28 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
         </div>
 
         {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
-        {nearbyInfo && (
-          <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[200px]">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xl">📍</span>
-              <h4 className="text-sm font-bold text-gray-900 truncate max-w-[150px]">
-                {nearbyInfo.destination}
-              </h4>
+        <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[200px]">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">📍</span>
+            <h4 className="text-sm font-bold text-gray-900 truncate max-w-[150px]">
+              {currentStats?.destination || "위치 분석 중..."}
+            </h4>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+              <span className="text-[11px] font-bold text-blue-700">반경 500m</span>
+              <span className="text-sm font-black text-blue-900">{currentStats?.within500m || 0}개</span>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                <span className="text-[11px] font-bold text-blue-700">반경 500m</span>
-                <span className="text-sm font-black text-blue-900">{nearbyInfo.within500m}개</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
-                <span className="text-[11px] font-bold text-indigo-700">반경 1km</span>
-                <span className="text-sm font-black text-indigo-900">{nearbyInfo.within1km}개</span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-                <span className="text-[11px] font-bold text-purple-700">반경 2km</span>
-                <span className="text-sm font-black text-purple-900">{nearbyInfo.within2km}개</span>
-              </div>
+            <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
+              <span className="text-[11px] font-bold text-indigo-700">반경 1km</span>
+              <span className="text-sm font-black text-indigo-900">{currentStats?.within1km || 0}개</span>
             </div>
+            <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+              <span className="text-[11px] font-bold text-purple-700">반경 2km</span>
+              <span className="text-sm font-black text-purple-900">{currentStats?.within2km || 0}개</span>
+            </div>
+          </div>
+          {nearbyInfo && (
             <button
               onClick={() => {
                 setNearbyInfo(null);
@@ -312,8 +337,8 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
             >
               결과 지우기
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Custom Zoom Controls (Bottom Left) */}
         <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
