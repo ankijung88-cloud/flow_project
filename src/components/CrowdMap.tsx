@@ -658,17 +658,17 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
           <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
             <button
               onClick={handleZoomIn}
-              className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+              className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30"
               title="확대"
             >
-              <PlusIcon className="w-6 h-6 text-gray-700" />
+              <PlusIcon className="w-7 h-7 text-gray-800 relative z-40" />
             </button>
             <button
               onClick={handleZoomOut}
-              className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+              className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30"
               title="축소"
             >
-              <MinusIcon className="w-6 h-6 text-gray-700" />
+              <MinusIcon className="w-7 h-7 text-gray-800 relative z-40" />
             </button>
           </div>
         </div>
