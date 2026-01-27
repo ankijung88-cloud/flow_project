@@ -12,6 +12,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flow - 흡연부스 회피 네비게이션</title>
+  <script id="kakao-map-sdk" type="text/javascript"
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&autoload=false&libraries=services,clusterer,drawing"
+    onload="console.log('[HTML] Kakao SDK Script Loaded')"
+    onerror="console.error('[HTML] Kakao SDK Script Failed to Load')"></script>
 </head>
 
 <body>
@@ -21,8 +25,6 @@
     </div>
   </div>
   <script type="module" src="/src/main.tsx"></script>
-  <script id="kakao-map-sdk" type="text/javascript"
-    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&autoload=false&libraries=services,clusterer,drawing"></script>
 </body>
 
 </html>
