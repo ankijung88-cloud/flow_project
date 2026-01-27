@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Data aggregation
+raw_data/
+combined_smoking_areas.xlsx
+*.xlsx
+*.csv
+
