@@ -205,8 +205,27 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       }
     };
 
+    const scriptId = "kakao-map-sdk";
+    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
+
     if (window.kakao && window.kakao.maps) {
       initializeMaps();
+    } else {
+      const existingScript = document.getElementById(scriptId);
+      if (!existingScript) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services,clusterer,drawing`;
+        script.async = true;
+        script.onload = () => {
+          window.kakao.maps.load(initializeMaps);
+        };
+        document.head.appendChild(script);
+      } else {
+        existingScript.addEventListener("load", () => {
+          window.kakao.maps.load(initializeMaps);
+        });
+      }
     }
   }, [region, regionInfo]);
 
