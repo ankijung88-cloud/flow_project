@@ -166,49 +166,68 @@ export default function ServicePage() {
    * 지도 초기화
    */
   useEffect(() => {
-    const initializeMap = (lat: number, lng: number) => {
-      setUserLocation({ lat, lng });
-
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(lat, lng),
-            level: 8,
-            zoomable: false, // 마우스 휠 확대/축소 금지
-          };
-          const map = new window.kakao.maps.Map(
-            mapContainerRef.current,
-            options
-          );
-          mapRef.current = map;
-
-          // 사용자 위치 마커
-          const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
-            new window.kakao.maps.Size(40, 40)
-          );
-
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(lat, lng),
-            map: map,
-            image: userMarkerImage,
-            title: "내 위치",
-          });
-
-          // 전국 흡연부스 마커 렌더링
-          renderSmokingBooths(map);
-        }
-      });
-    };
-
     const startApp = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
-          () => initializeMap(37.5665, 126.978)
-        );
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
+
+        const handleInit = (lat: number, lng: number) => {
+          setUserLocation({ lat, lng });
+
+          window.kakao.maps.load(() => {
+            if (mapContainerRef.current) {
+              const options = {
+                center: new window.kakao.maps.LatLng(lat, lng),
+                level: 8,
+                zoomable: false, // 마우스 휠 확대/축소 금지
+              };
+              const map = new window.kakao.maps.Map(
+                mapContainerRef.current,
+                options
+              );
+              mapRef.current = map;
+
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map.relayout();
+                map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+              }, 100);
+
+              // 사용자 위치 마커
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(40, 40)
+              );
+
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(lat, lng),
+                map: map,
+                image: userMarkerImage,
+                title: "내 위치",
+              });
+
+              // 전국 흡연부스 마커 렌더링
+              renderSmokingBooths(map);
+            }
+          });
+        };
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => handleInit(pos.coords.latitude, pos.coords.longitude),
+            () => handleInit(37.5665, 126.978)
+          );
+        } else {
+          handleInit(37.5665, 126.978);
+        }
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
       } else {
-        initializeMap(37.5665, 126.978);
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
+        }
       }
     };
 

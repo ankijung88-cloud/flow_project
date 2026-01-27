@@ -192,71 +192,90 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   // 흡연부스 지도 초기화
   useEffect(() => {
     const initializeBoothMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef1.current && !mapRef1.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
-            level: regionInfo.level,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef1.current, options);
-          mapRef1.current = map;
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
+        window.kakao.maps.load(() => {
+          if (mapContainerRef1.current && !mapRef1.current) {
+            const options = {
+              center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
+              level: regionInfo.level,
+            };
+            const map = new window.kakao.maps.Map(mapContainerRef1.current, options);
+            mapRef1.current = map;
 
-          // 지역 흡연부스 마커 표시
-          regionBooths.forEach((booth) => {
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
-              </div>
-            `;
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng));
+            }, 100);
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-              content: markerContent,
-              yAnchor: 0.5,
+            // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+            map.setZoomable(false);
+
+            // 지역 흡연부스 마커 표시
+            regionBooths.forEach((booth) => {
+              const markerContent = document.createElement('div');
+              markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
+              markerContent.innerHTML = `
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                  <div class="smoke-marker-ripple"></div>
+                  <div class="smoke-marker-ripple"></div>
+                  <div class="smoke-marker-ripple"></div>
+                  <div class="smoke-marker-ripple"></div>
+                  <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+                </div>
+              `;
+
+              const customOverlay = new window.kakao.maps.CustomOverlay({
+                position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+                content: markerContent,
+                yAnchor: 0.5,
+              });
+              customOverlay.setMap(map);
             });
-            customOverlay.setMap(map);
-          });
 
-          // 초기 통계 계산
-          const initCenter = map.getCenter();
-          const initLat = initCenter.getLat();
-          const initLng = initCenter.getLng();
+            // 초기 통계 계산
+            const initCenter = map.getCenter();
+            const initLat = initCenter.getLat();
+            const initLng = initCenter.getLng();
 
-          let w500 = 0, w1k = 0, w2k = 0;
-          nationalBooths.forEach(booth => {
-            const d = calculateDist(initLat, initLng, booth.latitude, booth.longitude);
-            if (d <= 500) w500++;
-            if (d <= 1000) w1k++;
-            if (d <= 2000) w2k++;
-          });
-          setStats({ within500m: w500, within1km: w1k, within2km: w2k });
-
-          // 지도 이동 시 통계 업데이트
-          window.kakao.maps.event.addListener(map, 'idle', () => {
-            const center = map.getCenter();
-            const cLat = center.getLat();
-            const cLng = center.getLng();
-
-            let ww500 = 0, ww1k = 0, ww2k = 0;
+            let w500 = 0, w1k = 0, w2k = 0;
             nationalBooths.forEach(booth => {
-              const d = calculateDist(cLat, cLng, booth.latitude, booth.longitude);
-              if (d <= 500) ww500++;
-              if (d <= 1000) ww1k++;
-              if (d <= 2000) ww2k++;
+              const d = calculateDist(initLat, initLng, booth.latitude, booth.longitude);
+              if (d <= 500) w500++;
+              if (d <= 1000) w1k++;
+              if (d <= 2000) w2k++;
             });
-            setStats({ within500m: ww500, within1km: ww1k, within2km: ww2k });
-          });
+            setStats({ within500m: w500, within1km: w1k, within2km: w2k });
+
+            // 지도 이동 시 통계 업데이트
+            window.kakao.maps.event.addListener(map, 'idle', () => {
+              const center = map.getCenter();
+              const cLat = center.getLat();
+              const cLng = center.getLng();
+
+              let ww500 = 0, ww1k = 0, ww2k = 0;
+              nationalBooths.forEach(booth => {
+                const d = calculateDist(cLat, cLng, booth.latitude, booth.longitude);
+                if (d <= 500) ww500++;
+                if (d <= 1000) ww1k++;
+                if (d <= 2000) ww2k++;
+              });
+              setStats({ within500m: ww500, within1km: ww1k, within2km: ww2k });
+            });
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
         }
-      });
+      }
     };
 
     const scriptId = "kakao-map-sdk";
@@ -282,45 +301,64 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   // 혼잡도 지도 초기화
   useEffect(() => {
     const initializeCrowdMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef2.current && !mapRef2.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
-            level: regionInfo.level,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef2.current, options);
-          mapRef2.current = map;
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
+        window.kakao.maps.load(() => {
+          if (mapContainerRef2.current && !mapRef2.current) {
+            const options = {
+              center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
+              level: regionInfo.level,
+            };
+            const map = new window.kakao.maps.Map(mapContainerRef2.current, options);
+            mapRef2.current = map;
 
-          // 지역 혼잡도 마커 표시
-          regionLocations.forEach((loc) => {
-            const data = generateLocationData(loc.name, loc.lat, loc.lng);
-            const color = getLevelColor(data.currentLevel);
-            const radius = data.currentLevel === "매우혼잡" ? 45 :
-              data.currentLevel === "혼잡" ? 38 :
-                data.currentLevel === "보통" ? 32 : 28;
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng));
+            }, 100);
 
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
-                <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
-                <div style="position: absolute; font-size: 8px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
-              </div>
-            `;
+            // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+            map.setZoomable(false);
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-              content: markerContent,
-              yAnchor: 0.5,
+            // 지역 혼잡도 마커 표시
+            regionLocations.forEach((loc) => {
+              const data = generateLocationData(loc.name, loc.lat, loc.lng);
+              const color = getLevelColor(data.currentLevel);
+              const radius = data.currentLevel === "매우혼잡" ? 45 :
+                data.currentLevel === "혼잡" ? 38 :
+                  data.currentLevel === "보통" ? 32 : 28;
+
+              const markerContent = document.createElement('div');
+              markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
+              markerContent.innerHTML = `
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
+                  <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
+                  <div style="position: absolute; font-size: 8px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
+                </div>
+              `;
+
+              const customOverlay = new window.kakao.maps.CustomOverlay({
+                position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+                content: markerContent,
+                yAnchor: 0.5,
+              });
+              customOverlay.setMap(map);
             });
-            customOverlay.setMap(map);
-          });
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
         }
-      });
+      }
     };
 
     const scriptId = "kakao-map-sdk";

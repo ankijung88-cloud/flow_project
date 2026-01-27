@@ -129,51 +129,70 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
   // 지도 초기화
   useEffect(() => {
     const initializeMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current && !mapRef.current) {
-          const center = new window.kakao.maps.LatLng(36.5, 127.5);
-          const options = {
-            center: center,
-            level: 13,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          mapRef.current = map;
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
-
-          // 모든 지역에 혼잡도 마커 표시
-          majorLocations.forEach((loc) => {
-            const data = generateLocationData(loc.name, loc.lat, loc.lng);
-            const color = getLevelColor(data.currentLevel);
-            const radius = data.currentLevel === "매우혼잡" ? 45 :
-              data.currentLevel === "혼잡" ? 38 :
-                data.currentLevel === "보통" ? 32 : 28;
-
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
-                <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${loc.name}</div>
-              </div>
-            `;
-
-            markerContent.onclick = () => {
-              setSelectedLocation(data);
-              map.setCenter(new window.kakao.maps.LatLng(loc.lat, loc.lng));
-              map.setLevel(8);
+        window.kakao.maps.load(() => {
+          if (mapContainerRef.current && !mapRef.current) {
+            const center = new window.kakao.maps.LatLng(36.5, 127.5);
+            const options = {
+              center: center,
+              level: 13,
             };
+            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+            mapRef.current = map;
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-              content: markerContent,
-              yAnchor: 0.5,
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(center);
+            }, 100);
+
+            // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+            map.setZoomable(false);
+
+            // 모든 지역에 혼잡도 마커 표시
+            majorLocations.forEach((loc) => {
+              const data = generateLocationData(loc.name, loc.lat, loc.lng);
+              const color = getLevelColor(data.currentLevel);
+              const radius = data.currentLevel === "매우혼잡" ? 45 :
+                data.currentLevel === "혼잡" ? 38 :
+                  data.currentLevel === "보통" ? 32 : 28;
+
+              const markerContent = document.createElement('div');
+              markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
+              markerContent.innerHTML = `
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
+                  <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${loc.name}</div>
+                </div>
+              `;
+
+              markerContent.onclick = () => {
+                setSelectedLocation(data);
+                map.setCenter(new window.kakao.maps.LatLng(loc.lat, loc.lng));
+                map.setLevel(8);
+              };
+
+              const customOverlay = new window.kakao.maps.CustomOverlay({
+                position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+                content: markerContent,
+                yAnchor: 0.5,
+              });
+              customOverlay.setMap(map);
             });
-            customOverlay.setMap(map);
-          });
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
         }
-      });
+      }
     };
 
     const scriptId = "kakao-map-sdk";

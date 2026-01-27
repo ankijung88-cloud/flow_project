@@ -11,28 +11,42 @@ export default function WalkCourseMap({
   const kakaoMapRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!window.kakao || !window.kakao.maps) {
-      console.error("Kakao Maps SDK not found");
-      return;
-    }
+    const initLogic = () => {
+      if (!window.kakao || !window.kakao.maps) return;
 
-    window.kakao.maps.load(() => {
-      if (mapContainerRef.current) {
-        const options = {
-          center: new window.kakao.maps.LatLng(course.lat, course.lng),
-          level: 3,
-        };
-        const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-        kakaoMapRef.current = map;
+      window.kakao.maps.load(() => {
+        if (mapContainerRef.current) {
+          const options = {
+            center: new window.kakao.maps.LatLng(course.lat, course.lng),
+            level: 3,
+          };
+          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+          kakaoMapRef.current = map;
 
-        map.setZoomable(false);
+          // 회색 화면 방지를 위한 레이아웃 갱신
+          setTimeout(() => {
+            map.relayout();
+            map.setCenter(new window.kakao.maps.LatLng(course.lat, course.lng));
+          }, 100);
 
-        new window.kakao.maps.Marker({
-          position: new window.kakao.maps.LatLng(course.lat, course.lng),
-          map: map,
-        });
+          map.setZoomable(false);
+
+          new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(course.lat, course.lng),
+            map: map,
+          });
+        }
+      });
+    };
+
+    if (window.kakao && window.kakao.maps) {
+      initLogic();
+    } else {
+      const script = document.getElementById("kakao-map-sdk");
+      if (script) {
+        script.addEventListener("load", initLogic);
       }
-    });
+    }
   }, [course]);
 
   // 줌 컨트롤 핸들러

@@ -101,36 +101,50 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
      * 지도 초기화 함수
      */
     const initializeMap = (lat: number, lng: number) => {
-      if (!window.kakao || !window.kakao.maps) {
-        console.error("Kakao Maps SDK not found");
-        return;
-      }
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
 
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(lat, lng),
-            level: 8,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          mapRef.current = map;
+        window.kakao.maps.load(() => {
+          if (mapContainerRef.current) {
+            const options = {
+              center: new window.kakao.maps.LatLng(lat, lng),
+              level: 8,
+            };
+            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+            mapRef.current = map;
 
-          const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
-            new window.kakao.maps.Size(40, 40)
-          );
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+            }, 100);
 
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(lat, lng),
-            map: map,
-            image: userMarkerImage,
-            title: "내 위치",
-          });
+            const userMarkerImage = new window.kakao.maps.MarkerImage(
+              `${import.meta.env.BASE_URL}image/user-marker.svg`,
+              new window.kakao.maps.Size(40, 40)
+            );
 
-          map.setZoomable(false);
-          renderMarkers(map);
+            new window.kakao.maps.Marker({
+              position: new window.kakao.maps.LatLng(lat, lng),
+              map: map,
+              image: userMarkerImage,
+              title: "내 위치",
+            });
+
+            map.setZoomable(false);
+            renderMarkers(map);
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
         }
-      });
+      }
     };
 
     startApp();

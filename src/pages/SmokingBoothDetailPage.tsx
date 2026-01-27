@@ -79,55 +79,74 @@ export default function SmokingBoothDetailPage() {
     if (!userLocation) return;
 
     const initializeMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current && !mapRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            level: 5,
-            zoomable: false, // 마우스 휠 확대/축소 금지
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          mapRef.current = map;
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) return;
 
-          // 사용자 위치 마커
-          const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
-            new window.kakao.maps.Size(40, 40)
-          );
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            map: map,
-            image: userMarkerImage,
-            title: "내 위치",
-          });
+        window.kakao.maps.load(() => {
+          if (mapContainerRef.current && !mapRef.current) {
+            const options = {
+              center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+              level: 5,
+              zoomable: false, // 마우스 휠 확대/축소 금지
+            };
+            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+            mapRef.current = map;
 
-          // 흡연부스 마커
-          nearbyBooths.forEach((booth: SmokingBooth & { distance: number }) => {
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = 'position: relative; width: 36px; height: 36px; cursor: pointer;';
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
-              </div>
-            `;
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
+            }, 100);
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-              content: markerContent,
-              yAnchor: 0.5,
+            // 사용자 위치 마커
+            const userMarkerImage = new window.kakao.maps.MarkerImage(
+              `${import.meta.env.BASE_URL}image/user-marker.svg`,
+              new window.kakao.maps.Size(40, 40)
+            );
+            new window.kakao.maps.Marker({
+              position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+              map: map,
+              image: userMarkerImage,
+              title: "내 위치",
             });
-            customOverlay.setMap(map);
 
-            markerContent.addEventListener('click', () => {
-              setSelectedBooth(booth);
-              map.setCenter(new window.kakao.maps.LatLng(booth.latitude, booth.longitude));
+            // 흡연부스 마커
+            nearbyBooths.forEach((booth: SmokingBooth & { distance: number }) => {
+              const markerContent = document.createElement('div');
+              markerContent.style.cssText = 'position: relative; width: 36px; height: 36px; cursor: pointer;';
+              markerContent.innerHTML = `
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                  <div class="smoke-marker-ripple"></div>
+                  <div class="smoke-marker-ripple"></div>
+                  <div class="smoke-marker-ripple"></div>
+                  <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
+                </div>
+              `;
+
+              const customOverlay = new window.kakao.maps.CustomOverlay({
+                position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+                content: markerContent,
+                yAnchor: 0.5,
+              });
+              customOverlay.setMap(map);
+
+              markerContent.addEventListener('click', () => {
+                setSelectedBooth(booth);
+                map.setCenter(new window.kakao.maps.LatLng(booth.latitude, booth.longitude));
+              });
             });
-          });
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
         }
-      });
+      }
     };
 
     const scriptId = "kakao-map-sdk";
