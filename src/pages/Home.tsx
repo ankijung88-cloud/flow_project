@@ -138,7 +138,7 @@ export default function Home() {
 
         {/* Crowd 섹션 */}
         <section id="section-crowd" className="relative w-full px-4 page-section">
-          <Crowd />
+          <Crowd onBack={() => { }} onShowRegionDetail={(region) => setSelectedRegion(region)} />
         </section>
 
         {/* Spacer for 20px gap */}

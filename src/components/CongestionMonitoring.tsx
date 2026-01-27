@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 declare global {
   interface Window {

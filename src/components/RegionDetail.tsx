@@ -30,6 +30,15 @@ interface LocationData {
 
 export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // 1분마다 현재 시각 업데이트
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   const mapContainerRef1 = useRef<HTMLDivElement>(null);
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
   const mapRef1 = useRef<any>(null);

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import type { SmokingBooth as SmokingBoothType } from "../services/smokingBoothService";
 
@@ -22,7 +21,6 @@ interface SmokingCard {
 }
 
 export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBoothProps) {
-  const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 

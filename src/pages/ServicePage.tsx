@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { findPath, calculatePathDistance } from "../utils/pathfinding";
@@ -51,7 +50,6 @@ function MergeAnimation({
 }
 
 export default function ServicePage() {
-  const navigate = useNavigate();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
 
@@ -266,7 +264,7 @@ export default function ServicePage() {
                 </span>
                 {environmentData && (
                   <span className="text-xs text-gray-400">
-                    {environmentData.locName} | 미세먼지: {environmentData.pm10Value}
+                    서울 | 미세먼지: {environmentData.airQuality.value}
                   </span>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { MergeSection, MergeCardGrid, FadeInSection } from "../components/MergeScrollAnimation";
+import { FadeInSection } from "../components/MergeScrollAnimation";
 import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 declare global {
@@ -42,7 +42,6 @@ export default function CrowdDetailPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
     const timer = setInterval(() => {
