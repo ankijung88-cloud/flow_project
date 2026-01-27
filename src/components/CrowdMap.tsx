@@ -641,14 +641,14 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
               className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
               title="확대"
             >
-              <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
+              <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain brightness-0 p-2" />
             </button>
             <button
               onClick={handleZoomOut}
               className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
               title="축소"
             >
-              <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
+              <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain brightness-0 p-2" />
             </button>
           </div>
         </div>
