@@ -25,6 +25,8 @@ interface NearbyBoothsInfo {
 export default function SmokingMap({ onBack }: SmokingMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
   const [keyword, setKeyword] = useState("");
   const markersRef = useRef<any[]>([]);
   const destinationMarkerRef = useRef<any>(null);
@@ -102,37 +104,48 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
      */
     const initializeMap = (lat: number, lng: number) => {
       const initLogic = () => {
-        if (!window.kakao || !window.kakao.maps) return;
+        if (!window.kakao || !window.kakao.maps) {
+          setMapError("카카오 맵 SDK를 찾을 수 없습니다.");
+          return;
+        }
 
+        setMapStatus("SDK 로드 중...");
         window.kakao.maps.load(() => {
-          if (mapContainerRef.current) {
-            const options = {
-              center: new window.kakao.maps.LatLng(lat, lng),
-              level: 8,
-            };
-            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-            mapRef.current = map;
+          if (mapContainerRef.current && !mapRef.current) {
+            try {
+              setMapStatus("지도 초기화 중...");
+              const options = {
+                center: new window.kakao.maps.LatLng(lat, lng),
+                level: 8,
+              };
+              const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+              mapRef.current = map;
 
-            // 회색 화면 방지를 위한 레이아웃 갱신
-            setTimeout(() => {
-              map.relayout();
-              map.setCenter(new window.kakao.maps.LatLng(lat, lng));
-            }, 100);
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map.relayout();
+                map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+                setMapStatus("완료");
+              }, 500);
 
-            const userMarkerImage = new window.kakao.maps.MarkerImage(
-              `${import.meta.env.BASE_URL}image/user-marker.svg`,
-              new window.kakao.maps.Size(40, 40)
-            );
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(40, 40)
+              );
 
-            new window.kakao.maps.Marker({
-              position: new window.kakao.maps.LatLng(lat, lng),
-              map: map,
-              image: userMarkerImage,
-              title: "내 위치",
-            });
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(lat, lng),
+                map: map,
+                image: userMarkerImage,
+                title: "내 위치",
+              });
 
-            map.setZoomable(false);
-            renderMarkers(map);
+              map.setZoomable(false);
+              renderMarkers(map);
+            } catch (err) {
+              console.error(err);
+              setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+            }
           }
         });
       };
@@ -143,6 +156,9 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
         const script = document.getElementById("kakao-map-sdk");
         if (script) {
           script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
         }
       }
     };
@@ -290,6 +306,22 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
       <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
         <div className="relative w-full h-full">
           <div ref={mapContainerRef} className="w-full h-full" />
+
+          {/* 진단 오버레이 (회색 화면 발생 시 원인 파악용) */}
+          {(mapError || mapStatus !== "완료") && (
+            <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+              <p className="text-sm text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+              {mapError && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
+                  <p className="text-xs text-red-500">{mapError}</p>
+                  <p className="text-[10px] text-red-400 mt-2">API 키 도메인 허용 설정이나 네트워크를 확인해주세요.</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Legend (Top Right) */}
           <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200 z-50 pointer-events-none">

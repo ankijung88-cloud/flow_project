@@ -174,7 +174,7 @@ export default function ServicePage() {
           setUserLocation({ lat, lng });
 
           window.kakao.maps.load(() => {
-            if (mapContainerRef.current) {
+            if (mapContainerRef.current && !mapRef.current) {
               const options = {
                 center: new window.kakao.maps.LatLng(lat, lng),
                 level: 8,
