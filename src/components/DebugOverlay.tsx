@@ -42,7 +42,7 @@ export default function DebugOverlay() {
         }, 2000);
 
         // Network Diagnostic
-        fetch("https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&libraries=services")
+        fetch("https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2de87d8f&libraries=services")
             .then(res => {
                 setLogs(prev => [`[DIAGNOSTIC] SDK Fetch: ${res.status} ${res.statusText}`, ...prev]);
                 return res.text().then(txt => {

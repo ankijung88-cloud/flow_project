@@ -310,7 +310,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
     };
 
     const scriptId = "kakao-map-sdk";
-    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
+    const appKey = "7eb77dd1772e545a47f6066b2de87d8f";
 
     if (window.kakao && window.kakao.maps) {
       initializeBoothMap();
