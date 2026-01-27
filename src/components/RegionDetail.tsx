@@ -415,7 +415,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
             <p className="text-gray-600 mb-3 text-sm">
               {region} 지역의 흡연부스 {regionBooths.length}개가 표시되어 있습니다.
             </p>
-            <div className="relative group">
+            <div className="relative">
               <div
                 ref={mapContainerRef1}
                 className="w-full h-[350px] rounded-lg shadow-lg mb-3"
@@ -444,18 +444,18 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
                 </div>
               </div>
 
-              {/* Custom Zoom Controls (Bottom Left) */}
-              <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+              {/* Custom Zoom Controls (Inside Map Wrapper) */}
+              <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
                 <button
                   onClick={handleZoomIn1}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
                 </button>
                 <button
                   onClick={handleZoomOut1}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="축소"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
@@ -476,25 +476,25 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
             <p className="text-gray-600 mb-3 text-sm">
               {region} 지역 주요 {regionLocations.length}개 지점의 인구 밀집도입니다.
             </p>
-            <div className="relative group">
+            <div className="relative">
               <div
                 ref={mapContainerRef2}
                 className="w-full h-[350px] rounded-lg shadow-lg mb-3"
                 style={{ border: "2px solid #e0e7ff" }}
               />
 
-              {/* Custom Zoom Controls (Bottom Left) */}
-              <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+              {/* Custom Zoom Controls (Inside Map Wrapper) */}
+              <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
                 <button
                   onClick={handleZoomIn2}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
                 </button>
                 <button
                   onClick={handleZoomOut2}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="축소"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />

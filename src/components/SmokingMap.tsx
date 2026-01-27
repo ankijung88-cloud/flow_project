@@ -243,7 +243,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
   return (
     <div className="flex flex-col items-center justify-center w-screen min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
       {/* 1. 상단 검색 바 영역 (지도 프레임 밖) */}
-      <div className="w-full w-full mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+      <div className="w-full mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
             전국 흡연부스 위치 확인
@@ -272,92 +272,93 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
         </form>
       </div>
 
+      {/* 2. 지도 프레임 */}
+      <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
+        <div className="relative w-full h-full">
+          <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* 3. 지도 프레임 (반응형) */}
-      <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
-        <div ref={mapContainerRef} className="w-full h-full" />
-
-        {/* Legend (Top Right) */}
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200 z-50 pointer-events-none">
-          <p className="text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-            지도 범례
-          </p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <img src={`${import.meta.env.BASE_URL}image/smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
-              <span className="text-[11px] font-medium text-gray-600">흡연부스</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#3b82f6' }}></div>
-              <span className="text-[11px] font-medium text-gray-600">내 위치</span>
-            </div>
-            <div className="flex items-center gap-2 opacity-60">
-              <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#ef4444' }}></div>
-              <span className="text-[11px] font-medium text-gray-600">검색 목적지</span>
+          {/* Legend (Top Right) */}
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200 z-50 pointer-events-none">
+            <p className="text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+              지도 범례
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <img src={`${import.meta.env.BASE_URL}image/smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
+                <span className="text-[11px] font-medium text-gray-600">흡연부스</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#3b82f6' }}></div>
+                <span className="text-[11px] font-medium text-gray-600">내 위치</span>
+              </div>
+              <div className="flex items-center gap-2 opacity-60">
+                <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#ef4444' }}></div>
+                <span className="text-[11px] font-medium text-gray-600">검색 목적지</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
-        <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[200px]">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">📍</span>
-            <h4 className="text-sm font-bold text-gray-900 truncate max-w-[150px]">
-              {currentStats?.destination || "위치 분석 중..."}
-            </h4>
+          {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
+          <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[200px]">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">📍</span>
+              <h4 className="text-sm font-bold text-gray-900 truncate max-w-[150px]">
+                {currentStats?.destination || "위치 분석 중..."}
+              </h4>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                <span className="text-[11px] font-bold text-blue-700">반경 500m</span>
+                <span className="text-sm font-black text-blue-900">{currentStats?.within500m || 0}개</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
+                <span className="text-[11px] font-bold text-indigo-700">반경 1km</span>
+                <span className="text-sm font-black text-indigo-900">{currentStats?.within1km || 0}개</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                <span className="text-[11px] font-bold text-purple-700">반경 2km</span>
+                <span className="text-sm font-black text-purple-900">{currentStats?.within2km || 0}개</span>
+              </div>
+            </div>
+            {nearbyInfo && (
+              <button
+                onClick={() => {
+                  setNearbyInfo(null);
+                  if (destinationMarkerRef.current) {
+                    destinationMarkerRef.current.setMap(null);
+                    destinationMarkerRef.current = null;
+                  }
+                  setKeyword("");
+                }}
+                className="w-full mt-3 py-1.5 text-[10px] font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
+              >
+                결과 지우기
+              </button>
+            )}
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-              <span className="text-[11px] font-bold text-blue-700">반경 500m</span>
-              <span className="text-sm font-black text-blue-900">{currentStats?.within500m || 0}개</span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
-              <span className="text-[11px] font-bold text-indigo-700">반경 1km</span>
-              <span className="text-sm font-black text-indigo-900">{currentStats?.within1km || 0}개</span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-              <span className="text-[11px] font-bold text-purple-700">반경 2km</span>
-              <span className="text-sm font-black text-purple-900">{currentStats?.within2km || 0}개</span>
-            </div>
-          </div>
-          {nearbyInfo && (
+
+          {/* Custom Zoom Controls (Inside Map Wrapper) */}
+          <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
             <button
-              onClick={() => {
-                setNearbyInfo(null);
-                if (destinationMarkerRef.current) {
-                  destinationMarkerRef.current.setMap(null);
-                  destinationMarkerRef.current = null;
-                }
-                setKeyword("");
-              }}
-              className="w-full mt-3 py-1.5 text-[10px] font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
+              onClick={handleZoomIn}
+              className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+              title="확대"
             >
-              결과 지우기
+              <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
             </button>
-          )}
-        </div>
-
-        {/* Custom Zoom Controls (Bottom Left) */}
-        <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
-          <button
-            onClick={handleZoomIn}
-            className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-            title="확대"
-          >
-            <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
-          </button>
-          <button
-            onClick={handleZoomOut}
-            className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-            title="축소"
-          >
-            <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
-          </button>
+            <button
+              onClick={handleZoomOut}
+              className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+              title="축소"
+            >
+              <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 4. 하단 버튼 영역 */}
+      {/* 3. 하단 버튼 영역 */}
       <div className="mt-4 sm:mt-6 flex justify-center">
         <button
           onClick={onBack}

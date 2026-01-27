@@ -283,28 +283,30 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
             <div className="w-full">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-indigo-200 relative group">
                 <h4 className="text-lg font-bold text-gray-900 mb-3 text-center">실시간 혼잡도 지도</h4>
-                <div
-                  ref={mapContainerRef}
-                  className="w-full h-[400px] rounded-lg shadow-lg"
-                  style={{ border: "2px solid #e0e7ff" }}
-                />
+                <div className="relative">
+                  <div
+                    ref={mapContainerRef}
+                    className="w-full h-[400px] rounded-lg shadow-lg"
+                    style={{ border: "2px solid #e0e7ff" }}
+                  />
 
-                {/* Custom Zoom Controls (Bottom Left) */}
-                <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
-                  <button
-                    onClick={handleZoomIn}
-                    className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-                    title="확대"
-                  >
-                    <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
-                  </button>
-                  <button
-                    onClick={handleZoomOut}
-                    className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-                    title="축소"
-                  >
-                    <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
-                  </button>
+                  {/* Custom Zoom Controls (Inside Map Wrapper) */}
+                  <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
+                    <button
+                      onClick={handleZoomIn}
+                      className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                      title="확대"
+                    >
+                      <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
+                    </button>
+                    <button
+                      onClick={handleZoomOut}
+                      className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                      title="축소"
+                    >
+                      <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
+                    </button>
+                  </div>
                 </div>
 
                 <p className="text-xs text-gray-500 text-center mt-3">

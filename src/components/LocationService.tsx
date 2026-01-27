@@ -233,7 +233,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
           {/* 지도 */}
           <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-200 p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">실시간 지도</h3>
-            <div className="relative group">
+            <div className="relative">
               <div
                 ref={mapContainerRef}
                 className="w-full h-[400px] rounded-lg shadow-lg"
@@ -262,18 +262,18 @@ export default function LocationService({ onBack }: LocationServiceProps) {
                 </div>
               </div>
 
-              {/* Custom Zoom Controls (Bottom Left) */}
-              <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+              {/* Custom Zoom Controls (Inside Map Wrapper) */}
+              <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
                 <button
                   onClick={handleZoomIn}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
                 </button>
                 <button
                   onClick={handleZoomOut}
-                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="축소"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
