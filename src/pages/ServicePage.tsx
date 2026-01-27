@@ -5,6 +5,7 @@ import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { findPath, calculatePathDistance } from "../utils/pathfinding";
 import { getEnvironmentData } from "../services/weatherService";
 import type { SmokingBooth } from "../services/smokingBoothService";
+import { aStar, calculateDistance } from "../utils/pathfinding";
 import type { Point } from "../utils/pathfinding";
 import type { WeatherData } from "../services/weatherService";
 
@@ -68,7 +69,8 @@ export default function ServicePage() {
   const [environmentData, setEnvironmentData] = useState<WeatherData | null>(null);
   const [routeDistance, setRouteDistance] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [userLocation, setUserLocation] = useState<Point | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyInfo, setNearbyInfo] = useState<{ within500m: number; within1km: number; within2km: number } | null>(null);
 
   /**
    * 실시간 시간 업데이트
@@ -272,6 +274,16 @@ export default function ServicePage() {
             bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng));
           });
           mapRef.current.setBounds(bounds);
+
+          // 목적지 주변 흡연부스 수량 계산
+          let w500 = 0, w1k = 0, w2k = 0;
+          nationalBooths.forEach(booth => {
+            const dist = calculateDistance(dest, { lat: booth.latitude, lng: booth.longitude });
+            if (dist <= 500) w500++;
+            if (dist <= 1000) w1k++;
+            if (dist <= 2000) w2k++;
+          });
+          setNearbyInfo({ within500m: w500, within1km: w1k, within2km: w2k });
         } else {
           alert("목적지 검색 결과가 없습니다.");
         }
@@ -493,11 +505,29 @@ export default function ServicePage() {
               </button>
             </div>
 
-            {/* 흡연부스 통계 오버레이 */}
-            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg">
-              <p className="text-xs text-gray-500">전국 흡연부스</p>
-              <p className="text-xl font-bold text-red-500">{nationalBooths.length}개</p>
-              <p className="text-xs text-gray-400">실시간 회피 중</p>
+            {/* 거리별 흡연구역 수량 박스 (상시 또는 검색 결과) */}
+            <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-red-100 min-w-[180px]">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">📊</span>
+                <h4 className="text-sm font-bold text-gray-900">흡연구역 통계</h4>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                  <span className="text-[10px] font-bold text-red-700">반경 500m</span>
+                  <span className="text-sm font-black text-red-900">{nearbyInfo ? nearbyInfo.within500m : "-"}개</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                  <span className="text-[10px] font-bold text-orange-700">반경 1km</span>
+                  <span className="text-sm font-black text-orange-900">{nearbyInfo ? nearbyInfo.within1km : "-"}개</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                  <span className="text-[10px] font-bold text-gray-700">전국 합계</span>
+                  <span className="text-sm font-black text-gray-900">{nationalBooths.length}개</span>
+                </div>
+              </div>
+              <p className="text-[9px] text-gray-400 mt-2 text-center">
+                {nearbyInfo ? "목적지 주변 수량" : "전국 데이터 로드됨"}
+              </p>
             </div>
           </div>
         </MergeAnimation>

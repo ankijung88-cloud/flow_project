@@ -249,44 +249,6 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
         </form>
       </div>
 
-      {/* 2. 근처 흡연부스 정보 카드 */}
-      {nearbyInfo && (
-        <div className="w-full w-full mb-4">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 sm:p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg sm:text-xl font-bold mb-4 flex items-center gap-2">
-              <span>📍</span>
-              <span>{nearbyInfo.destination} 근처 흡연부스</span>
-            </h3>
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                <p className="text-xs sm:text-sm text-white/80 mb-1">반경 500m</p>
-                <p className="text-2xl sm:text-3xl font-black">{nearbyInfo.within500m}개</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                <p className="text-xs sm:text-sm text-white/80 mb-1">반경 1km</p>
-                <p className="text-2xl sm:text-3xl font-black">{nearbyInfo.within1km}개</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-white/20">
-                <p className="text-xs sm:text-sm text-white/80 mb-1">반경 2km</p>
-                <p className="text-2xl sm:text-3xl font-black">{nearbyInfo.within2km}개</p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setNearbyInfo(null);
-                if (destinationMarkerRef.current) {
-                  destinationMarkerRef.current.setMap(null);
-                  destinationMarkerRef.current = null;
-                }
-                setKeyword("");
-              }}
-              className="mt-4 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              검색 초기화
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* 3. 지도 프레임 (반응형) */}
       <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
@@ -313,6 +275,45 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
             </div>
           </div>
         </div>
+
+        {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
+        {nearbyInfo && (
+          <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[200px]">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">📍</span>
+              <h4 className="text-sm font-bold text-gray-900 truncate max-w-[150px]">
+                {nearbyInfo.destination}
+              </h4>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                <span className="text-[11px] font-bold text-blue-700">반경 500m</span>
+                <span className="text-sm font-black text-blue-900">{nearbyInfo.within500m}개</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg">
+                <span className="text-[11px] font-bold text-indigo-700">반경 1km</span>
+                <span className="text-sm font-black text-indigo-900">{nearbyInfo.within1km}개</span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                <span className="text-[11px] font-bold text-purple-700">반경 2km</span>
+                <span className="text-sm font-black text-purple-900">{nearbyInfo.within2km}개</span>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setNearbyInfo(null);
+                if (destinationMarkerRef.current) {
+                  destinationMarkerRef.current.setMap(null);
+                  destinationMarkerRef.current = null;
+                }
+                setKeyword("");
+              }}
+              className="w-full mt-3 py-1.5 text-[10px] font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100"
+            >
+              결과 지우기
+            </button>
+          </div>
+        )}
 
         {/* Custom Zoom Controls (Bottom Left) */}
         <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
