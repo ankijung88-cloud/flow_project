@@ -1,4 +1,3 @@
-```
 import { useEffect, useRef, useState, useMemo } from "react";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { calculateDistance } from "../utils/pathfinding";
@@ -70,7 +69,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
       // 마커 클릭 시 정보창 표시
       const infowindow = new window.kakao.maps.InfoWindow({
-        content: `< div style = "padding:8px;font-size:12px;font-weight:bold;white-space:nowrap;" > ${ booth.name }</div > `,
+        content: `< div style = "padding:8px;font-size:12px;font-weight:bold;white-space:nowrap;" > ${booth.name}</div > `,
       });
 
       markerContent.addEventListener('click', () => {
@@ -118,7 +117,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
           mapRef.current = map;
 
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${ import.meta.env.BASE_URL } image / user - marker.svg`,
+            `${import.meta.env.BASE_URL} image / user - marker.svg`,
             new window.kakao.maps.Size(40, 40)
           );
 
@@ -191,7 +190,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
         // 목적지 라벨 표시
         const destLabel = new window.kakao.maps.InfoWindow({
-          content: `< div style = "padding:8px 12px;font-size:14px;font-weight:bold;background:#ef4444;color:white;border-radius:8px;" > ${ result.place_name }</div > `,
+          content: `< div style = "padding:8px 12px;font-size:14px;font-weight:bold;background:#ef4444;color:white;border-radius:8px;" > ${result.place_name}</div > `,
           removable: false,
         });
         destLabel.open(mapRef.current, destMarker);
@@ -287,7 +286,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
           </p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <img src={`${ import.meta.env.BASE_URL } image / smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
+              <img src={`${import.meta.env.BASE_URL} image / smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
               <span className="text-[11px] font-medium text-gray-600">흡연부스</span>
             </div>
             <div className="flex items-center gap-2">
