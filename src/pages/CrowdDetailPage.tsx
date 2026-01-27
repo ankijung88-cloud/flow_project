@@ -219,6 +219,8 @@ export default function CrowdDetailPage() {
     };
 
     const scriptId = "kakao-map-sdk";
+    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
+
     if (window.kakao && window.kakao.maps) {
       initializeMap();
     } else {
@@ -226,10 +228,12 @@ export default function CrowdDetailPage() {
       if (!existingScript) {
         const script = document.createElement("script");
         script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&autoload=false&libraries=services`;
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
         script.async = true;
         script.onload = initializeMap;
         document.head.appendChild(script);
+      } else {
+        existingScript.addEventListener("load", initializeMap);
       }
     }
   }, [userLocation]);
