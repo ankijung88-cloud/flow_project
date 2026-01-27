@@ -30,21 +30,13 @@ interface LocationData {
 
 export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-
-  // 1분마다 현재 시각 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    return () => clearInterval(timer);
-  }, []);
-
   const mapContainerRef1 = useRef<HTMLDivElement>(null);
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
   const mapRef1 = useRef<any>(null);
   const mapRef2 = useRef<any>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
 
+  // 지역별 중심 좌표 및 zoom level 설정
   const getRegionInfo = (regionName: string) => {
     const regionMap: { [key: string]: { lat: number; lng: number; level: number; keyword: string } } = {
       "서울": { lat: 37.5665, lng: 126.978, level: 8, keyword: "서울" },
@@ -61,6 +53,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
 
   const regionInfo = getRegionInfo(region);
 
+  // 해당 지역의 흡연부스 필터링 (주소 기반)
   const getRegionBooths = (): SmokingBooth[] => {
     return nationalBooths.filter(booth =>
       booth.address.includes(regionInfo.keyword)
@@ -69,6 +62,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
 
   const regionBooths = getRegionBooths();
 
+  // 지역별 주요 장소 (혼잡도 모니터링용)
   const getRegionLocations = () => {
     const locationsByRegion: { [key: string]: { name: string; lat: number; lng: number }[] } = {
       "서울": [
@@ -103,35 +97,44 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
         { name: "광주 금남로", lat: 35.1546, lng: 126.9161 },
       ],
       "대전": [
-        { name: "대전역", lat: 36.3312, lng: 127.4333 },
+        { name: "대전역", lat: 36.3504, lng: 127.3845 },
         { name: "유성온천", lat: 36.3539, lng: 127.3435 },
       ],
       "제주": [
-        { name: "제주 중문단지", lat: 33.2541, lng: 126.5603 },
-      ]
+        { name: "제주 중문관광단지", lat: 33.2541, lng: 126.5603 },
+      ],
     };
-    return locationsByRegion[region] || [];
+    return locationsByRegion[region] || locationsByRegion["서울"];
   };
 
-  const majorLocations = getRegionLocations();
+  const regionLocations = getRegionLocations();
 
+  // 시간대별 혼잡도 데이터 생성
   const generateHourlyData = (): HourlyData[] => {
     const hourlyData: HourlyData[] = [];
-    const seed = Math.random();
     for (let hour = 0; hour < 24; hour++) {
-      let basePopulation = 500 + seed * 1000;
-      if ((hour >= 11 && hour <= 13) || (hour >= 17 && hour <= 20)) basePopulation *= 3;
-      const population = Math.floor(basePopulation * (0.8 + Math.random() * 0.4));
+      let congestionPercent = 0;
+      if ((hour >= 8 && hour < 10) || (hour >= 12 && hour < 13) || (hour >= 18 && hour < 20)) {
+        congestionPercent = 80 + Math.random() * 30;
+      } else {
+        congestionPercent = 20 + Math.random() * 30;
+      }
+      const basePopulation = Math.floor((congestionPercent / 100) * 5000);
+      const variation = (Math.random() - 0.5) * 0.2;
+      const population = Math.floor(basePopulation * (1 + variation));
+
       let level: "매우혼잡" | "혼잡" | "보통" | "여유";
-      if (population > 3000) level = "매우혼잡";
-      else if (population > 1500) level = "혼잡";
-      else if (population > 500) level = "보통";
+      if (congestionPercent > 100) level = "매우혼잡";
+      else if (congestionPercent >= 76) level = "혼잡";
+      else if (congestionPercent >= 51) level = "보통";
       else level = "여유";
+
       hourlyData.push({ hour, population, level });
     }
     return hourlyData;
   };
 
+  // 위치 데이터 생성
   const generateLocationData = (name: string, lat: number, lng: number): LocationData => {
     const hourlyData = generateHourlyData();
     const currentHour = currentTime.getHours();
@@ -147,159 +150,356 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
     };
   };
 
+  // 혼잡도 레벨 색상
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "매우혼잡": return "#ef4444";
-      case "혼잡": return "#f97316";
-      case "보통": return "#eab308";
-      case "여유": return "#22c55e";
-      default: return "#94a3b8";
+      case "매우혼잡": return "#DC2626";
+      case "혼잡": return "#FF6B6B";
+      case "보통": return "#F97316";
+      case "여유": return "#10B981";
+      default: return "#6B7280";
     }
   };
 
+  // 거리 계산 함수 (추후 사용 가능)
+  // const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  //   const R = 6371000;
+  //   const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  //   const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  //   const a =
+  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  //     Math.cos((lat1 * Math.PI) / 180) *
+  //       Math.cos((lat2 * Math.PI) / 180) *
+  //       Math.sin(dLng / 2) *
+  //       Math.sin(dLng / 2);
+  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  //   return R * c;
+  // };
+
+  // 흡연부스 지도 초기화
   useEffect(() => {
-    const initializeMaps = () => {
-      // 지도 1: 흡연부스 위치
-      if (mapContainerRef1.current && !mapRef1.current) {
-        const map1 = new window.kakao.maps.Map(mapContainerRef1.current, {
-          center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
-          level: regionInfo.level,
-        });
-        mapRef1.current = map1;
+    const initializeBoothMap = () => {
+      window.kakao.maps.load(() => {
+        if (mapContainerRef1.current && !mapRef1.current) {
+          const options = {
+            center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
+            level: regionInfo.level,
+          };
+          const map = new window.kakao.maps.Map(mapContainerRef1.current, options);
+          mapRef1.current = map;
 
-        regionBooths.forEach(booth => {
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-            map: map1,
-          });
-        });
-      }
+          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+          map.setZoomable(false);
 
-      // 지도 2: 혼잡도 모니터링
-      if (mapContainerRef2.current && !mapRef2.current) {
-        const map2 = new window.kakao.maps.Map(mapContainerRef2.current, {
-          center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
-          level: regionInfo.level,
-        });
-        mapRef2.current = map2;
-
-        majorLocations.forEach(loc => {
-          const data = generateLocationData(loc.name, loc.lat, loc.lng);
-          const color = getLevelColor(data.currentLevel);
-
-          const content = document.createElement("div");
-          content.innerHTML = `
-                <div class="flex flex-col items-center">
-                  <div class="bg-white px-2 py-1 rounded shadow-lg text-[10px] font-bold mb-1 border border-indigo-100 whitespace-nowrap">${loc.name}</div>
-                  <div class="w-4 h-4 rounded-full border-2 border-white shadow-lg animate-pulse" style="background-color: ${color}"></div>
-                </div>
+          // 지역 흡연부스 마커 표시
+          regionBooths.forEach((booth) => {
+            const markerContent = document.createElement('div');
+            markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
+            markerContent.innerHTML = `
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                <div class="smoke-marker-ripple"></div>
+                <div class="smoke-marker-ripple"></div>
+                <div class="smoke-marker-ripple"></div>
+                <div class="smoke-marker-ripple"></div>
+                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+              </div>
             `;
 
-          new window.kakao.maps.CustomOverlay({
-            position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-            content: content,
-            map: map2,
-            yAnchor: 1.2,
+            const customOverlay = new window.kakao.maps.CustomOverlay({
+              position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+              content: markerContent,
+              yAnchor: 0.5,
+            });
+            customOverlay.setMap(map);
           });
-        });
-      }
+        }
+      });
     };
 
     const scriptId = "kakao-map-sdk";
-    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
-
-    if (window.kakao && window.kakao.maps) {
-      initializeMaps();
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      initializeBoothMap();
     } else {
       const existingScript = document.getElementById(scriptId);
       if (!existingScript) {
         const script = document.createElement("script");
         script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services,clusterer,drawing`;
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&autoload=false&libraries=services`;
         script.async = true;
-        script.onload = () => {
-          window.kakao.maps.load(initializeMaps);
-        };
+        script.onload = initializeBoothMap;
         document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener("load", () => {
-          window.kakao.maps.load(initializeMaps);
-        });
       }
     }
-  }, [region, regionInfo]);
+  }, [regionBooths]);
+
+  // 혼잡도 지도 초기화
+  useEffect(() => {
+    const initializeCrowdMap = () => {
+      window.kakao.maps.load(() => {
+        if (mapContainerRef2.current && !mapRef2.current) {
+          const options = {
+            center: new window.kakao.maps.LatLng(regionInfo.lat, regionInfo.lng),
+            level: regionInfo.level,
+          };
+          const map = new window.kakao.maps.Map(mapContainerRef2.current, options);
+          mapRef2.current = map;
+
+          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+          map.setZoomable(false);
+
+          // 지역 혼잡도 마커 표시
+          regionLocations.forEach((loc) => {
+            const data = generateLocationData(loc.name, loc.lat, loc.lng);
+            const color = getLevelColor(data.currentLevel);
+            const radius = data.currentLevel === "매우혼잡" ? 45 :
+              data.currentLevel === "혼잡" ? 38 :
+                data.currentLevel === "보통" ? 32 : 28;
+
+            const markerContent = document.createElement('div');
+            markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
+            markerContent.innerHTML = `
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
+                <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
+                <div style="position: absolute; font-size: 8px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
+              </div>
+            `;
+
+            const customOverlay = new window.kakao.maps.CustomOverlay({
+              position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+              content: markerContent,
+              yAnchor: 0.5,
+            });
+            customOverlay.setMap(map);
+          });
+        }
+      });
+    };
+
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      initializeCrowdMap();
+    }
+  }, [regionLocations, regionInfo]);
+
+  // 1분마다 시간 업데이트
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 통계 계산
+  const allLocations = regionLocations.map(loc => generateLocationData(loc.name, loc.lat, loc.lng));
+  const avgPopulation = Math.floor(
+    allLocations.reduce((sum, loc) => sum + loc.currentPopulation, 0) / allLocations.length
+  );
+
+  // 줌 컨트롤 핸들러 (지도 1)
+  const handleZoomIn1 = () => {
+    if (mapRef1.current) {
+      mapRef1.current.setLevel(mapRef1.current.getLevel() - 1);
+    }
+  };
+
+  const handleZoomOut1 = () => {
+    if (mapRef1.current) {
+      mapRef1.current.setLevel(mapRef1.current.getLevel() + 1);
+    }
+  };
+
+  // 줌 컨트롤 핸들러 (지도 2)
+  const handleZoomIn2 = () => {
+    if (mapRef2.current) {
+      mapRef2.current.setLevel(mapRef2.current.getLevel() - 1);
+    }
+  };
+
+  const handleZoomOut2 = () => {
+    if (mapRef2.current) {
+      mapRef2.current.setLevel(mapRef2.current.getLevel() + 1);
+    }
+  };
 
   return (
-    <div className="flex flex-col w-full h-full bg-slate-50 overflow-y-auto">
-      <div className="p-6 border-b border-gray-100 bg-white flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h2 className="text-2xl font-black text-gray-900">{region} 지역 상세 분석</h2>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-bold text-gray-400">DATA UPDATED</p>
-          <p className="text-lg font-black text-indigo-600">{currentTime.toLocaleTimeString()}</p>
+    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 overflow-y-auto">
+      {/* 헤더 */}
+      <div className="w-full w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
+            🏙️ {region} 지역 정보
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
+            {region} 지역의 흡연부스 위치, 실시간 혼잡도, 추천 산책코스를 한눈에 확인하세요
+          </p>
         </div>
       </div>
 
-      <div className="p-6 space-y-8">
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1.5 h-6 bg-red-500 rounded-full"></div>
-            <h3 className="text-xl font-bold text-gray-800">흡연시설 분포 ({regionBooths.length})</h3>
+      {/* 요약 통계 */}
+      <div className="w-full w-full px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
+            <p className="text-sm font-semibold mb-2">흡연부스</p>
+            <p className="text-4xl font-black">{regionBooths.length}개</p>
           </div>
-          <div className="bg-white rounded-3xl p-4 shadow-xl border border-gray-100 h-[400px]">
-            <div ref={mapContainerRef1} className="w-full h-full rounded-2xl overflow-hidden" />
+          <div className="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-xl">
+            <p className="text-sm font-semibold mb-2">모니터링 지점</p>
+            <p className="text-4xl font-black">{regionLocations.length}곳</p>
           </div>
-        </section>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-2xl shadow-xl">
+            <p className="text-sm font-semibold mb-2">평균 인구</p>
+            <p className="text-4xl font-black">{avgPopulation.toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
 
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1.5 h-6 bg-indigo-500 rounded-full"></div>
-            <h3 className="text-xl font-bold text-gray-800">유동인구 혼잡도 분석</h3>
-          </div>
-          <div className="bg-white rounded-3xl p-4 shadow-xl border border-gray-100 h-[400px]">
-            <div ref={mapContainerRef2} className="w-full h-full rounded-2xl overflow-hidden" />
-          </div>
-        </section>
+      {/* 지도 섹션 - 가로 배치 */}
+      <div className="w-full w-full px-4 sm:px-6 lg:px-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 흡연부스 지도 섹션 */}
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-200 p-5">
+            <h2 className="text-2xl font-black text-gray-900 mb-3">🗺️ {region} 흡연부스 위치</h2>
+            <p className="text-gray-600 mb-3 text-sm">
+              {region} 지역의 흡연부스 {regionBooths.length}개가 표시되어 있습니다.
+            </p>
+            <div className="relative group">
+              <div
+                ref={mapContainerRef1}
+                className="w-full h-[350px] rounded-lg shadow-lg mb-3"
+                style={{ border: "2px solid #dbeafe" }}
+              />
 
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-red-50 to-white p-6 rounded-3xl border border-red-100">
-            <h4 className="font-bold text-gray-900 mb-4">흡연시설 관리 효율성</h4>
-            <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-sm text-gray-500">시설 밀집도</span>
-                <span className="text-2xl font-black text-red-600">고위험</span>
+              {/* Custom Zoom Controls (Bottom Left) */}
+              <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+                <button
+                  onClick={handleZoomIn1}
+                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  title="확대"
+                >
+                  <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                </button>
+                <button
+                  onClick={handleZoomOut1}
+                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  title="축소"
+                >
+                  <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                </button>
               </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className="w-[85%] h-full bg-red-500"></div>
-              </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                해당 지역은 시설 밀집도가 높아 정기적인 공공 위생 관리가 집중적으로 필요합니다.
+            </div>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-xs text-gray-700 font-semibold">💡 사용 팁</p>
+              <p className="text-xs text-gray-600 mt-1">
+                파란색 전파 효과가 있는 아이콘이 흡연부스 위치입니다.
               </p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-3xl border border-indigo-100">
-            <h4 className="font-bold text-gray-900 mb-4">지역 기반 추천 경로</h4>
-            <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-sm text-gray-500">회피 가능성</span>
-                <span className="text-2xl font-black text-indigo-600">최상</span>
+          {/* 혼잡도 모니터링 섹션 */}
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 p-5">
+            <h2 className="text-2xl font-black text-gray-900 mb-3">📊 {region} 실시간 혼잡도</h2>
+            <p className="text-gray-600 mb-3 text-sm">
+              {region} 지역 주요 {regionLocations.length}개 지점의 인구 밀집도입니다.
+            </p>
+            <div className="relative group">
+              <div
+                ref={mapContainerRef2}
+                className="w-full h-[350px] rounded-lg shadow-lg mb-3"
+                style={{ border: "2px solid #e0e7ff" }}
+              />
+
+              {/* Custom Zoom Controls (Bottom Left) */}
+              <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+                <button
+                  onClick={handleZoomIn2}
+                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  title="확대"
+                >
+                  <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                </button>
+                <button
+                  onClick={handleZoomOut2}
+                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  title="축소"
+                >
+                  <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                </button>
               </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className="w-[92%] h-full bg-indigo-500"></div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#10B981" }}></div>
+                <span className="text-xs font-semibold text-gray-700">여유</span>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                A* 알고리즘 분석 결과, 해당 지역 내에서는 모든 인프라를 활용한 최적 회피가 가능합니다.
-              </p>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#F97316" }}></div>
+                <span className="text-xs font-semibold text-gray-700">보통</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#FF6B6B" }}></div>
+                <span className="text-xs font-semibold text-gray-700">혼잡</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#DC2626" }}></div>
+                <span className="text-xs font-semibold text-gray-700">매우혼잡</span>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
+
+      {/* 추천 산책코스 섹션 */}
+      <div className="w-full w-full px-4 sm:px-6 lg:px-8 mb-12">
+        <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6">
+          <h2 className="text-3xl font-black text-gray-900 mb-4">🚶 {region} 추천 산책코스</h2>
+          <p className="text-gray-600 mb-6">
+            흡연부스를 회피한 쾌적한 산책코스를 추천합니다.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { name: `${region} 힐링 숲길`, distance: "1.2km", time: "20분", level: "쉬움" },
+              { name: `${region} 강변 산책로`, distance: "2.5km", time: "40분", level: "보통" },
+              { name: `${region} 공원 둘레길`, distance: "800m", time: "15분", level: "쉬움" },
+              { name: `${region} 전망 트레일`, distance: "3.2km", time: "60분", level: "어려움" },
+            ].map((course, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-2 border-green-200 hover:shadow-lg transition-all"
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{course.name}</h3>
+                <div className="flex gap-4 mb-3">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-gray-600">거리:</span>
+                    <span className="text-sm font-bold text-green-600">{course.distance}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-gray-600">시간:</span>
+                    <span className="text-sm font-bold text-blue-600">{course.time}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-gray-600">난이도:</span>
+                    <span className="text-sm font-bold text-orange-600">{course.level}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600">
+                  흡연부스를 회피하여 설계된 쾌적한 산책 코스입니다.
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 하단 버튼 */}
+      <div className="w-full w-full px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="flex justify-center">
+          <button
+            onClick={onBack}
+            className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+          >
+            홈으로 돌아가기
+          </button>
+        </div>
       </div>
     </div>
   );

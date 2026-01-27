@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { findPath, calculatePathDistance } from "../utils/pathfinding";
@@ -13,8 +14,10 @@ declare global {
   }
 }
 
+
+
 /**
- * Merge 스크롤 애니메이션 헬퍼 컴포넌트
+ * Merge 스크롤 애니메이션 래퍼 컴포넌트
  */
 function MergeAnimation({
   children,
@@ -50,11 +53,13 @@ function MergeAnimation({
 }
 
 export default function ServicePage() {
+  const navigate = useNavigate();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
 
   const [startKeyword, setStartKeyword] = useState("");
   const [destKeyword, setDestKeyword] = useState("");
+
 
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
   const markersRef = useRef<any[]>([]);
@@ -89,61 +94,115 @@ export default function ServicePage() {
     };
 
     loadEnvironmentData();
+    // 1시간마다 환경 데이터 갱신 (수정: 5분 -> 1시간)
     const interval = setInterval(loadEnvironmentData, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   /**
-   * 지도 초기화
+   * 전국 흡연부스 마커 렌더링
    */
-  const initializeMap = useCallback((lat: number, lng: number) => {
-    if (!mapContainerRef.current) return;
-
-    const options = {
-      center: new window.kakao.maps.LatLng(lat, lng),
-      level: 11,
-    };
-
-    const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-    mapRef.current = map;
-
-    renderSmokingBooths(map);
-  }, []);
-
-  /**
-   * 흡연부스 마커 렌더링
-   */
-  const renderSmokingBooths = (map: any) => {
+  const renderSmokingBooths = useCallback((map: any) => {
+    // 기존 마커 제거
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
-    nationalBooths.forEach((booth) => {
-      const content = document.createElement("div");
-      content.innerHTML = `
-        <div class="w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm opacity-60"></div>
-      `;
+    // 커스텀 마커 이미지 (투명 원형 처리)
+    const markerImage = new window.kakao.maps.MarkerImage(
+      `${import.meta.env.BASE_URL}image/smoke_icon.png`,
+      new window.kakao.maps.Size(32, 32),
+      {
+        offset: new window.kakao.maps.Point(16, 16),
+      }
+    );
 
-      const overlay = new window.kakao.maps.CustomOverlay({
+    // 전국 흡연부스 마커 생성
+    nationalBooths.forEach((booth) => {
+      const marker = new window.kakao.maps.Marker({
         position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-        content: content,
-        yAnchor: 0.5,
+        image: markerImage,
+        map: map,
+        title: booth.name,
       });
 
-      overlay.setMap(map);
-      markersRef.current.push(overlay);
+      markersRef.current.push(marker);
     });
+  }, [nationalBooths]);
+
+  /**
+   * 경로 그리기 (초록색 입체감)
+   */
+  const drawPath = (map: any, path: Point[]) => {
+    // 기존 경로 제거
+    if (pathOverlayRef.current) {
+      pathOverlayRef.current.setMap(null);
+    }
+
+    // Kakao Maps LatLng 배열로 변환
+    const linePath = path.map(
+      (p) => new window.kakao.maps.LatLng(p.lat, p.lng)
+    );
+
+    // 입체감 있는 초록색 라인
+    const polyline = new window.kakao.maps.Polyline({
+      path: linePath,
+      strokeWeight: 8, // 두께
+      strokeColor: "#10B981", // 초록색
+      strokeOpacity: 0.9,
+      strokeStyle: "solid",
+    });
+
+    polyline.setMap(map);
+    pathOverlayRef.current = polyline;
+
+    // 경로 거리 계산
+    const distance = calculatePathDistance(path);
+    setRouteDistance(distance);
   };
 
+  /**
+   * 지도 초기화
+   */
   useEffect(() => {
+    const initializeMap = (lat: number, lng: number) => {
+      setUserLocation({ lat, lng });
+
+      window.kakao.maps.load(() => {
+        if (mapContainerRef.current) {
+          const options = {
+            center: new window.kakao.maps.LatLng(lat, lng),
+            level: 8,
+            zoomable: false, // 마우스 휠 확대/축소 금지
+          };
+          const map = new window.kakao.maps.Map(
+            mapContainerRef.current,
+            options
+          );
+          mapRef.current = map;
+
+          // 사용자 위치 마커
+          const userMarkerImage = new window.kakao.maps.MarkerImage(
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
+            new window.kakao.maps.Size(40, 40)
+          );
+
+          new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(lat, lng),
+            map: map,
+            image: userMarkerImage,
+            title: "내 위치",
+          });
+
+          // 전국 흡연부스 마커 렌더링
+          renderSmokingBooths(map);
+        }
+      });
+    };
+
     const startApp = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            setUserLocation({ lat, lng });
-            initializeMap(lat, lng);
-          },
+          (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
           () => initializeMap(37.5665, 126.978)
         );
       } else {
@@ -152,8 +211,6 @@ export default function ServicePage() {
     };
 
     const scriptId = "kakao-map-sdk";
-    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
-
     if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
       startApp();
     } else {
@@ -161,22 +218,16 @@ export default function ServicePage() {
       if (!existingScript) {
         const script = document.createElement("script");
         script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=7eb77dd1772e545a47f6066b2e87d8f&autoload=false&libraries=services`;
         script.async = true;
-        script.onload = () => {
-          window.kakao.maps.load(startApp);
-        };
+        script.onload = startApp;
         document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener("load", () => {
-          window.kakao.maps.load(startApp);
-        });
       }
     }
-  }, [nationalBooths, initializeMap]);
+  }, [nationalBooths, renderSmokingBooths]);
 
   /**
-   * 장소 검색 및 경로 탐색
+   * 장소 검색 및 경로 탐색 (실시간 현재 위치 기준)
    */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +239,10 @@ export default function ServicePage() {
 
     const ps = new window.kakao.maps.services.Places();
 
+    // 출발지: 사용자가 입력했으면 검색, 아니면 현재 위치 사용
     const processRoute = (start: Point) => {
+
+      // 목적지 검색 (전국 단위 지원)
       ps.keywordSearch(destKeyword, (destData: any, destStatus: any) => {
         if (destStatus === window.kakao.maps.services.Status.OK) {
           const dest: Point = {
@@ -196,68 +250,71 @@ export default function ServicePage() {
             lng: parseFloat(destData[0].x),
           };
 
+          // 흡연부스 위치를 Point 배열로 변환
           const obstacles: Point[] = nationalBooths.map((booth) => ({
             lat: booth.latitude,
             lng: booth.longitude,
           }));
 
+          // A* 알고리즘 경로 탐색 (흡연부스 회피)
           const path = findPath(start, dest, obstacles);
-          const distance = calculatePathDistance(path);
-          setRouteDistance(distance);
 
-          drawPath(path);
+          // 경로 그리기
+          drawPath(mapRef.current, path);
 
+          // 지도 중심 이동
           const bounds = new window.kakao.maps.LatLngBounds();
-          path.forEach(p => bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng)));
+          path.forEach((p) => {
+            bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng));
+          });
           mapRef.current.setBounds(bounds);
         } else {
-          alert("목적지를 찾을 수 없습니다.");
+          alert("목적지 검색 결과가 없습니다.");
         }
       });
     };
 
     if (startKeyword.trim()) {
+      // 출발지 검색
       ps.keywordSearch(startKeyword, (startData: any, startStatus: any) => {
         if (startStatus === window.kakao.maps.services.Status.OK) {
-          processRoute({
+          const start: Point = {
             lat: parseFloat(startData[0].y),
             lng: parseFloat(startData[0].x),
-          });
+          };
+          processRoute(start);
         } else {
-          alert("출발지를 찾을 수 없습니다.");
+          alert("출발지 검색 결과가 없습니다.");
         }
       });
     } else if (userLocation) {
+      // 현재 위치 사용
       processRoute(userLocation);
     } else {
-      alert("출발지 또는 현재 위치가 필요합니다.");
+      alert("출발지를 입력하거나 위치 권한을 허용해주세요.");
     }
   };
 
   /**
-   * 지도에 경로 그리기
+   * 현재 위치로 출발지 설정
    */
-  const drawPath = (path: Point[]) => {
-    if (pathOverlayRef.current) {
-      pathOverlayRef.current.setMap(null);
+  const handleUseCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setStartKeyword("현재 위치");
+        },
+        () => {
+          alert("위치 정보를 가져올 수 없습니다.");
+        }
+      );
     }
-
-    const linePath = path.map(
-      (p) => new window.kakao.maps.LatLng(p.lat, p.lng)
-    );
-
-    const polyline = new window.kakao.maps.Polyline({
-      path: linePath,
-      strokeWeight: 5,
-      strokeColor: "#22c55e",
-      strokeOpacity: 0.8,
-      strokeStyle: "solid",
-    });
-
-    polyline.setMap(mapRef.current);
-    pathOverlayRef.current = polyline;
   };
 
+  /**
+   * 줌 컨트롤 핸들러
+   */
   const handleZoomIn = () => {
     if (mapRef.current) {
       mapRef.current.setLevel(mapRef.current.getLevel() - 1);
@@ -271,54 +328,95 @@ export default function ServicePage() {
   };
 
   return (
-    <div className="w-screen min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* ========== 섹션 1: 헤더 및 검색 ========== */}
-      <section className="w-full px-4 pt-10 pb-6 md:px-8 lg:px-16">
-        <MergeAnimation direction="left">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div className="flex flex-col w-screen h-screen min-h-screen bg-gradient-to-br from-blue-50 to-green-50 overflow-x-hidden overflow-y-auto">
+      {/* ========== 섹션 1: 헤더 및 검색 영역 ========== */}
+      <section className="w-full px-4 py-6 md:px-8 lg:px-16">
+        {/* 상단 헤더 */}
+        <MergeAnimation direction="left" className="mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                  AI Navigation
-                </span>
-                {environmentData && (
-                  <span className="text-xs text-gray-400">
-                    서울 | 미세먼지: {environmentData.airQuality.value}
-                  </span>
-                )}
-              </div>
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
-                흡연부스 회피 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-600">
-                  최적 경로 탐색
-                </span>
-              </h2>
-            </div>
-            <div className="hidden md:block text-right">
-              <p className="text-sm font-bold text-gray-400 mb-1">CURRENT TIME</p>
-              <p className="text-2xl font-black text-gray-800">
-                {currentTime.toLocaleTimeString()}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                흡연부스 회피 네비게이션
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-2">
+                A* 알고리즘 기반 지능형 경로 탐색 시스템
               </p>
             </div>
+            <button
+              onClick={() => navigate("/")}
+              className="bg-gray-800 hover:bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
+            >
+              홈으로
+            </button>
           </div>
+        </MergeAnimation>
 
+        {/* 실시간 정보 카드 */}
+        <MergeAnimation direction="right" delay={0.1} className="mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+              <div className="text-center sm:text-left">
+                <p className="text-xs sm:text-sm text-gray-500">실시간 정보</p>
+                <p className="text-lg sm:text-xl font-bold text-gray-800">
+                  {currentTime.toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    weekday: "long",
+                  })}
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                  {currentTime.toLocaleTimeString("ko-KR")}
+                </p>
+              </div>
+              {environmentData && (
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-1">미세먼지</p>
+                    <p className="text-lg sm:text-2xl font-bold text-blue-600">
+                      {environmentData.airQuality.value}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {environmentData.airQuality.level}
+                    </p>
+                  </div>
+                  <div className="border-x border-gray-200 px-4">
+                    <p className="text-xs sm:text-sm text-gray-500 mb-1">날씨</p>
+                    <p className="text-lg sm:text-2xl font-bold text-green-600">
+                      {environmentData.weather.condition}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-1">기온</p>
+                    <p className="text-lg sm:text-2xl font-bold text-orange-600">
+                      {environmentData.weather.temp}°C
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </MergeAnimation>
+
+        {/* 검색 폼 */}
+        <MergeAnimation direction="left" delay={0.2} className="mb-6">
           <form
             onSubmit={handleSearch}
-            className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border border-gray-100 mb-8"
+            className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-              <div className="lg:col-span-2 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="relative">
                 <input
                   type="text"
-                  placeholder="출발지 (미입력 시 현재 위치)"
+                  placeholder="출발지 (비워두면 현재 위치)"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   value={startKeyword}
                   onChange={(e) => setStartKeyword(e.target.value)}
                 />
                 <button
                   type="button"
-                  onClick={() => setStartKeyword("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-blue-600 hover:text-blue-800"
+                  onClick={handleUseCurrentLocation}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:text-blue-800"
                 >
                   현재 위치
                 </button>
@@ -414,7 +512,7 @@ export default function ServicePage() {
                 </div>
                 <h3 className="text-lg font-bold text-gray-800 mb-2">A* 알고리즘</h3>
                 <p className="text-sm text-gray-600">
-                  최적의 경로를 찾는 인공지능 알고리즘으로 흡연부스를 능동적으로 회피합니다.
+                  최적의 경로를 찾는 인공지능 알고리즘으로 흡연부스를 자동으로 회피합니다.
                 </p>
               </div>
             </MergeAnimation>
@@ -427,7 +525,7 @@ export default function ServicePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 mb-2">전국 단위 지도</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">전국 단위 지원</h3>
                 <p className="text-sm text-gray-600">
                   서울부터 제주까지 전국 어디든 흡연부스 회피 경로를 제공합니다.
                 </p>
