@@ -118,7 +118,7 @@ export default function SmokingBoothDetailPage() {
           </div>
         `;
 
-        const overlay = new window.kakao.maps.CustomOverlay({
+        new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
           content: boothContent,
           map: map,
