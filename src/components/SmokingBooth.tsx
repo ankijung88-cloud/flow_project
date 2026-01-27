@@ -313,7 +313,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                     )}
 
                     {/* Custom Zoom Controls (Bottom Left) */}
-                    <div className="absolute bottom-6 left-6 z-40 flex flex-col gap-[30px] pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-4 left-4 z-40 flex flex-col gap-2 pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

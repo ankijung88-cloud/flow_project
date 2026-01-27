@@ -484,7 +484,7 @@ export default function ServicePage() {
             <div ref={mapContainerRef} className="w-full h-full min-h-[400px] md:min-h-[500px]" />
 
             {/* Custom Zoom Controls (Bottom Left) */}
-            <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
+            <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
               <button
                 onClick={handleZoomIn}
                 className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
