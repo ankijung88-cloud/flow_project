@@ -75,7 +75,7 @@ export default function Navbar() {
           {/* 햄버거 버튼 (모바일 & 데스크탑 모두 표시) */}
           <button
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center p-0 bg-transparent border-none outline-none"
           >
             {menuOpen ? (
               <XMarkIcon className="w-8 h-8 text-white" />
