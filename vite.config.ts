@@ -7,5 +7,5 @@ export default defineConfig({
     host: "0.0.0.0",
   },
   plugins: [react()],
-  base: "./", // 이 부분을 추가하여 상대 경로로 빌드되게 합니다.
+  base: "/flow_project/", // GitHub Pages 저장소 명에 맞게 베이스 경로 설정
 });
