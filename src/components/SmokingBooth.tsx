@@ -25,6 +25,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [stats, setStats] = useState({ within500m: 0, within1km: 0, within2km: 0 });
 
   const mapContainerRef1 = useRef<HTMLDivElement>(null);
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
@@ -98,19 +99,20 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
 
           // 주변 흡연부스 마커 (가까운 10개만)
           const sortedBooths = nationalBooths
-            .map((booth) => {
-              const distance = getDistance(
-                userLocation.lat,
-                userLocation.lng,
-                booth.latitude,
-                booth.longitude
-              );
-              return { ...booth, distance };
-            })
-            .sort((a, b) => a.distance - b.distance)
-            .slice(0, 10);
+            .map(b => ({
+              ...b,
+              distance: Math.sqrt(Math.pow(b.latitude - userLocation.lat, 2) + Math.pow(b.longitude - userLocation.lng, 2)) * 111320
+            }))
+            .sort((a, b) => a.distance - b.distance);
 
-          sortedBooths.forEach((booth) => {
+          // 통계 업데이트
+          setStats({
+            within500m: sortedBooths.filter(b => b.distance <= 500).length,
+            within1km: sortedBooths.filter(b => b.distance <= 1000).length,
+            within2km: sortedBooths.filter(b => b.distance <= 2000).length,
+          });
+
+          sortedBooths.slice(0, 10).forEach((booth) => {
             const markerContent = document.createElement('div');
             markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
             markerContent.innerHTML = `
@@ -226,22 +228,6 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
     }
   }, [userLocation, nationalBooths]);
 
-  // Haversine formula for distance calculation
-  const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const R = 6371000; // Earth radius in meters
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
 
   // 줌 컨트롤 핸들러 (지도 1)
   const handleZoomIn1 = () => {
@@ -305,6 +291,26 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                       className="w-full h-full"
                       style={{ pointerEvents: "none" }}
                     />
+
+                    {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) - 첫 번째 카드에만 표시 */}
+                    {index === 0 && (
+                      <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-xl border-2 border-green-100 min-w-[140px] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm">📊</span>
+                          <h4 className="text-[10px] font-bold text-gray-900">주변 흡정보</h4>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between px-2 py-1 bg-green-50 rounded-lg">
+                            <span className="text-[8px] font-bold text-green-700">500m</span>
+                            <span className="text-xs font-black text-green-900">{stats.within500m}개</span>
+                          </div>
+                          <div className="flex items-center justify-between px-2 py-1 bg-emerald-50 rounded-lg">
+                            <span className="text-[8px] font-bold text-emerald-700">1km</span>
+                            <span className="text-xs font-black text-emerald-900">{stats.within1km}개</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Custom Zoom Controls (Bottom Left) */}
                     <div className="absolute bottom-4 left-4 z-40 flex flex-col gap-[30px] pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
