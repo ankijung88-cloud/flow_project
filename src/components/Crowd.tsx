@@ -23,7 +23,12 @@ interface LocationData {
   hourlyData: HourlyData[];
 }
 
-export default function Crowd() {
+interface CrowdProps {
+  onBack: () => void;
+  onShowRegionDetail: (region: string) => void;
+}
+
+export default function Crowd({ onShowRegionDetail }: CrowdProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [hourlyUpdateTime, setHourlyUpdateTime] = useState(new Date()); // 1시간 단위 업데이트용
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -92,6 +97,11 @@ export default function Crowd() {
             yAnchor: 0.5,
           });
           customOverlay.setMap(map);
+
+          // 마커 클릭 시 상세 지역 보기
+          markerContent.onclick = () => {
+            onShowRegionDetail(loc.name);
+          };
         });
       });
     };
