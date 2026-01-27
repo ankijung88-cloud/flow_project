@@ -225,6 +225,36 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
             });
             customOverlay.setMap(map);
           });
+
+          // 초기 통계 계산
+          const initCenter = map.getCenter();
+          const initLat = initCenter.getLat();
+          const initLng = initCenter.getLng();
+
+          let w500 = 0, w1k = 0, w2k = 0;
+          nationalBooths.forEach(booth => {
+            const d = calculateDist(initLat, initLng, booth.latitude, booth.longitude);
+            if (d <= 500) w500++;
+            if (d <= 1000) w1k++;
+            if (d <= 2000) w2k++;
+          });
+          setStats({ within500m: w500, within1km: w1k, within2km: w2k });
+
+          // 지도 이동 시 통계 업데이트
+          window.kakao.maps.event.addListener(map, 'idle', () => {
+            const center = map.getCenter();
+            const cLat = center.getLat();
+            const cLng = center.getLng();
+
+            let ww500 = 0, ww1k = 0, ww2k = 0;
+            nationalBooths.forEach(booth => {
+              const d = calculateDist(cLat, cLng, booth.latitude, booth.longitude);
+              if (d <= 500) ww500++;
+              if (d <= 1000) ww1k++;
+              if (d <= 2000) ww2k++;
+            });
+            setStats({ within500m: ww500, within1km: ww1k, within2km: ww2k });
+          });
         }
       });
     };
