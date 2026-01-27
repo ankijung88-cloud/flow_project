@@ -39,11 +39,11 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
    */
   const renderMarkers = (map: any) => {
     // 기존 마커 제거
-    markersRef.current.forEach((m) => m.setMap(null));
+    markersRef.current.forEach((m: any) => m.setMap(null));
     markersRef.current = [];
 
     // 전국 흡연부스 마커 생성
-    nationalBooths.forEach((booth) => {
+    nationalBooths.forEach((booth: SmokingBooth) => {
       // 전파 효과와 아이콘을 포함한 커스텀 오버레이 생성
       const markerContent = document.createElement('div');
       markerContent.style.cssText = 'position: relative; width: 32px; height: 32px; cursor: pointer;';
@@ -54,7 +54,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
           <div class="smoke-marker-ripple"></div>
           <div class="smoke-marker-ripple"></div>
           <div class="smoke-marker-ripple"></div>
-          <img src="/image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+          <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
         </div>
       `;
 
@@ -101,7 +101,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
           // 사용자 위치 마커 (파란색)
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(40, 40)
           );
 
@@ -200,7 +200,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
         let within1km = 0;
         let within2km = 0;
 
-        nationalBooths.forEach((booth) => {
+        nationalBooths.forEach((booth: SmokingBooth) => {
           const distance = calculateDistance(
             { lat, lng },
             { lat: booth.latitude, lng: booth.longitude }
@@ -260,7 +260,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
             placeholder="지역 검색 (예: 강남역)"
             className="flex-1 sm:flex-initial sm:w-48 md:w-64 px-3 sm:px-4 py-2 outline-none border rounded-md focus:border-blue-500 text-sm sm:text-base"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setKeyword(e.target.value)}
           />
           <button
             type="submit"
@@ -321,14 +321,14 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
             className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
             title="확대"
           >
-            <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+            <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
           </button>
           <button
             onClick={handleZoomOut}
             className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
             title="축소"
           >
-            <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+            <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
           </button>
         </div>
       </div>

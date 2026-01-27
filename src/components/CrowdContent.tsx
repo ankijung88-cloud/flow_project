@@ -105,7 +105,7 @@ export default function CrowdContent() {
                             muted
                             loop
                             playsInline
-                            src="/video/video-03.mp4"
+                            src={`${import.meta.env.BASE_URL}video/video-03.mp4`}
                         >
                             <div className="absolute inset-0 flex items-center justify-center text-white">
                                 <p className="text-xl">Crowd Analysis Video</p>

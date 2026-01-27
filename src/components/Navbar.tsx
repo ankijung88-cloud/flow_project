@@ -4,13 +4,9 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
 // 1. 인터페이스에 부모(App.tsx)로부터 받는 함수 타입을 정의합니다.
-interface NavbarProps {
-  onWalkClick: () => void;
-  onShowSmokingMap: () => void; // 이 부분을 추가하여 에러를 해결합니다.
-  onShowCrowdMap: () => void; // 이 부분도 함께 추가합니다.
-}
 
-export default function Navbar({ onWalkClick }: NavbarProps) {
+
+export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +46,7 @@ export default function Navbar({ onWalkClick }: NavbarProps) {
           >
             <div className="w-8 h-8 overflow-hidden rounded-full">
               <img
-                src="/image/logo.png"
+                src={`${import.meta.env.BASE_URL}image/logo.png`}
                 alt="FLOW 로고"
                 className="w-full h-full object-contain"
               />

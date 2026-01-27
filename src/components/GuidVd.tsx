@@ -628,7 +628,7 @@ export default function GuideVd() {
 
                 // 현재 위치 마커 (3D 남자 캐릭터)
                 const markerImage = new window.kakao.maps.MarkerImage(
-                  "/image/user-marker.svg",
+                  `${import.meta.env.BASE_URL}image/user-marker.svg`,
                   new window.kakao.maps.Size(40, 50),
                   {
                     offset: new window.kakao.maps.Point(20, 50)
@@ -680,7 +680,7 @@ export default function GuideVd() {
                         box-shadow: 0 3px 8px rgba(0,0,0,0.3);
                         border: 2px solid #ff6b35;
                       ">
-                        <img src="/image/smoke_icon.png" style="width: 24px; height: 24px; object-fit: contain; mix-blend-mode: multiply; background: transparent;" />
+                        <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" style="width: 24px; height: 24px; object-fit: contain; mix-blend-mode: multiply; background: transparent;" />
                       </div>
                       <div style="
                         position: absolute;
@@ -957,14 +957,14 @@ export default function GuideVd() {
                 className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                 title="확대"
               >
-                <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
               </button>
               <button
                 onClick={handleZoomOut}
                 className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                 title="축소"
               >
-                <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
               </button>
             </div>
 

@@ -13,7 +13,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
       <div className="absolute inset-0">
         <img
           className="w-full h-full object-cover"
-          src="/image/guide_bg.png"
+          src={`${import.meta.env.BASE_URL}image/guide_bg.png`}
           alt="Guide Background"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />

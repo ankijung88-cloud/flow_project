@@ -87,7 +87,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
 
           // 사용자 위치 마커
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(32, 32)
           );
           new window.kakao.maps.Marker({
@@ -119,7 +119,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
-                <img src="/image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
               </div>
             `;
 
@@ -147,7 +147,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
 
           // 사용자 위치 마커
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(32, 32)
           );
           new window.kakao.maps.Marker({
@@ -312,7 +312,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                         className="w-8 h-8 bg-white/90 rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                         title="확대"
                       >
-                        <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                        <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -322,7 +322,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                         className="w-8 h-8 bg-white/90 rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                         title="축소"
                       >
-                        <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                        <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
                       </button>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import type { SmokingBooth } from "../services/smokingBoothService";
 
@@ -17,7 +17,6 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const mapRef = useRef<any>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [nearestBooths, setNearestBooths] = useState<(SmokingBooth & { distance: number })[]>([]);
 
   // 사용자 위치 가져오기
   useEffect(() => {
@@ -57,10 +56,10 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   };
 
   // 가장 가까운 흡연부스 찾기
-  useEffect(() => {
-    if (!userLocation) return;
+  const nearestBooths = useMemo(() => {
+    if (!userLocation) return [];
 
-    const boothsWithDistance = nationalBooths
+    return nationalBooths
       .map((booth) => ({
         ...booth,
         distance: getDistance(
@@ -72,8 +71,6 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 10);
-
-    setNearestBooths(boothsWithDistance);
   }, [userLocation, nationalBooths]);
 
   // 지도 초기화
@@ -95,7 +92,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
 
           // 사용자 위치 마커
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(32, 32)
           );
           new window.kakao.maps.Marker({
@@ -104,21 +101,9 @@ export default function LocationService({ onBack }: LocationServiceProps) {
             image: userMarkerImage,
           });
 
-          // 전국 흡연부스 마커 (가까운 50개)
-          const sortedBooths = nationalBooths
-            .map((booth) => ({
-              ...booth,
-              distance: getDistance(
-                userLocation.lat,
-                userLocation.lng,
-                booth.latitude,
-                booth.longitude
-              ),
-            }))
-            .sort((a, b) => a.distance - b.distance)
-            .slice(0, 50);
 
-          sortedBooths.forEach((booth) => {
+          // 전국 흡연부스 마커 (가께운 50개)
+          nearestBooths.slice(0, 50).forEach((booth) => {
             const markerContent = document.createElement('div');
             markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
             markerContent.innerHTML = `
@@ -127,7 +112,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
-                <img src="/image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
               </div>
             `;
 
@@ -162,7 +147,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const getRegionalStats = () => {
     const regions: { [key: string]: number } = {};
 
-    nationalBooths.forEach((booth) => {
+    nationalBooths.forEach((booth: SmokingBooth) => {
       const region = booth.address.split(" ")[0]; // 시/도 단위
       regions[region] = (regions[region] || 0) + 1;
     });
@@ -222,7 +207,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
             <p className="text-sm font-semibold mb-2">평균 거리</p>
             <p className="text-4xl font-black">
               {nearestBooths.length > 0
-                ? `${(nearestBooths.slice(0, 5).reduce((sum, b) => sum + b.distance, 0) / 5 / 1000).toFixed(1)}km`
+                ? `${(nearestBooths.slice(0, 5).reduce((sum: number, b) => sum + b.distance, 0) / 5 / 1000).toFixed(1)}km`
                 : "-"}
             </p>
           </div>
@@ -249,14 +234,14 @@ export default function LocationService({ onBack }: LocationServiceProps) {
                   className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="확대"
                 >
-                  <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                  <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                 </button>
                 <button
                   onClick={handleZoomOut}
                   className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="축소"
                 >
-                  <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                  <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
                 </button>
               </div>
             </div>

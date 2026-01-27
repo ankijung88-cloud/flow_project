@@ -18,7 +18,7 @@ export default function ServiceVideo() {
           <div className="lg:w-[65%] w-full">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-purple-200 bg-black aspect-[1900/1060]">
               <video className="w-full h-full object-cover" controls playsInline>
-                <source src="/video/guideVD.mp4" type="video/mp4" />
+                <source src={`${import.meta.env.BASE_URL}video/guideVD.mp4`} type="video/mp4" />
                 브라우저가 비디오 태그를 지원하지 않습니다.
               </video>
             </div>

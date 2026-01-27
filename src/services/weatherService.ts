@@ -29,7 +29,7 @@ export async function getAirQuality(): Promise<{ level: string; value: number; c
 }
 
 // 중기예보 데이터 가져오기
-export async function getMidTermForecast(regId: string = "11B00000"): Promise<any> {
+export async function getMidTermForecast(regId: string = "11B00000"): Promise<unknown> {
   try {
     const today = new Date();
     const year = today.getFullYear();

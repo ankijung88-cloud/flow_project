@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import type { SmokingBooth } from "../services/smokingBoothService";
@@ -14,9 +14,23 @@ export default function SmokingBoothDetailPage() {
   const navigate = useNavigate();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+
+  // Haversine formula
+  const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371000;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
-  const [nearbyBooths, setNearbyBooths] = useState<(SmokingBooth & { distance: number })[]>([]);
   const [selectedBooth, setSelectedBooth] = useState<(SmokingBooth & { distance: number }) | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -40,27 +54,25 @@ export default function SmokingBoothDetailPage() {
           });
         },
         () => {
-          setUserLocation({ lat: 37.5665, lng: 126.978 });
+          setTimeout(() => setUserLocation({ lat: 37.5665, lng: 126.978 }), 0);
         }
       );
     } else {
-      setUserLocation({ lat: 37.5665, lng: 126.978 });
+      setTimeout(() => setUserLocation({ lat: 37.5665, lng: 126.978 }), 0);
     }
   }, []);
 
   // 가까운 흡연부스 계산
-  useEffect(() => {
-    if (!userLocation) return;
+  const nearbyBooths = useMemo(() => {
+    if (!userLocation) return [];
 
-    const boothsWithDistance = nationalBooths
+    return nationalBooths
       .map((booth) => ({
         ...booth,
         distance: getDistance(userLocation.lat, userLocation.lng, booth.latitude, booth.longitude),
       }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 20);
-
-    setNearbyBooths(boothsWithDistance);
   }, [userLocation, nationalBooths]);
 
   // 지도 초기화
@@ -80,7 +92,7 @@ export default function SmokingBoothDetailPage() {
 
           // 사용자 위치 마커
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(40, 40)
           );
           new window.kakao.maps.Marker({
@@ -91,7 +103,7 @@ export default function SmokingBoothDetailPage() {
           });
 
           // 흡연부스 마커
-          nearbyBooths.forEach((booth) => {
+          nearbyBooths.forEach((booth: SmokingBooth & { distance: number }) => {
             const markerContent = document.createElement('div');
             markerContent.style.cssText = 'position: relative; width: 36px; height: 36px; cursor: pointer;';
             markerContent.innerHTML = `
@@ -99,7 +111,7 @@ export default function SmokingBoothDetailPage() {
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
-                <img src="/image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
+                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 32px; height: 32px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
               </div>
             `;
 
@@ -135,20 +147,6 @@ export default function SmokingBoothDetailPage() {
     }
   }, [userLocation, nearbyBooths]);
 
-  // Haversine formula
-  const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const R = 6371000;
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLng = ((lng2 - lng1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
 
   const formatDistance = (distance: number): string => {
     if (distance < 1000) {
@@ -186,7 +184,7 @@ export default function SmokingBoothDetailPage() {
     if (!searchKeyword.trim() || !mapRef.current) return;
 
     const ps = new window.kakao.maps.services.Places();
-    ps.keywordSearch(searchKeyword, (data: any, status: any) => {
+    ps.keywordSearch(searchKeyword, (data: any[], status: string) => {
       if (status === window.kakao.maps.services.Status.OK) {
         const result = data[0];
         const lat = parseFloat(result.y);
@@ -306,14 +304,14 @@ export default function SmokingBoothDetailPage() {
                     className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                     title="확대"
                   >
-                    <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                    <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                   </button>
                   <button
                     onClick={handleZoomOut}
                     className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                     title="축소"
                   >
-                    <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                    <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
                   </button>
                 </div>
               </div>

@@ -20,11 +20,23 @@ import FocusScroll from "../components/FocusScroll";
 import ServiceVideo from "../components/ServiceVideo";
 import CrowdContent from "../components/CrowdContent";
 
+interface Course {
+  id: number;
+  name: string;
+  dist: string;
+  lat: number;
+  lng: number;
+  desc: string;
+  difficulty: "쉬움" | "보통" | "어려움";
+  time: string;
+  features: string[];
+}
+
 export default function Home() {
   const [showMap, setShowMap] = useState(false);
   const [showCrowdMap, setShowCrowdMap] = useState(false);
   const [showWalkList, setShowWalkList] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [crowdSearchKeyword, setCrowdSearchKeyword] = useState<string>("");
   const [showLocationService, setShowLocationService] = useState(false);
   const [showCongestionMonitoring, setShowCongestionMonitoring] = useState(false);
@@ -86,11 +98,7 @@ export default function Home() {
     <div className="relative w-full min-h-screen bg-white overflow-x-hidden">
       <main className="w-full">
         {/* Navbar 연동 */}
-        <Navbar
-          onWalkClick={() => setShowWalkList(true)}
-          onShowSmokingMap={() => setShowMap(true)}
-          onShowCrowdMap={() => setShowCrowdMap(true)}
-        />
+        <Navbar />
 
         {/* Hero 섹션 - 영상 사이즈에 맞춰 고정 (내부에서 휠 인터랙션 처리) */}
         <section id="section-hero" style={{ scrollSnapAlign: "start" }} className="relative w-full h-screen">

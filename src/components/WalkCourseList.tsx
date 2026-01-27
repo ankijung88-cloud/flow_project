@@ -176,12 +176,12 @@ export default function WalkCourseList({
           });
         },
         () => {
-          // 위치 권한 거부 시 서울 중심으로 설정
-          setUserLocation({ lat: 37.5665, lng: 126.978 });
+          // 위치 권한 거부 시 서울 중심으로 설정 (동기 호출 방지)
+          setTimeout(() => setUserLocation({ lat: 37.5665, lng: 126.978 }), 0);
         }
       );
     } else {
-      setUserLocation({ lat: 37.5665, lng: 126.978 });
+      setTimeout(() => setUserLocation({ lat: 37.5665, lng: 126.978 }), 0);
     }
   }, []);
 
@@ -193,9 +193,9 @@ export default function WalkCourseList({
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -210,9 +210,13 @@ export default function WalkCourseList({
     }));
 
     const sorted = coursesWithDistance.sort((a, b) => a.calculatedDistance - b.calculatedDistance);
-    setSortedCourses(sorted);
-    setIsLoading(false);
-  }, [userLocation]);
+
+    // 비동기 처리를 통해 렌더링 도중 상태 변경 방지
+    setTimeout(() => {
+      setSortedCourses(sorted);
+      setIsLoading(false);
+    }, 0);
+  }, [userLocation, courses]);
 
   const formatDistance = (distance: number): string => {
     if (distance < 1) {
@@ -265,11 +269,10 @@ export default function WalkCourseList({
             <button
               key={f}
               onClick={() => setFilter(f as typeof filter)}
-              className={`px-6 py-2 rounded-full font-bold transition-all ${
-                filter === f
+              className={`px-6 py-2 rounded-full font-bold transition-all ${filter === f
                   ? "bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg"
                   : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-400"
-              }`}
+                }`}
             >
               {f === "all" ? "전체" : f}
             </button>

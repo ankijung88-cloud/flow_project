@@ -14,7 +14,7 @@ export default function ServiceCards({ onShowSmokingMap, onShowCrowdMap }: Servi
       smallTitle: "내 주변 흡연부스 위치",
       title: "흡연부스 위치 확인",
       description: "주변 흡연부스 위치를 빠르게 확인하여 불필요한 이동과 혼잡을 줄일 수 있습니다. 실시간으로 업데이트되는 위치 정보를 통해 가장 가까운 흡연부스를 찾아보세요.",
-      previewImage: "/image/smokeArea.png",
+      previewImage: `${import.meta.env.BASE_URL}image/smokeArea.png`,
       onClick: onShowSmokingMap,
       bgColor: "from-green-50 to-emerald-50",
       borderColor: "border-green-200",
@@ -25,7 +25,7 @@ export default function ServiceCards({ onShowSmokingMap, onShowCrowdMap }: Servi
       smallTitle: "현지 혼잡도 현황",
       title: "혼잡도확인",
       description: "전국 주요 지역의 실시간 인구 밀집도를 확인하고 최적의 방문 시간을 선택하세요. 4단계 컬러 시스템으로 한눈에 혼잡도를 파악할 수 있습니다.",
-      previewImage: "/image/crowdArea.png",
+      previewImage: `${import.meta.env.BASE_URL}image/crowdArea.png`,
       onClick: onShowCrowdMap,
       bgColor: "from-blue-50 to-indigo-50",
       borderColor: "border-blue-200",
@@ -93,9 +93,8 @@ export default function ServiceCards({ onShowSmokingMap, onShowCrowdMap }: Servi
 
                   {/* 설명 - hover 시에만 표시 */}
                   <div
-                    className={`overflow-hidden transition-all duration-300 ${
-                      hoveredCard === card.id ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                    }`}
+                    className={`overflow-hidden transition-all duration-300 ${hoveredCard === card.id ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                      }`}
                   >
                     <p className="text-gray-600 text-base leading-relaxed text-center">
                       {card.description}

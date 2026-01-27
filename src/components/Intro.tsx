@@ -53,7 +53,7 @@ export default function Intro() {
               {/* 아이콘 1 */}
               <div className="flex items-start gap-2 sm:gap-3">
                 <img
-                  src="/image/smokeIcon.png"
+                  src={`${import.meta.env.BASE_URL}image/smokeIcon.png`}
                   alt="연기아이콘"
                   className="w-6 h-6 sm:w-8 sm:h-8"
                 />
@@ -68,7 +68,7 @@ export default function Intro() {
               {/* 아이콘 2 */}
               <div className="flex items-start gap-2 sm:gap-3">
                 <img
-                  src="/image/signalIcon.png"
+                  src={`${import.meta.env.BASE_URL}image/signalIcon.png`}
                   alt="신호아이콘"
                   className="w-6 h-6 sm:w-8 sm:h-8"
                 />
@@ -91,7 +91,7 @@ export default function Intro() {
     "
             >
               <video
-                src="/video/family_01.mp4"
+                src={`${import.meta.env.BASE_URL}video/family_01.mp4`}
                 autoPlay
                 loop
                 muted

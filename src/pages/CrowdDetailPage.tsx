@@ -23,6 +23,18 @@ interface LocationData {
   hourlyData: HourlyData[];
 }
 
+// Pre-calculate populations for all hours to stay pure during render
+// Moved outside component to avoid purity check issues with Math.random during render
+const HOURLY_POPULATIONS = Array.from({ length: 24 }, (_, i) => {
+  if ((i >= 8 && i < 10) || (i >= 12 && i < 13) || (i >= 18 && i < 20)) {
+    return 4000 + Math.random() * 1000;
+  } else if (i >= 0 && i < 6) {
+    return 500 + Math.random() * 300;
+  } else {
+    return 1500 + Math.random() * 1000;
+  }
+});
+
 export default function CrowdDetailPage() {
   const navigate = useNavigate();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -375,14 +387,14 @@ export default function CrowdDetailPage() {
                     className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                     title="확대"
                   >
-                    <img src="/image/zoom-plus.jpg" alt="확대" className="w-full h-full object-contain" />
+                    <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                   </button>
                   <button
                     onClick={handleZoomOut}
                     className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                     title="축소"
                   >
-                    <img src="/image/zoom-minus.png" alt="축소" className="w-full h-full object-contain" />
+                    <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
                   </button>
                 </div>
               </div>
@@ -394,16 +406,7 @@ export default function CrowdDetailPage() {
                   {Array.from({ length: 24 }, (_, hour) => {
                     const currentHour = currentTime.getHours();
                     const isCurrentHour = hour === currentHour;
-
-                    let basePopulation = 1000;
-                    if ((hour >= 8 && hour < 10) || (hour >= 12 && hour < 13) || (hour >= 18 && hour < 20)) {
-                      basePopulation = 4000 + Math.random() * 1000;
-                    } else if (hour >= 0 && hour < 6) {
-                      basePopulation = 500 + Math.random() * 300;
-                    } else {
-                      basePopulation = 1500 + Math.random() * 1000;
-                    }
-
+                    const basePopulation = HOURLY_POPULATIONS[hour];
                     const level = basePopulation > 4000 ? "매우혼잡" : basePopulation > 2500 ? "혼잡" : basePopulation > 1000 ? "보통" : "여유";
                     const color = getLevelColor(level);
                     const maxPopulation = 5000;

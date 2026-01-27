@@ -201,7 +201,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
                 <div class="smoke-marker-ripple"></div>
-                <img src="/image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
               </div>
             `;
 

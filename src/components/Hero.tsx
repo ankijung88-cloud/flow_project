@@ -54,7 +54,7 @@ export default function Hero() {
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover z-0"
-        src="/video/test.mp4"
+        src={`${import.meta.env.BASE_URL}video/test.mp4`}
         autoPlay
         muted
         loop

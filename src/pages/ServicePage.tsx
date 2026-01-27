@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
@@ -13,6 +13,8 @@ declare global {
     kakao: any;
   }
 }
+
+
 
 /**
  * Merge 스크롤 애니메이션 래퍼 컴포넌트
@@ -58,8 +60,6 @@ export default function ServicePage() {
   const [startKeyword, setStartKeyword] = useState("");
   const [destKeyword, setDestKeyword] = useState("");
 
-  const [_startPoint, setStartPoint] = useState<Point | null>(null);
-  const [_destPoint, setDestPoint] = useState<Point | null>(null);
 
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
   const markersRef = useRef<any[]>([]);
@@ -102,14 +102,14 @@ export default function ServicePage() {
   /**
    * 전국 흡연부스 마커 렌더링
    */
-  const renderSmokingBooths = (map: any) => {
+  const renderSmokingBooths = useCallback((map: any) => {
     // 기존 마커 제거
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
     // 커스텀 마커 이미지 (투명 원형 처리)
     const markerImage = new window.kakao.maps.MarkerImage(
-      "/image/smoke_icon.png",
+      `${import.meta.env.BASE_URL}image/smoke_icon.png`,
       new window.kakao.maps.Size(32, 32),
       {
         offset: new window.kakao.maps.Point(16, 16),
@@ -127,7 +127,7 @@ export default function ServicePage() {
 
       markersRef.current.push(marker);
     });
-  };
+  }, [nationalBooths]);
 
   /**
    * 경로 그리기 (초록색 입체감)
@@ -182,7 +182,7 @@ export default function ServicePage() {
 
           // 사용자 위치 마커
           const userMarkerImage = new window.kakao.maps.MarkerImage(
-            "/image/user-marker.svg",
+            `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(40, 40)
           );
 
@@ -224,7 +224,7 @@ export default function ServicePage() {
         document.head.appendChild(script);
       }
     }
-  }, [nationalBooths]);
+  }, [nationalBooths, renderSmokingBooths]);
 
   /**
    * 장소 검색 및 경로 탐색 (실시간 현재 위치 기준)
@@ -241,7 +241,6 @@ export default function ServicePage() {
 
     // 출발지: 사용자가 입력했으면 검색, 아니면 현재 위치 사용
     const processRoute = (start: Point) => {
-      setStartPoint(start);
 
       // 목적지 검색 (전국 단위 지원)
       ps.keywordSearch(destKeyword, (destData: any, destStatus: any) => {
@@ -250,7 +249,6 @@ export default function ServicePage() {
             lat: parseFloat(destData[0].y),
             lng: parseFloat(destData[0].x),
           };
-          setDestPoint(dest);
 
           // 흡연부스 위치를 Point 배열로 변환
           const obstacles: Point[] = nationalBooths.map((booth) => ({

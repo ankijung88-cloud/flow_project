@@ -4,40 +4,42 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import { FlatCompat } from "@eslint/eslintrc";
 import { defineConfig, globalIgnores } from "eslint/config";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
-export default defineConfig([
-  // 전역 무시
-  globalIgnores(["dist"]),
-
-  // TypeScript + React 설정
+export default [
+  { ignores: ["dist", "**/node_modules/"] },
+  js.configs.recommended,
+  ...compat.extends("plugin:@typescript-eslint/recommended"),
+  ...compat.extends("plugin:react/recommended"),
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      parser: "@typescript-eslint/parser",
-      parserOptions: {
-        ecmaVersion: 2020,
-        sourceType: "module",
-        ecmaFeatures: { jsx: true },
+      parser: require("@typescript-eslint/parser"),
+      ecmaVersion: 2020,
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
       },
-      globals: globals.browser,
     },
     plugins: {
-      "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
-      react: require("eslint-plugin-react"),
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
-    extends: [
-      js.configs.recommended,
-      compat.extends("plugin:@typescript-eslint/recommended"),
-      compat.extends("plugin:react/recommended"),
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
     rules: {
-      // 필요시 커스텀 규칙 추가 가능
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+      "react/react-in-jsx-scope": "off", // Vite handles this
     },
   },
-]);
+];

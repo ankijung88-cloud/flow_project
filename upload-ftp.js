@@ -1,9 +1,6 @@
+/* global console */
 import ftp from 'basic-ftp';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 async function uploadToFTP() {
   const client = new ftp.Client();
@@ -36,17 +33,20 @@ async function uploadToFTP() {
           } else {
             await client.remove(file.name);
           }
-        } catch (e) {
+        } catch (_e) {
           console.log(`파일 삭제 실패: ${file.name}`);
         }
       }
-    } catch (e) {
-      console.log('기존 파일 정리 건너뜀');
+    } catch (err) {
+      console.log('FTP Cleanup skipped or failed:', err);
     }
 
-    // dist 폴더의 내용을 업로드
-    console.log('빌드 파일 업로드 중...');
-    await client.uploadFromDir(path.join(__dirname, 'dist'));
+    try {
+      console.log('Uploading files...');
+      await client.uploadFromDir('dist');
+    } catch (err) {
+      console.log('FTP Upload failed:', err);
+    }
 
     console.log('✅ 업로드 완료!');
     console.log('접속 URL: http://tlghks132.dothome.co.kr');
