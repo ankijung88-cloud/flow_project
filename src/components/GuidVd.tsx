@@ -989,15 +989,7 @@ export default function GuideVd() {
               </div>
             )}
 
-            {currentPosition && (
-              <div className="absolute bottom-4 left-4 bg-white px-4 py-2 rounded-lg shadow-lg">
-                <p className="text-sm font-semibold">현재 위치</p>
-                <p className="text-xs text-gray-600">
-                  위도: {currentPosition.lat.toFixed(6)}, 경도: {currentPosition.lng.toFixed(6)}
-                </p>
-              </div>
-            )}
-            <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-lg shadow-lg">
+            <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-100 z-50">
               <p className="text-xs font-semibold text-gray-700 mb-2">범례</p>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-4 h-4 bg-red-500 rounded-full"></div>

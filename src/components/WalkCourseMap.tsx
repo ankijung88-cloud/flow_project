@@ -12,30 +12,28 @@ export default function WalkCourseMap({
   const kakaoMapRef = useRef<any>(null);
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false`;
-    script.async = true;
-    script.onload = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(course.lat, course.lng),
-            level: 3,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          kakaoMapRef.current = map;
+    if (!window.kakao || !window.kakao.maps) {
+      console.error("Kakao Maps SDK not found");
+      return;
+    }
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
+    window.kakao.maps.load(() => {
+      if (mapContainerRef.current) {
+        const options = {
+          center: new window.kakao.maps.LatLng(course.lat, course.lng),
+          level: 3,
+        };
+        const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+        kakaoMapRef.current = map;
 
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(course.lat, course.lng),
-            map: map,
-          });
-        }
-      });
-    };
-    document.head.appendChild(script);
+        map.setZoomable(false);
+
+        new window.kakao.maps.Marker({
+          position: new window.kakao.maps.LatLng(course.lat, course.lng),
+          map: map,
+        });
+      }
+    });
   }, [course]);
 
   // 줌 컨트롤 핸들러

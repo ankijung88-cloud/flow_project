@@ -300,6 +300,27 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
   };
 
   useEffect(() => {
+    const startApp = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const position = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            setCurrentPosition(position);
+            initializeMap(position.lat, position.lng);
+          },
+          () => {
+            const defaultPos = { lat: 37.5665, lng: 126.978 };
+            setCurrentPosition(defaultPos);
+            initializeMap(defaultPos.lat, defaultPos.lng);
+          }
+        );
+      } else {
+        const defaultPos = { lat: 37.5665, lng: 126.978 };
+        setCurrentPosition(defaultPos);
+        initializeMap(defaultPos.lat, defaultPos.lng);
+      }
+    };
+
     const initializeMap = (lat: number, lng: number) => {
       if (!window.kakao || !window.kakao.maps) {
         console.error("Kakao Maps SDK not loaded");
@@ -311,16 +332,13 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
 
         const mapOptions = {
           center: new window.kakao.maps.LatLng(lat, lng),
-          level: 8, // 넓은 영역 표시
+          level: 8,
         };
 
         const map = new window.kakao.maps.Map(mapContainerRef.current, mapOptions);
         mapRef.current = map;
-
-        // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
         map.setZoomable(false);
 
-        // 현재 위치 마커 표시
         if (currentPosition) {
           new window.kakao.maps.Marker({
             position: new window.kakao.maps.LatLng(currentPosition.lat, currentPosition.lng),
@@ -328,49 +346,11 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
           });
         }
 
-        // 주요 지역 마커 표시
         renderMajorLocations(map);
-
-        console.log("지도 초기화 완료");
       });
     };
 
-    // Kakao Maps SDK 로드
-    if (!window.kakao) {
-      const script = document.createElement("script");
-      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false&libraries=services`;
-      script.async = true;
-      script.onload = () => {
-        // 현재 위치 가져오기
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const position = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-              setCurrentPosition(position);
-              initializeMap(position.lat, position.lng);
-            },
-            () => {
-              const defaultPos = { lat: 37.5665, lng: 126.978 };
-              setCurrentPosition(defaultPos);
-              initializeMap(defaultPos.lat, defaultPos.lng);
-            }
-          );
-        } else {
-          const defaultPos = { lat: 37.5665, lng: 126.978 };
-          setCurrentPosition(defaultPos);
-          initializeMap(defaultPos.lat, defaultPos.lng);
-        }
-      };
-      document.head.appendChild(script);
-    } else {
-      if (currentPosition) {
-        initializeMap(currentPosition.lat, currentPosition.lng);
-      } else {
-        const defaultPos = { lat: 37.5665, lng: 126.978 };
-        setCurrentPosition(defaultPos);
-        initializeMap(defaultPos.lat, defaultPos.lng);
-      }
-    }
+    startApp();
 
     return () => {
       markersRef.current.forEach(marker => marker.setMap(null));
@@ -456,31 +436,6 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
                 </div>
                 <div className="text-xs text-gray-500">
                   마지막 갱신: {lastUpdate.toLocaleTimeString("ko-KR")} (1시간마다 자동 갱신)
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                {currentPosition ?
-                  `📍 현재 위치 기준 · 전국 주요 지역의 시간대별 인구 밀집도를 확인하고, 최적의 방문 시간을 추천받으세요` :
-                  "위치 정보를 가져오는 중..."}
-              </p>
-
-              {/* 혼잡도 범례 */}
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-lg">
-                  <div className="w-3 h-3 rounded-full bg-red-600"></div>
-                  <span className="text-xs font-semibold text-red-700">매우혼잡 (4000+명)</span>
-                </div>
-                <div className="flex items-center gap-2 bg-orange-50 px-3 py-1.5 rounded-lg">
-                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                  <span className="text-xs font-semibold text-orange-700">혼잡 (2500+명)</span>
-                </div>
-                <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg">
-                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                  <span className="text-xs font-semibold text-yellow-700">보통 (1000+명)</span>
-                </div>
-                <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-lg">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-xs font-semibold text-green-700">여유 (~1000명)</span>
                 </div>
               </div>
             </div>
@@ -653,6 +608,32 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
             <p className="text-indigo-100 text-xs mt-1">지도에서 지역을 클릭하여 상세 정보를 확인하세요</p>
           </div>
           <div ref={mapContainerRef} className="w-full h-[600px]" />
+
+          {/* Legend (Top Right) */}
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-indigo-100 z-50 pointer-events-none">
+            <p className="text-xs font-bold text-gray-800 mb-3 flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+              혼잡도 범례
+            </p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-600 shadow-sm shadow-red-200"></div>
+                <span className="text-[11px] font-semibold text-gray-600">매우혼잡</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm shadow-orange-200"></div>
+                <span className="text-[11px] font-semibold text-gray-600">혼잡</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm shadow-yellow-200"></div>
+                <span className="text-[11px] font-semibold text-gray-600">보통</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm shadow-green-200"></div>
+                <span className="text-[11px] font-semibold text-gray-600">여유</span>
+              </div>
+            </div>
+          </div>
 
           {/* Custom Zoom Controls (Bottom Left) */}
           <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">

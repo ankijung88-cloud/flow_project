@@ -82,25 +82,40 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
 
   useEffect(() => {
     /**
+     * 앱 시작 함수
+     */
+    const startApp = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
+          () => {
+            console.log("위치 권한이 거부되었지만, 전국 지도를 표시합니다.");
+            initializeMap(37.5665, 126.978);
+          }
+        );
+      } else {
+        initializeMap(37.5665, 126.978);
+      }
+    };
+
+    /**
      * 지도 초기화 함수
-     *
-     * @param {number} lat - 초기 위도
-     * @param {number} lng - 초기 경도
      */
     const initializeMap = (lat: number, lng: number) => {
+      if (!window.kakao || !window.kakao.maps) {
+        console.error("Kakao Maps SDK not found");
+        return;
+      }
+
       window.kakao.maps.load(() => {
         if (mapContainerRef.current) {
           const options = {
             center: new window.kakao.maps.LatLng(lat, lng),
-            level: 8, // 전국 단위 표시를 위해 레벨 조정
+            level: 8,
           };
-          const map = new window.kakao.maps.Map(
-            mapContainerRef.current,
-            options
-          );
+          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
           mapRef.current = map;
 
-          // 사용자 위치 마커 (파란색)
           const userMarkerImage = new window.kakao.maps.MarkerImage(
             `${import.meta.env.BASE_URL}image/user-marker.svg`,
             new window.kakao.maps.Size(40, 40)
@@ -113,51 +128,13 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
             title: "내 위치",
           });
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
           map.setZoomable(false);
-
-          // 전국 흡연부스 마커 렌더링
           renderMarkers(map);
         }
       });
     };
 
-    /**
-     * 앱 시작 함수
-     *
-     * 위치 권한을 요청하고, 거부 시에도 서울 중심으로 전국 지도를 표시합니다.
-     * 위치 권한 거부 시에도 전국 탐색이 가능합니다.
-     */
-    const startApp = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
-          () => {
-            // 위치 권한 거부 시에도 서울 중심으로 전국 지도 표시
-            console.log("위치 권한이 거부되었지만, 전국 지도를 표시합니다.");
-            initializeMap(37.5665, 126.978);
-          }
-        );
-      } else {
-        // Geolocation API를 지원하지 않는 브라우저
-        initializeMap(37.5665, 126.978);
-      }
-    };
-
-    const scriptId = "kakao-map-sdk";
-    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-      startApp();
-    } else {
-      const existingScript = document.getElementById(scriptId);
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false&libraries=services`;
-        script.async = true;
-        script.onload = startApp;
-        document.head.appendChild(script);
-      }
-    }
+    startApp();
   }, [nationalBooths]);
 
   const onSearch = (e: React.FormEvent) => {
@@ -314,6 +291,28 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
       {/* 3. 지도 프레임 (반응형) */}
       <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
         <div ref={mapContainerRef} className="w-full h-full" />
+
+        {/* Legend (Top Right) */}
+        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200 z-50 pointer-events-none">
+          <p className="text-xs font-bold text-gray-800 mb-2 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+            지도 범례
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <img src={`${import.meta.env.BASE_URL}image/smoke_icon.png`} alt="" className="w-5 h-5 object-contain" />
+              <span className="text-[11px] font-medium text-gray-600">흡연부스</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#3b82f6' }}></div>
+              <span className="text-[11px] font-medium text-gray-600">내 위치</span>
+            </div>
+            <div className="flex items-center gap-2 opacity-60">
+              <div className="w-4 h-4 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: '#ef4444' }}></div>
+              <span className="text-[11px] font-medium text-gray-600">검색 목적지</span>
+            </div>
+          </div>
+        </div>
 
         {/* Custom Zoom Controls (Bottom Left) */}
         <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">

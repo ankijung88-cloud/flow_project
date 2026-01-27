@@ -1,28 +1,27 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="src/assets/flowLogo-transparent.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flow - 흡연부스 회피 네비게이션</title>
-  </head>
-  <body>
-    <div id="root">
-      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
-        <p>Loading Flow...</p>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="src/assets/flowLogo-transparent.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow - 흡연부스 회피 네비게이션</title>
+</head>
+
+<body>
+  <div id="root">
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+      <p>Loading Flow...</p>
     </div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script
-      type="text/javascript"
-      src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&libraries=services,clusterer,drawing"
-    ></script>
-  </body>
+  </div>
+  <script id="kakao-map-sdk" type="text/javascript"
+    src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false&libraries=services,clusterer,drawing"></script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
