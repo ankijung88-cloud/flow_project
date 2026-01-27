@@ -5,7 +5,7 @@ import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import { findPath, calculatePathDistance } from "../utils/pathfinding";
 import { getEnvironmentData } from "../services/weatherService";
 import type { SmokingBooth } from "../services/smokingBoothService";
-import { aStar, calculateDistance } from "../utils/pathfinding";
+import { calculateDistance } from "../utils/pathfinding";
 import type { Point } from "../utils/pathfinding";
 import type { WeatherData } from "../services/weatherService";
 
