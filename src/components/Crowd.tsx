@@ -33,6 +33,8 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
   const [hourlyUpdateTime, setHourlyUpdateTime] = useState(new Date()); // 1시간 단위 업데이트용
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   // 1초마다 현재 시각 업데이트 (UI 시간 표시용)
   useEffect(() => {
@@ -55,76 +57,93 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
   // 전국 혼잡도 지도 초기화
   useEffect(() => {
     const initializeMap = () => {
-      if (!mapContainerRef.current || mapRef.current) return;
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) {
+          setMapError("카카오 맵 SDK를 찾을 수 없습니다.");
+          return;
+        }
 
-      window.kakao.maps.load(() => {
-        // 대한민국 중심 좌표 (서울)
-        const center = new window.kakao.maps.LatLng(36.5, 127.5);
+        setMapStatus("SDK 로드 중...");
+        window.kakao.maps.load(() => {
+          if (mapContainerRef.current && !mapRef.current) {
+            try {
+              setMapStatus("지도 초기화 중...");
+              // 대한민국 중심 좌표 (서울)
+              const center = new window.kakao.maps.LatLng(36.5, 127.5);
 
-        const options = {
-          center: center,
-          level: 13, // 전국이 보이는 레벨
-          draggable: true,
-          zoomable: false, // 마우스 휠 확대/축소 금지
-        };
+              const options = {
+                center: center,
+                level: 13, // 전국이 보이는 레벨
+                draggable: true,
+                zoomable: false, // 마우스 휠 확대/축소 금지
+              };
 
-        const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-        mapRef.current = map;
+              const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+              mapRef.current = map;
 
-        // 모든 주요 지역에 혼잡도 마커 표시
-        majorLocations.forEach((loc) => {
-          const data = generateLocationData(loc.name, loc.lat, loc.lng);
-          const color = getLevelColor(data.currentLevel);
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map.relayout();
+                map.setCenter(center);
+                setMapStatus("완료");
+              }, 500);
 
-          // 혼잡도에 따라 마커 크기 조정
-          const radius = data.currentLevel === "매우혼잡" ? 45 :
-            data.currentLevel === "혼잡" ? 38 :
-              data.currentLevel === "보통" ? 32 : 28;
+              // 모든 주요 지역에 혼잡도 마커 표시
+              majorLocations.forEach((loc) => {
+                const data = generateLocationData(loc.name, loc.lat, loc.lng);
+                const color = getLevelColor(data.currentLevel);
 
-          const markerContent = document.createElement('div');
-          markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
-          markerContent.innerHTML = `
-            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-              <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s ease-in-out infinite;"></div>
-              <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
-              <div style="position: absolute; font-size: 8px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
-            </div>
-          `;
+                // 혼잡도에 따라 마커 크기 조정
+                const radius = data.currentLevel === "매우혼잡" ? 45 :
+                  data.currentLevel === "혼잡" ? 38 :
+                    data.currentLevel === "보통" ? 32 : 28;
 
-          const customOverlay = new window.kakao.maps.CustomOverlay({
-            position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-            content: markerContent,
-            yAnchor: 0.5,
-          });
-          customOverlay.setMap(map);
+                const markerContent = document.createElement('div');
+                markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
+                markerContent.innerHTML = `
+                  <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3); animation: pulse 2s ease-in-out infinite;"></div>
+                    <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
+                    <div style="position: absolute; font-size: 8px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
+                  </div>
+                `;
 
-          // 마커 클릭 시 상세 지역 보기
-          markerContent.onclick = () => {
-            onShowRegionDetail(loc.name);
-          };
+                const customOverlay = new window.kakao.maps.CustomOverlay({
+                  position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+                  content: markerContent,
+                  yAnchor: 0.5,
+                });
+                customOverlay.setMap(map);
+
+                // 마커 클릭 시 상세 지역 보기
+                markerContent.onclick = () => {
+                  onShowRegionDetail(loc.name);
+                };
+              });
+            } catch (err) {
+              console.error(err);
+              setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+            }
+          }
         });
-      });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const scriptId = "kakao-map-sdk";
+        const script = document.getElementById(scriptId);
+        if (script) {
+          script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
+        }
+      }
     };
 
-    const scriptId = "kakao-map-sdk";
-    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
-
-    if (window.kakao && window.kakao.maps) {
-      initializeMap();
-    } else {
-      const existingScript = document.getElementById(scriptId);
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
-        script.async = true;
-        script.onload = initializeMap;
-        document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener("load", initializeMap);
-      }
-    }
-  }, [currentTime]); // currentTime이 변경될 때마다 지도 다시 렌더링
+    initializeMap();
+  }, []); // Run only once on mount
 
   // 시간대별 혼잡도 데이터 생성 (실시간 기반)
   const generateHourlyData = (): HourlyData[] => {
@@ -289,6 +308,21 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
                     className="w-full h-[400px] rounded-lg shadow-lg"
                     style={{ border: "2px solid #e0e7ff" }}
                   />
+
+                  {/* 진단 오버레이 */}
+                  {(mapError || mapStatus !== "완료") && (
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center rounded-lg">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                      <p className="text-base text-gray-600 mb-2">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                      {mapError && (
+                        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                          <p className="text-sm font-bold text-red-600 mb-1">오류 발생</p>
+                          <p className="text-sm text-red-500">{mapError}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Custom Zoom Controls (Inside Map Wrapper) */}
                   <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">

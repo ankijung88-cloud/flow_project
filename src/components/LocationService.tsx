@@ -18,6 +18,8 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [stats, setStats] = useState({ within500m: 0, within1km: 0, within2km: 0 });
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   // 사용자 위치 가져오기
   useEffect(() => {
@@ -92,39 +94,61 @@ export default function LocationService({ onBack }: LocationServiceProps) {
 
         window.kakao.maps.load(() => {
           if (mapContainerRef.current && !mapRef.current) {
-            const options = {
-              center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-              level: 8,
-            };
-            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-            mapRef.current = map;
+            try {
+              setMapStatus("지도 초기화 중...");
+              const options = {
+                center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                level: 8,
+              };
+              const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+              mapRef.current = map;
 
-            // 회색 화면 방지를 위한 레이아웃 갱신
-            setTimeout(() => {
-              map.relayout();
-              map.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
-            }, 100);
+              // 회색 화면 방지를 위한 레이아웃 갱신 (Sequential Relayout Pattern)
+              const relayout = () => {
+                if (map) {
+                  map.relayout();
+                  map.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
+                }
+              };
 
-            // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-            map.setZoomable(false);
+              // 1. 즉시 실행
+              relayout();
 
-            // 사용자 위치 마커
-            const userMarkerImage = new window.kakao.maps.MarkerImage(
-              `${import.meta.env.BASE_URL}image/user-marker.svg`,
-              new window.kakao.maps.Size(32, 32)
-            );
-            new window.kakao.maps.Marker({
-              position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-              map: map,
-              image: userMarkerImage,
-            });
+              // 2. 0ms (Next Tick)
+              setTimeout(relayout, 0);
+
+              // 3. 500ms (Animation Safety)
+              setTimeout(() => {
+                relayout();
+                setMapStatus("완료");
+              }, 500);
+
+              // 4. ResizeObserver로 컨테이너 크기 변경 감지
+              const resizeObserver = new ResizeObserver(() => {
+                relayout();
+              });
+              resizeObserver.observe(mapContainerRef.current);
+
+              // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+              map.setZoomable(false);
+
+              // 사용자 위치 마커
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(32, 32)
+              );
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                map: map,
+                image: userMarkerImage,
+              });
 
 
-            // 전국 흡연부스 마커 (가까운 50개)
-            nearestBooths.slice(0, 50).forEach((booth) => {
-              const markerContent = document.createElement('div');
-              markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
-              markerContent.innerHTML = `
+              // 전국 흡연부스 마커 (가까운 50개)
+              nearestBooths.slice(0, 50).forEach((booth) => {
+                const markerContent = document.createElement('div');
+                markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
+                markerContent.innerHTML = `
                 <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                   <div class="smoke-marker-ripple"></div>
                   <div class="smoke-marker-ripple"></div>
@@ -134,13 +158,17 @@ export default function LocationService({ onBack }: LocationServiceProps) {
                 </div>
               `;
 
-              const customOverlay = new window.kakao.maps.CustomOverlay({
-                position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-                content: markerContent,
-                yAnchor: 0.5,
+                const customOverlay = new window.kakao.maps.CustomOverlay({
+                  position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+                  content: markerContent,
+                  yAnchor: 0.5,
+                });
+                customOverlay.setMap(map);
               });
-              customOverlay.setMap(map);
-            });
+            } catch (err) {
+              console.error(err);
+              setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+            }
           }
         });
       };
@@ -151,6 +179,9 @@ export default function LocationService({ onBack }: LocationServiceProps) {
         const script = document.getElementById("kakao-map-sdk");
         if (script) {
           script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
         }
       }
     };
@@ -170,6 +201,9 @@ export default function LocationService({ onBack }: LocationServiceProps) {
         script.onload = initializeMap;
         document.head.appendChild(script);
       } else {
+        // 이미 스크립트가 존재하면 로드 이벤트를 기다리거나, 이미 로드되었는지 확인
+        // 주의: 이미 로드된 경우 load 이벤트가 발생하지 않을 수 있음.
+        // 하지만 window.kakao 체크가 상단에 있으므로 여기는 로딩 중인 경우임.
         existingScript.addEventListener("load", initializeMap);
       }
     }
@@ -255,9 +289,24 @@ export default function LocationService({ onBack }: LocationServiceProps) {
             <div className="relative">
               <div
                 ref={mapContainerRef}
-                className="w-full h-[400px] rounded-lg shadow-lg"
-                style={{ border: "2px solid #dbeafe" }}
+                className="w-full rounded-lg shadow-lg"
+                style={{ width: "100%", height: "450px", border: "2px solid #dbeafe" }}
               />
+
+              {/* 진단 오버레이 */}
+              {(mapError || mapStatus !== "완료") && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center rounded-lg">
+                  <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                  <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                  {mapError && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
+                      <p className="text-xs text-red-500">{mapError}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
               <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-blue-100 min-w-[170px]">

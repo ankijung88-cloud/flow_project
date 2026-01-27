@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function WalkCourseMap({
   course,
@@ -9,32 +9,41 @@ export default function WalkCourseMap({
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const kakaoMapRef = useRef<any>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   useEffect(() => {
     const initLogic = () => {
       if (!window.kakao || !window.kakao.maps) return;
 
       window.kakao.maps.load(() => {
-        if (mapContainerRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(course.lat, course.lng),
-            level: 3,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          kakaoMapRef.current = map;
+        if (mapContainerRef.current && !kakaoMapRef.current) {
+          try {
+            setMapStatus("지도 초기화 중...");
+            const options = {
+              center: new window.kakao.maps.LatLng(course.lat, course.lng),
+              level: 3,
+            };
+            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+            kakaoMapRef.current = map;
 
-          // 회색 화면 방지를 위한 레이아웃 갱신
-          setTimeout(() => {
-            map.relayout();
-            map.setCenter(new window.kakao.maps.LatLng(course.lat, course.lng));
-          }, 100);
+            // 회색 화면 방지를 위한 레이아웃 갱신
+            setTimeout(() => {
+              map.relayout();
+              map.setCenter(new window.kakao.maps.LatLng(course.lat, course.lng));
+              setMapStatus("완료");
+            }, 500);
 
-          map.setZoomable(false);
+            map.setZoomable(false);
 
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(course.lat, course.lng),
-            map: map,
-          });
+            new window.kakao.maps.Marker({
+              position: new window.kakao.maps.LatLng(course.lat, course.lng),
+              map: map,
+            });
+          } catch (err) {
+            console.error(err);
+            setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+          }
         }
       });
     };
@@ -45,6 +54,9 @@ export default function WalkCourseMap({
       const script = document.getElementById("kakao-map-sdk");
       if (script) {
         script.addEventListener("load", initLogic);
+        script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+      } else {
+        setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
       }
     }
   }, [course]);
@@ -75,6 +87,21 @@ export default function WalkCourseMap({
       <div className="relative rounded-2xl shadow-2xl border overflow-hidden" style={{ width: "1024px", height: "700px" }}>
         <div className="relative w-full h-full">
           <div ref={mapContainerRef} className="w-full h-full" />
+
+          {/* 진단 오버레이 */}
+          {(mapError || mapStatus !== "완료") && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center rounded-lg">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+              <p className="text-base text-gray-600 mb-2">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+              {mapError && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-sm font-bold text-red-600 mb-1">오류 발생</p>
+                  <p className="text-sm text-red-500">{mapError}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Custom Zoom Controls (Inside Map Wrapper) */}
           <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">

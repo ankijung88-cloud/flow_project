@@ -71,6 +71,8 @@ export default function ServicePage() {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [nearbyInfo, setNearbyInfo] = useState<{ within500m: number; within1km: number; within2km: number } | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   /**
    * 실시간 시간 업데이트
@@ -175,38 +177,45 @@ export default function ServicePage() {
 
           window.kakao.maps.load(() => {
             if (mapContainerRef.current && !mapRef.current) {
-              const options = {
-                center: new window.kakao.maps.LatLng(lat, lng),
-                level: 8,
-                zoomable: false, // 마우스 휠 확대/축소 금지
-              };
-              const map = new window.kakao.maps.Map(
-                mapContainerRef.current,
-                options
-              );
-              mapRef.current = map;
+              try {
+                setMapStatus("지도 초기화 중...");
+                const options = {
+                  center: new window.kakao.maps.LatLng(lat, lng),
+                  level: 8,
+                  zoomable: false, // 마우스 휠 확대/축소 금지
+                };
+                const map = new window.kakao.maps.Map(
+                  mapContainerRef.current,
+                  options
+                );
+                mapRef.current = map;
 
-              // 회색 화면 방지를 위한 레이아웃 갱신
-              setTimeout(() => {
-                map.relayout();
-                map.setCenter(new window.kakao.maps.LatLng(lat, lng));
-              }, 100);
+                // 회색 화면 방지를 위한 레이아웃 갱신
+                setTimeout(() => {
+                  map.relayout();
+                  map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+                  setMapStatus("완료");
+                }, 500);
 
-              // 사용자 위치 마커
-              const userMarkerImage = new window.kakao.maps.MarkerImage(
-                `${import.meta.env.BASE_URL}image/user-marker.svg`,
-                new window.kakao.maps.Size(40, 40)
-              );
+                // 사용자 위치 마커
+                const userMarkerImage = new window.kakao.maps.MarkerImage(
+                  `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                  new window.kakao.maps.Size(40, 40)
+                );
 
-              new window.kakao.maps.Marker({
-                position: new window.kakao.maps.LatLng(lat, lng),
-                map: map,
-                image: userMarkerImage,
-                title: "내 위치",
-              });
+                new window.kakao.maps.Marker({
+                  position: new window.kakao.maps.LatLng(lat, lng),
+                  map: map,
+                  image: userMarkerImage,
+                  title: "내 위치",
+                });
 
-              // 전국 흡연부스 마커 렌더링
-              renderSmokingBooths(map);
+                // 전국 흡연부스 마커 렌더링
+                renderSmokingBooths(map);
+              } catch (err) {
+                console.error(err);
+                setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+              }
             }
           });
         };
@@ -227,6 +236,9 @@ export default function ServicePage() {
         const script = document.getElementById("kakao-map-sdk");
         if (script) {
           script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
         }
       }
     };
@@ -501,6 +513,21 @@ export default function ServicePage() {
         <MergeAnimation direction="left" delay={0.4} className="h-full">
           <div className="relative shadow-2xl border border-gray-200 rounded-2xl overflow-hidden h-full">
             <div ref={mapContainerRef} className="w-full h-full min-h-[400px] md:min-h-[500px]" />
+
+            {/* 진단 오버레이 */}
+            {(mapError || mapStatus !== "완료") && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                {mapError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
+                    <p className="text-xs text-red-500">{mapError}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Custom Zoom Controls (Bottom Left) */}
             <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">

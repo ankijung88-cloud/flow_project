@@ -27,6 +27,8 @@ export default function GuideVd() {
   const [nextTurn, setNextTurn] = useState<{ direction: string; distance: number } | null>(null);
   const [error, setError] = useState<string>("");
   const [nearbyBoothsCount, setNearbyBoothsCount] = useState<number>(0);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // 실제 흡연구역 위치 데이터 (지정된 실제 흡연구역)
   const generateSmokingBooths = (): SmokingBooth[] => {
@@ -613,54 +615,64 @@ export default function GuideVd() {
             setSmokingBooths(booths);
 
             if (mapRef.current && window.kakao && window.kakao.maps) {
+              setMapStatus("SDK 로드 중...");
               window.kakao.maps.load(() => {
-                const options = {
-                  center: new window.kakao.maps.LatLng(latitude, longitude),
-                  level: 5, // 레벨을 5로 올려서 더 넓은 영역 표시
-                };
-                const map = new window.kakao.maps.Map(mapRef.current!, options);
-                kakaoMapRef.current = map;
+                try {
+                  setMapStatus("지도 초기화 중...");
+                  const options = {
+                    center: new window.kakao.maps.LatLng(latitude, longitude),
+                    level: 5, // 레벨을 5로 올려서 더 넓은 영역 표시
+                  };
+                  const map = new window.kakao.maps.Map(mapRef.current!, options);
+                  kakaoMapRef.current = map;
 
-                // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-                map.setZoomable(false);
+                  // 회색 화면 방지를 위한 레이아웃 갱신
+                  setTimeout(() => {
+                    map.relayout();
+                    map.setCenter(new window.kakao.maps.LatLng(latitude, longitude));
+                    setMapStatus("완료");
+                  }, 500);
 
-                console.log('지도 초기화 완료');
+                  // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
+                  map.setZoomable(false);
 
-                // 현재 위치 마커 (3D 남자 캐릭터)
-                const markerImage = new window.kakao.maps.MarkerImage(
-                  `${import.meta.env.BASE_URL}image/user-marker.svg`,
-                  new window.kakao.maps.Size(40, 50),
-                  {
-                    offset: new window.kakao.maps.Point(20, 50)
-                  }
-                );
+                  console.log('지도 초기화 완료');
 
-                const marker = new window.kakao.maps.Marker({
-                  position: new window.kakao.maps.LatLng(latitude, longitude),
-                  map: map,
-                  image: markerImage,
-                });
-                currentMarkerRef.current = marker;
+                  // 현재 위치 마커 (3D 남자 캐릭터)
+                  const markerImage = new window.kakao.maps.MarkerImage(
+                    `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                    new window.kakao.maps.Size(40, 50),
+                    {
+                      offset: new window.kakao.maps.Point(20, 50)
+                    }
+                  );
 
-                // 흡연부스 마커 표시 (담배꽁초 아이콘)
-                console.log(`흡연부스 마커 생성 시작: ${booths.length}개`);
-                booths.forEach((booth) => {
-                  // 흡연부스 영향 반경 표시 (50m)
-                  const circle = new window.kakao.maps.Circle({
-                    center: new window.kakao.maps.LatLng(booth.lat, booth.lng),
-                    radius: 50, // 50미터 반경
-                    strokeWeight: 2,
-                    strokeColor: '#ff6b35',
-                    strokeOpacity: 0.6,
-                    strokeStyle: 'dashed',
-                    fillColor: '#ff6b35',
-                    fillOpacity: 0.15,
+                  const marker = new window.kakao.maps.Marker({
+                    position: new window.kakao.maps.LatLng(latitude, longitude),
+                    map: map,
+                    image: markerImage,
                   });
-                  circle.setMap(map);
+                  currentMarkerRef.current = marker;
 
-                  // 흡연부스 아이콘 마커 생성 (smokeIcon.png)
-                  const content = document.createElement('div');
-                  content.innerHTML = `
+                  // 흡연부스 마커 표시 (담배꽁초 아이콘)
+                  console.log(`흡연부스 마커 생성 시작: ${booths.length}개`);
+                  booths.forEach((booth) => {
+                    // 흡연부스 영향 반경 표시 (50m)
+                    const circle = new window.kakao.maps.Circle({
+                      center: new window.kakao.maps.LatLng(booth.lat, booth.lng),
+                      radius: 50, // 50미터 반경
+                      strokeWeight: 2,
+                      strokeColor: '#ff6b35',
+                      strokeOpacity: 0.6,
+                      strokeStyle: 'dashed',
+                      fillColor: '#ff6b35',
+                      fillOpacity: 0.15,
+                    });
+                    circle.setMap(map);
+
+                    // 흡연부스 아이콘 마커 생성 (smokeIcon.png)
+                    const content = document.createElement('div');
+                    content.innerHTML = `
                     <div style="
                       position: relative;
                       width: 40px;
@@ -696,65 +708,69 @@ export default function GuideVd() {
                     </div>
                   `;
 
-                  // CSS 애니메이션 추가
-                  const style = document.createElement('style');
-                  style.textContent = `
+                    // CSS 애니메이션 추가
+                    const style = document.createElement('style');
+                    style.textContent = `
                     @keyframes pulse {
                       0%, 100% { opacity: 1; transform: scale(1); }
                       50% { opacity: 0.6; transform: scale(1.1); }
                     }
                   `;
-                  if (!document.querySelector('style[data-smoking-animation]')) {
-                    style.setAttribute('data-smoking-animation', 'true');
-                    document.head.appendChild(style);
-                  }
+                    if (!document.querySelector('style[data-smoking-animation]')) {
+                      style.setAttribute('data-smoking-animation', 'true');
+                      document.head.appendChild(style);
+                    }
 
-                  const customOverlay = new window.kakao.maps.CustomOverlay({
-                    position: new window.kakao.maps.LatLng(booth.lat, booth.lng),
-                    content: content,
-                    map: map,
-                    yAnchor: 0.5,
-                    zIndex: 3,
+                    const customOverlay = new window.kakao.maps.CustomOverlay({
+                      position: new window.kakao.maps.LatLng(booth.lat, booth.lng),
+                      content: content,
+                      map: map,
+                      yAnchor: 0.5,
+                      zIndex: 3,
+                    });
+
+                    smokingMarkersRef.current.push(customOverlay);
+                    smokingMarkersRef.current.push(circle);
                   });
 
-                  smokingMarkersRef.current.push(customOverlay);
-                  smokingMarkersRef.current.push(circle);
-                });
+                  // 실시간 위치 추적
+                  watchIdRef.current = navigator.geolocation.watchPosition(
+                    (pos) => {
+                      const newLat = pos.coords.latitude;
+                      const newLng = pos.coords.longitude;
+                      const newPosition = { lat: newLat, lng: newLng };
 
-                // 실시간 위치 추적
-                watchIdRef.current = navigator.geolocation.watchPosition(
-                  (pos) => {
-                    const newLat = pos.coords.latitude;
-                    const newLng = pos.coords.longitude;
-                    const newPosition = { lat: newLat, lng: newLng };
+                      setCurrentPosition(newPosition);
 
-                    setCurrentPosition(newPosition);
+                      const newMarkerPosition = new window.kakao.maps.LatLng(newLat, newLng);
+                      marker.setPosition(newMarkerPosition);
 
-                    const newMarkerPosition = new window.kakao.maps.LatLng(newLat, newLng);
-                    marker.setPosition(newMarkerPosition);
-
-                    if (navigationActive) {
-                      map.setCenter(newMarkerPosition);
+                      if (navigationActive) {
+                        map.setCenter(newMarkerPosition);
+                      }
+                    },
+                    (err) => {
+                      console.error("위치 추적 오류:", err);
+                      if (err.code === err.PERMISSION_DENIED) {
+                        setError("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
+                      } else if (err.code === err.POSITION_UNAVAILABLE) {
+                        setError("위치 정보를 사용할 수 없습니다.");
+                      } else if (err.code === err.TIMEOUT) {
+                        setError("위치 요청 시간이 초과되었습니다.");
+                      } else {
+                        setError("위치 추적 중 오류가 발생했습니다.");
+                      }
+                    },
+                    {
+                      enableHighAccuracy: true,
+                      maximumAge: 10000,
+                      timeout: 10000,
                     }
-                  },
-                  (err) => {
-                    console.error("위치 추적 오류:", err);
-                    if (err.code === err.PERMISSION_DENIED) {
-                      setError("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
-                    } else if (err.code === err.POSITION_UNAVAILABLE) {
-                      setError("위치 정보를 사용할 수 없습니다.");
-                    } else if (err.code === err.TIMEOUT) {
-                      setError("위치 요청 시간이 초과되었습니다.");
-                    } else {
-                      setError("위치 추적 중 오류가 발생했습니다.");
-                    }
-                  },
-                  {
-                    enableHighAccuracy: true,
-                    maximumAge: 10000,
-                    timeout: 10000,
-                  }
-                );
+                  );
+                } catch (err) {
+                  console.error(err);
+                  setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+                }
               });
             }
           },

@@ -122,11 +122,23 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
               mapRef.current = map;
 
               // 회색 화면 방지를 위한 레이아웃 갱신
+              const relayout = () => {
+                if (map) {
+                  map.relayout();
+                  map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+                }
+              };
+
+              relayout();
+              setTimeout(relayout, 0);
               setTimeout(() => {
-                map.relayout();
-                map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+                relayout();
                 setMapStatus("완료");
               }, 500);
+
+              // ResizeObserver
+              const resizeObserver = new ResizeObserver(() => relayout());
+              resizeObserver.observe(mapContainerRef.current);
 
               const userMarkerImage = new window.kakao.maps.MarkerImage(
                 `${import.meta.env.BASE_URL}image/user-marker.svg`,
@@ -305,7 +317,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
       {/* 2. 지도 프레임 */}
       <div className="relative shadow-2xl border border-gray-200 rounded-xl overflow-hidden w-full aspect-video sm:aspect-[4/3] md:h-[600px] group">
         <div className="relative w-full h-full">
-          <div ref={mapContainerRef} className="w-full h-full" />
+          <div ref={mapContainerRef} className="w-full" style={{ width: "100%", height: "600px" }} />
 
           {/* 진단 오버레이 (회색 화면 발생 시 원인 파악용) */}
           {(mapError || mapStatus !== "완료") && (

@@ -31,6 +31,10 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
   const mapRef1 = useRef<any>(null);
   const mapRef2 = useRef<any>(null);
+  const [map1Error, setMap1Error] = useState<string | null>(null);
+  const [map1Status, setMap1Status] = useState<string>("준비 중...");
+  const [map2Error, setMap2Error] = useState<string | null>(null);
+  const [map2Status, setMap2Status] = useState<string>("준비 중...");
   const [nationalBooths] = useState<SmokingBoothType[]>(getNationalSmokingBooths());
 
   const cards: SmokingCard[] = [
@@ -72,160 +76,189 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
     if (!userLocation) return;
 
     const initializeMaps = () => {
-      window.kakao.maps.load(() => {
-        // 카드 1: 흡연부스 위치 지도
-        if (mapContainerRef1.current && !mapRef1.current) {
-          const options1 = {
-            center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            level: 5,
-            draggable: false,
-            zoomable: false,
-            disableDoubleClickZoom: true,
-            scrollwheel: false,
-          };
-          const map1 = new window.kakao.maps.Map(mapContainerRef1.current, options1);
-          mapRef1.current = map1;
-
-          // 사용자 위치 마커
-          const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
-            new window.kakao.maps.Size(32, 32)
-          );
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            map: map1,
-            image: userMarkerImage,
-          });
-
-          // 주변 흡연부스 마커 (가까운 10개만)
-          const sortedBooths = nationalBooths
-            .map(b => ({
-              ...b,
-              distance: Math.sqrt(Math.pow(b.latitude - userLocation.lat, 2) + Math.pow(b.longitude - userLocation.lng, 2)) * 111320
-            }))
-            .sort((a, b) => a.distance - b.distance);
-
-          // 통계 업데이트
-          setStats({
-            within500m: sortedBooths.filter(b => b.distance <= 500).length,
-            within1km: sortedBooths.filter(b => b.distance <= 1000).length,
-            within2km: sortedBooths.filter(b => b.distance <= 2000).length,
-          });
-
-          sortedBooths.slice(0, 10).forEach((booth) => {
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <div class="smoke-marker-ripple"></div>
-                <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
-              </div>
-            `;
-
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-              content: markerContent,
-              yAnchor: 0.5,
-            });
-            customOverlay.setMap(map1);
-          });
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) {
+          setMap1Error("카카오 맵 SDK를 찾을 수 없습니다.");
+          setMap2Error("카카오 맵 SDK를 찾을 수 없습니다.");
+          return;
         }
 
-        // 카드 2: 혼잡도 모니터링 지도
-        if (mapContainerRef2.current && !mapRef2.current) {
-          const options2 = {
-            center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            level: 5,
-            draggable: false,
-            zoomable: false,
-            disableDoubleClickZoom: true,
-            scrollwheel: false,
-          };
-          const map2 = new window.kakao.maps.Map(mapContainerRef2.current, options2);
-          mapRef2.current = map2;
+        setMap1Status("SDK 로드 중...");
+        setMap2Status("SDK 로드 중...");
+        window.kakao.maps.load(() => {
+          // 카드 1: 흡연부스 위치 지도
+          if (mapContainerRef1.current && !mapRef1.current) {
+            try {
+              setMap1Status("지도 초기화 중...");
+              const options1 = {
+                center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                level: 5,
+                draggable: false,
+                zoomable: false,
+                disableDoubleClickZoom: true,
+                scrollwheel: false,
+              };
+              const map1 = new window.kakao.maps.Map(mapContainerRef1.current, options1);
+              mapRef1.current = map1;
 
-          // 사용자 위치 마커
-          const userMarkerImage = new window.kakao.maps.MarkerImage(
-            `${import.meta.env.BASE_URL}image/user-marker.svg`,
-            new window.kakao.maps.Size(32, 32)
-          );
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-            map: map2,
-            image: userMarkerImage,
-          });
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map1.relayout();
+                map1.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
+                setMap1Status("완료");
+              }, 500);
 
-          // 혼잡도 히트맵 (사용자 위치 기반 시뮬레이션 - 겹치지 않도록 위치 조정)
-          const crowdLocations = [
-            { name: "현재 위치", lat: userLocation.lat, lng: userLocation.lng, level: "medium", radius: 60 },
-            { name: "북쪽 지역", lat: userLocation.lat + 0.025, lng: userLocation.lng, level: "low", radius: 55 },
-            { name: "남쪽 지역", lat: userLocation.lat - 0.025, lng: userLocation.lng, level: "high", radius: 65 },
-            { name: "동쪽 지역", lat: userLocation.lat, lng: userLocation.lng + 0.03, level: "very_high", radius: 75 },
-            { name: "서쪽 지역", lat: userLocation.lat, lng: userLocation.lng - 0.03, level: "medium", radius: 58 },
-            { name: "북동쪽", lat: userLocation.lat + 0.02, lng: userLocation.lng + 0.025, level: "low", radius: 50 },
-            { name: "남서쪽", lat: userLocation.lat - 0.02, lng: userLocation.lng - 0.025, level: "high", radius: 62 },
-          ];
+              // 사용자 위치 마커
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(32, 32)
+              );
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                map: map1,
+                image: userMarkerImage,
+              });
 
-          crowdLocations.forEach((location) => {
-            const color =
-              location.level === "very_high"
-                ? "rgba(239, 68, 68, 0.6)"
-                : location.level === "high"
-                  ? "rgba(249, 115, 22, 0.6)"
-                  : location.level === "medium"
-                    ? "rgba(234, 179, 8, 0.6)"
-                    : "rgba(34, 197, 94, 0.6)";
+              // 주변 흡연부스 마커 (가까운 10개만)
+              const sortedBooths = nationalBooths
+                .map((b: SmokingBoothType) => ({
+                  ...b,
+                  distance: Math.sqrt(Math.pow(b.latitude - userLocation.lat, 2) + Math.pow(b.longitude - userLocation.lng, 2)) * 111320
+                }))
+                .sort((a, b) => a.distance - b.distance);
 
-            const borderColor =
-              location.level === "very_high"
-                ? "rgba(239, 68, 68, 0.8)"
-                : location.level === "high"
-                  ? "rgba(249, 115, 22, 0.8)"
-                  : location.level === "medium"
-                    ? "rgba(234, 179, 8, 0.8)"
-                    : "rgba(34, 197, 94, 0.8)";
+              // 통계 업데이트
+              setStats({
+                within500m: sortedBooths.filter(b => b.distance <= 500).length,
+                within1km: sortedBooths.filter(b => b.distance <= 1000).length,
+                within2km: sortedBooths.filter(b => b.distance <= 2000).length,
+              });
 
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = `position: relative; width: ${location.radius}px; height: ${location.radius}px;`;
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid ${borderColor}; box-shadow: 0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.3);"></div>
-                <div style="position: absolute; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap;">${location.name}</div>
-              </div>
-            `;
+              sortedBooths.slice(0, 10).forEach((booth: any) => {
+                const markerContent = document.createElement('div');
+                markerContent.style.cssText = 'position: relative; width: 32px; height: 32px;';
+                markerContent.innerHTML = `
+                  <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                    <div class="smoke-marker-ripple"></div>
+                    <div class="smoke-marker-ripple"></div>
+                    <div class="smoke-marker-ripple"></div>
+                    <div class="smoke-marker-ripple"></div>
+                    <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" alt="흡연부스" style="width: 28px; height: 28px; position: relative; z-index: 10; mix-blend-mode: multiply; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); background: transparent;" />
+                  </div>
+                `;
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(location.lat, location.lng),
-              content: markerContent,
-              yAnchor: 0.5,
-            });
-            customOverlay.setMap(map2);
+                const customOverlay = new window.kakao.maps.CustomOverlay({
+                  position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+                  content: markerContent,
+                  yAnchor: 0.5,
+                });
+                customOverlay.setMap(map1);
+              });
+            } catch (err) {
+              console.error(err);
+              setMap1Error("지도 1 생성 중 오류: " + (err as Error).message);
+            }
+          }
+
+          // 카드 2: 혼잡도 모니터링 지도
+          if (mapContainerRef2.current && !mapRef2.current) {
+            try {
+              setMap2Status("지도 초기화 중...");
+              const options2 = {
+                center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                level: 5,
+                draggable: false,
+                zoomable: false,
+                disableDoubleClickZoom: true,
+                scrollwheel: false,
+              };
+              const map2 = new window.kakao.maps.Map(mapContainerRef2.current, options2);
+              mapRef2.current = map2;
+
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map2.relayout();
+                map2.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
+                setMap2Status("완료");
+              }, 500);
+
+              // 사용자 위치 마커
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(32, 32)
+              );
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                map: map2,
+                image: userMarkerImage,
+              });
+
+              // 혼잡도 히트맵
+              const crowdLocations = [
+                { name: "현재 위치", lat: userLocation.lat, lng: userLocation.lng, level: "medium", radius: 60 },
+                { name: "북쪽 지역", lat: userLocation.lat + 0.025, lng: userLocation.lng, level: "low", radius: 55 },
+                { name: "남쪽 지역", lat: userLocation.lat - 0.025, lng: userLocation.lng, level: "high", radius: 65 },
+                { name: "동쪽 지역", lat: userLocation.lat, lng: userLocation.lng + 0.03, level: "very_high", radius: 75 },
+                { name: "서쪽 지역", lat: userLocation.lat, lng: userLocation.lng - 0.03, level: "medium", radius: 58 },
+                { name: "북동쪽", lat: userLocation.lat + 0.02, lng: userLocation.lng + 0.025, level: "low", radius: 50 },
+                { name: "남서쪽", lat: userLocation.lat - 0.02, lng: userLocation.lng - 0.025, level: "high", radius: 62 },
+              ];
+
+              crowdLocations.forEach((loc: any) => {
+                const color =
+                  loc.level === "very_high" ? "rgba(239, 68, 68, 0.6)" :
+                    loc.level === "high" ? "rgba(249, 115, 22, 0.6)" :
+                      loc.level === "medium" ? "rgba(234, 179, 8, 0.6)" :
+                        "rgba(34, 197, 94, 0.6)";
+
+                const borderColor =
+                  loc.level === "very_high" ? "rgba(239, 68, 68, 0.8)" :
+                    loc.level === "high" ? "rgba(249, 115, 22, 0.8)" :
+                      loc.level === "medium" ? "rgba(234, 179, 8, 0.8)" :
+                        "rgba(34, 197, 94, 0.8)";
+
+                const markerContent = document.createElement('div');
+                markerContent.style.cssText = `position: relative; width: ${loc.radius}px; height: ${loc.radius}px;`;
+                markerContent.innerHTML = `
+                  <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid ${borderColor}; box-shadow: 0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.3);"></div>
+                    <div style="position: absolute; font-size: 11px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap;">${loc.name}</div>
+                  </div>
+                `;
+
+                const customOverlay = new window.kakao.maps.CustomOverlay({
+                  position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+                  content: markerContent,
+                  yAnchor: 0.5,
+                });
+                customOverlay.setMap(map2);
+              });
+            } catch (err) {
+              console.error(err);
+              setMap2Error("지도 2 생성 중 오류: " + (err as Error).message);
+            }
+          }
+        });
+      };
+
+      const scriptId = "kakao-map-sdk";
+      const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById(scriptId);
+        if (script) {
+          script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => {
+            setMap1Error("SDK 스크립트 로드 실패");
+            setMap2Error("SDK 스크립트 로드 실패");
           });
         }
-      });
+      }
     };
 
-    const scriptId = "kakao-map-sdk";
-    const appKey = "7eb77dd1772e545a47f6066b2e87d8f";
-
-    if (window.kakao && window.kakao.maps) {
-      initializeMaps();
-    } else {
-      const existingScript = document.getElementById(scriptId);
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false&libraries=services`;
-        script.async = true;
-        script.onload = initializeMaps;
-        document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener("load", initializeMaps);
-      }
-    }
+    initializeMaps();
   }, [userLocation, nationalBooths]);
 
 
@@ -291,6 +324,25 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                       className="w-full h-full"
                       style={{ pointerEvents: "none" }}
                     />
+
+                    {/* 진단 오버레이 */}
+                    {index === 0 ? (
+                      (map1Error || map1Status !== "완료") && (
+                        <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-4 text-center">
+                          <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                          <p className="text-[10px] font-bold text-gray-900">지도 1 진단 중...</p>
+                          <p className="text-[8px] text-gray-600">상태: {map1Status}</p>
+                        </div>
+                      )
+                    ) : (
+                      (map2Error || map2Status !== "완료") && (
+                        <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-4 text-center">
+                          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                          <p className="text-[10px] font-bold text-gray-900">지도 2 진단 중...</p>
+                          <p className="text-[8px] text-gray-600">상태: {map2Status}</p>
+                        </div>
+                      )
+                    )}
 
                     {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) - 첫 번째 카드에만 표시 */}
                     {index === 0 && (

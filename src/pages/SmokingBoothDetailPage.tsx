@@ -34,6 +34,8 @@ export default function SmokingBoothDetailPage() {
   const [selectedBooth, setSelectedBooth] = useState<(SmokingBooth & { distance: number }) | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   // 1초마다 현재 시각 업데이트
   useEffect(() => {
@@ -80,41 +82,48 @@ export default function SmokingBoothDetailPage() {
 
     const initializeMap = () => {
       const initLogic = () => {
-        if (!window.kakao || !window.kakao.maps) return;
+        if (!window.kakao || !window.kakao.maps) {
+          setMapError("카카오 맵 SDK를 찾을 수 없습니다.");
+          return;
+        }
 
+        setMapStatus("SDK 로드 중...");
         window.kakao.maps.load(() => {
           if (mapContainerRef.current && !mapRef.current) {
-            const options = {
-              center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-              level: 5,
-              zoomable: false, // 마우스 휠 확대/축소 금지
-            };
-            const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-            mapRef.current = map;
+            try {
+              setMapStatus("지도 초기화 중...");
+              const options = {
+                center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                level: 5,
+                zoomable: false, // 마우스 휠 확대/축소 금지
+              };
+              const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+              mapRef.current = map;
 
-            // 회색 화면 방지를 위한 레이아웃 갱신
-            setTimeout(() => {
-              map.relayout();
-              map.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
-            }, 100);
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              setTimeout(() => {
+                map.relayout();
+                map.setCenter(new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng));
+                setMapStatus("완료");
+              }, 500);
 
-            // 사용자 위치 마커
-            const userMarkerImage = new window.kakao.maps.MarkerImage(
-              `${import.meta.env.BASE_URL}image/user-marker.svg`,
-              new window.kakao.maps.Size(40, 40)
-            );
-            new window.kakao.maps.Marker({
-              position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
-              map: map,
-              image: userMarkerImage,
-              title: "내 위치",
-            });
+              // 사용자 위치 마커
+              const userMarkerImage = new window.kakao.maps.MarkerImage(
+                `${import.meta.env.BASE_URL}image/user-marker.svg`,
+                new window.kakao.maps.Size(40, 40)
+              );
+              new window.kakao.maps.Marker({
+                position: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+                map: map,
+                image: userMarkerImage,
+                title: "내 위치",
+              });
 
-            // 흡연부스 마커
-            nearbyBooths.forEach((booth: SmokingBooth & { distance: number }) => {
-              const markerContent = document.createElement('div');
-              markerContent.style.cssText = 'position: relative; width: 36px; height: 36px; cursor: pointer;';
-              markerContent.innerHTML = `
+              // 흡연부스 마커
+              nearbyBooths.forEach((booth: SmokingBooth & { distance: number }) => {
+                const markerContent = document.createElement('div');
+                markerContent.style.cssText = 'position: relative; width: 36px; height: 36px; cursor: pointer;';
+                markerContent.innerHTML = `
                 <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
                   <div class="smoke-marker-ripple"></div>
                   <div class="smoke-marker-ripple"></div>
@@ -123,18 +132,18 @@ export default function SmokingBoothDetailPage() {
                 </div>
               `;
 
-              const customOverlay = new window.kakao.maps.CustomOverlay({
-                position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
-                content: markerContent,
-                yAnchor: 0.5,
-              });
-              customOverlay.setMap(map);
+                const customOverlay = new window.kakao.maps.CustomOverlay({
+                  position: new window.kakao.maps.LatLng(booth.latitude, booth.longitude),
+                  content: markerContent,
+                  yAnchor: 0.5,
+                });
+                customOverlay.setMap(map);
 
-              markerContent.addEventListener('click', () => {
-                setSelectedBooth(booth);
-                map.setCenter(new window.kakao.maps.LatLng(booth.latitude, booth.longitude));
               });
-            });
+            } catch (err) {
+              console.error(err);
+              setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+            }
           }
         });
       };
@@ -145,6 +154,9 @@ export default function SmokingBoothDetailPage() {
         const script = document.getElementById("kakao-map-sdk");
         if (script) {
           script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
         }
       }
     };
@@ -317,7 +329,24 @@ export default function SmokingBoothDetailPage() {
                   <h2 className="text-white font-bold text-xl">실시간 흡연부스 지도</h2>
                   <p className="text-green-100 text-sm">내 위치 기준 주변 흡연부스가 표시됩니다</p>
                 </div>
-                <div ref={mapContainerRef} className="w-full h-[500px]" />
+                <div className="relative">
+                  <div ref={mapContainerRef} className="w-full h-[500px]" />
+
+                  {/* 진단 오버레이 */}
+                  {(mapError || mapStatus !== "완료") && (
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
+                      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                      <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                      {mapError && (
+                        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
+                          <p className="text-xs text-red-500">{mapError}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
                 <div className="absolute top-[80px] left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-green-100 min-w-[180px]">

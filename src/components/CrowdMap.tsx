@@ -39,6 +39,8 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
   const markersRef = useRef<any[]>([]);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   // 실시간 시간 업데이트
   useEffect(() => {
@@ -321,32 +323,73 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
     };
 
     const initializeMap = (lat: number, lng: number) => {
-      if (!window.kakao || !window.kakao.maps) {
-        console.error("Kakao Maps SDK not loaded");
-        return;
-      }
-
-      window.kakao.maps.load(() => {
-        if (!mapContainerRef.current) return;
-
-        const mapOptions = {
-          center: new window.kakao.maps.LatLng(lat, lng),
-          level: 8,
-        };
-
-        const map = new window.kakao.maps.Map(mapContainerRef.current, mapOptions);
-        mapRef.current = map;
-        map.setZoomable(false);
-
-        if (currentPosition) {
-          new window.kakao.maps.Marker({
-            position: new window.kakao.maps.LatLng(currentPosition.lat, currentPosition.lng),
-            map: map,
-          });
+      const initLogic = () => {
+        if (!window.kakao || !window.kakao.maps) {
+          setMapError("카카오 맵 SDK를 찾을 수 없습니다.");
+          return;
         }
 
-        renderMajorLocations(map);
-      });
+        setMapStatus("SDK 로드 중...");
+        window.kakao.maps.load(() => {
+          if (mapContainerRef.current && !mapRef.current) {
+            try {
+              setMapStatus("지도 초기화 중...");
+              const mapOptions = {
+                center: new window.kakao.maps.LatLng(lat, lng),
+                level: 8,
+              };
+
+              const map = new window.kakao.maps.Map(mapContainerRef.current, mapOptions);
+              mapRef.current = map;
+
+              // 회색 화면 방지를 위한 레이아웃 갱신
+              const relayout = () => {
+                if (map) {
+                  map.relayout();
+                  map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+                }
+              };
+
+              relayout();
+              setTimeout(relayout, 0);
+              setTimeout(() => {
+                relayout();
+                setMapStatus("완료");
+              }, 500);
+
+              // ResizeObserver
+              const resizeObserver = new ResizeObserver(() => relayout());
+              resizeObserver.observe(mapContainerRef.current);
+
+              map.setZoomable(false);
+
+              if (currentPosition) {
+                new window.kakao.maps.Marker({
+                  position: new window.kakao.maps.LatLng(currentPosition.lat, currentPosition.lng),
+                  map: map,
+                });
+              }
+
+              renderMajorLocations(map);
+            } catch (err) {
+              console.error(err);
+              setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
+            }
+          }
+        });
+      };
+
+      if (window.kakao && window.kakao.maps) {
+        initLogic();
+      } else {
+        const script = document.getElementById("kakao-map-sdk");
+        if (script) {
+          script.addEventListener("load", initLogic);
+          script.addEventListener("error", () => setMapError("SDK 스크립트 로드 실패"));
+        } else {
+          setMapError("SDK 스크립트 태그를 찾을 수 없습니다.");
+        }
+      }
     };
 
     startApp();
@@ -606,7 +649,24 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
             <h3 className="text-white font-bold text-lg">📍 실시간 혼잡도 지도</h3>
             <p className="text-indigo-100 text-xs mt-1">지도에서 지역을 클릭하여 상세 정보를 확인하세요</p>
           </div>
-          <div ref={mapContainerRef} className="w-full h-[600px]" />
+          <div className="relative w-full h-[600px]">
+            <div ref={mapContainerRef} className="w-full" style={{ width: "100%", height: "600px" }} />
+
+            {/* 진단 오버레이 */}
+            {(mapError || mapStatus !== "완료") && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                <p className="text-base text-gray-600 mb-2">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                {mapError && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    <p className="text-sm font-bold text-red-600 mb-1">오류 발생</p>
+                    <p className="text-sm text-red-500">{mapError}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Legend (Top Right) */}
           <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-indigo-100 z-50 pointer-events-none">
