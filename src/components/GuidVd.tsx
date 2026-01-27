@@ -27,8 +27,8 @@ export default function GuideVd() {
   const [nextTurn, setNextTurn] = useState<{ direction: string; distance: number } | null>(null);
   const [error, setError] = useState<string>("");
   const [nearbyBoothsCount, setNearbyBoothsCount] = useState<number>(0);
-  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
-  const [mapError, setMapError] = useState<string | null>(null);
+  const [, setMapStatus] = useState<string>("준비 중...");
+  const [, setMapError] = useState<string | null>(null);
 
   // 실제 흡연구역 위치 데이터 (지정된 실제 흡연구역)
   const generateSmokingBooths = (): SmokingBooth[] => {
