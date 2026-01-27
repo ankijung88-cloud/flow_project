@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { MergeSection, MergeCardGrid, FadeInSection } from "../components/MergeScrollAnimation";
+import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 declare global {
   interface Window {
@@ -23,8 +24,7 @@ interface LocationData {
   hourlyData: HourlyData[];
 }
 
-// Pre-calculate populations for all hours to stay pure during render
-// Moved outside component to avoid purity check issues with Math.random during render
+// 24시간 인구 데이터 상수로 관리
 const HOURLY_POPULATIONS = Array.from({ length: 24 }, (_, i) => {
   if ((i >= 8 && i < 10) || (i >= 12 && i < 13) || (i >= 18 && i < 20)) {
     return 4000 + Math.random() * 1000;
@@ -44,7 +44,6 @@ export default function CrowdDetailPage() {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  // 1초마다 현재 시각 업데이트
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -52,7 +51,6 @@ export default function CrowdDetailPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 사용자 위치 가져오기
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -71,7 +69,6 @@ export default function CrowdDetailPage() {
     }
   }, []);
 
-  // 전국 주요 지역 데이터
   const majorLocations = [
     { name: "강남역", lat: 37.4979, lng: 127.0276 },
     { name: "홍대입구역", lat: 37.5572, lng: 126.9247 },
@@ -96,43 +93,17 @@ export default function CrowdDetailPage() {
     { name: "제주 중문관광단지", lat: 33.2541, lng: 126.5603 },
   ];
 
-  // 시간대별 혼잡도 데이터 생성
-  const generateHourlyData = (): HourlyData[] => {
-    const hourlyData: HourlyData[] = [];
-    for (let hour = 0; hour < 24; hour++) {
-      let basePopulation = 1000;
-      let congestionPercent = 0;
-
-      if (
-        (hour >= 8 && hour < 10) ||
-        (hour >= 12 && hour < 13) ||
-        (hour >= 18 && hour < 20)
-      ) {
-        congestionPercent = 80 + Math.random() * 30;
-        basePopulation = Math.floor((congestionPercent / 100) * 5000);
-      } else {
-        congestionPercent = 20 + Math.random() * 30;
-        basePopulation = Math.floor((congestionPercent / 100) * 5000);
-      }
-
-      const variation = (Math.random() - 0.5) * 0.2;
-      const population = Math.floor(basePopulation * (1 + variation));
-
-      let level: "매우혼잡" | "혼잡" | "보통" | "여유";
-      if (congestionPercent > 100) level = "매우혼잡";
-      else if (congestionPercent >= 76) level = "혼잡";
-      else if (congestionPercent >= 51) level = "보통";
-      else level = "여유";
-
-      hourlyData.push({ hour, population, level });
-    }
-    return hourlyData;
-  };
-
-  // 위치 데이터 생성
   const generateLocationData = (name: string, lat: number, lng: number): LocationData => {
-    const hourlyData = generateHourlyData();
-    const currentHour = new Date().getHours();
+    const hourlyData: HourlyData[] = HOURLY_POPULATIONS.map((pop, hour) => {
+      let level: "매우혼잡" | "혼잡" | "보통" | "여유";
+      if (pop > 4000) level = "매우혼잡";
+      else if (pop > 2500) level = "혼잡";
+      else if (pop > 1000) level = "보통";
+      else level = "여유";
+      return { hour, population: Math.floor(pop), level };
+    });
+
+    const currentHour = currentTime.getHours();
     const currentData = hourlyData[currentHour];
 
     return {
@@ -145,106 +116,61 @@ export default function CrowdDetailPage() {
     };
   };
 
-  // 혼잡도 레벨에 따른 색상
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "매우혼잡": return "#DC2626";
-      case "혼잡": return "#FF6B6B";
-      case "보통": return "#F97316";
-      case "여유": return "#10B981";
-      default: return "#6B7280";
+      case "매우혼잡": return "#ef4444";
+      case "혼잡": return "#f97316";
+      case "보통": return "#eab308";
+      case "여유": return "#22c55e";
+      default: return "#94a3b8";
     }
   };
 
-  const getLevelBgColor = (level: string) => {
-    switch (level) {
-      case "매우혼잡": return "bg-red-100 text-red-700";
-      case "혼잡": return "bg-pink-100 text-pink-700";
-      case "보통": return "bg-orange-100 text-orange-700";
-      case "여유": return "bg-green-100 text-green-700";
-      default: return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  // 지도 초기화
   useEffect(() => {
-    if (!userLocation) return;
-
     const initializeMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current && !mapRef.current) {
-          const options = {
-            center: new window.kakao.maps.LatLng(36.5, 127.5),
-            level: 13,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          mapRef.current = map;
+      if (!mapContainerRef.current || !userLocation) return;
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
+      const options = {
+        center: new window.kakao.maps.LatLng(userLocation.lat, userLocation.lng),
+        level: 8,
+      };
 
-          // 모든 주요 지역에 혼잡도 마커 표시
-          majorLocations.forEach((loc) => {
-            const data = generateLocationData(loc.name, loc.lat, loc.lng);
-            const color = getLevelColor(data.currentLevel);
-            const radius = data.currentLevel === "매우혼잡" ? 50 :
-              data.currentLevel === "혼잡" ? 42 :
-                data.currentLevel === "보통" ? 36 : 30;
+      const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+      mapRef.current = map;
 
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.3); animation: pulse 2s ease-in-out infinite;"></div>
-                <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
-                <div style="position: absolute; font-size: 9px; font-weight: bold; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); bottom: -18px;">${data.currentLevel}</div>
-              </div>
-            `;
+      majorLocations.forEach(loc => {
+        const data = generateLocationData(loc.name, loc.lat, loc.lng);
+        const color = getLevelColor(data.currentLevel);
+        const radius = 30 + (data.currentPopulation / 5000) * 40;
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-              content: markerContent,
-              yAnchor: 0.5,
-            });
-            customOverlay.setMap(map);
+        const markerContent = document.createElement('div');
+        markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
+        markerContent.innerHTML = `
+          <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.3); animation: pulse 2s ease-in-out infinite;"></div>
+            <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; top: -20px;">${loc.name}</div>
+          </div>
+        `;
 
-            markerContent.addEventListener('click', () => {
-              setSelectedLocation(data);
-              map.setCenter(new window.kakao.maps.LatLng(loc.lat, loc.lng));
-              map.setLevel(6);
-            });
-          });
-        }
+        const customOverlay = new window.kakao.maps.CustomOverlay({
+          position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+          content: markerContent,
+          yAnchor: 0.5,
+        });
+        customOverlay.setMap(map);
+
+        markerContent.addEventListener('click', () => {
+          setSelectedLocation(data);
+          map.panTo(new window.kakao.maps.LatLng(loc.lat, loc.lng));
+        });
       });
     };
 
-    const scriptId = "kakao-map-sdk";
-    if (window.kakao && window.kakao.maps) {
+    if (window.kakao && window.kakao.maps && userLocation) {
       initializeMap();
-    } else {
-      const existingScript = document.getElementById(scriptId);
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false&libraries=services`;
-        script.async = true;
-        script.onload = initializeMap;
-        document.head.appendChild(script);
-      }
     }
   }, [userLocation]);
 
-  const getCurrentTimeString = () => {
-    const year = currentTime.getFullYear();
-    const month = String(currentTime.getMonth() + 1).padStart(2, '0');
-    const day = String(currentTime.getDate()).padStart(2, '0');
-    const hours = String(currentTime.getHours()).padStart(2, '0');
-    const minutes = String(currentTime.getMinutes()).padStart(2, '0');
-    const seconds = String(currentTime.getSeconds()).padStart(2, '0');
-    return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
-  };
-
-  // 줌 컨트롤 핸들러
   const handleZoomIn = () => {
     if (mapRef.current) {
       mapRef.current.setLevel(mapRef.current.getLevel() - 1);
@@ -257,387 +183,116 @@ export default function CrowdDetailPage() {
     }
   };
 
-  // 통계 계산
-  const allLocationsData = majorLocations.map(loc => generateLocationData(loc.name, loc.lat, loc.lng));
   const stats = {
-    veryBusy: allLocationsData.filter(l => l.currentLevel === "매우혼잡").length,
-    busy: allLocationsData.filter(l => l.currentLevel === "혼잡").length,
-    normal: allLocationsData.filter(l => l.currentLevel === "보통").length,
-    free: allLocationsData.filter(l => l.currentLevel === "여유").length,
-    avgPopulation: Math.round(allLocationsData.reduce((sum, l) => sum + l.currentPopulation, 0) / allLocationsData.length),
+    veryBusy: majorLocations.map(l => generateLocationData(l.name, l.lat, l.lng)).filter(l => l.currentLevel === "매우혼잡").length,
+    busy: majorLocations.map(l => generateLocationData(l.name, l.lat, l.lng)).filter(l => l.currentLevel === "혼잡").length,
+    normal: majorLocations.map(l => generateLocationData(l.name, l.lat, l.lng)).filter(l => l.currentLevel === "보통").length,
+    free: majorLocations.map(l => generateLocationData(l.name, l.lat, l.lng)).filter(l => l.currentLevel === "여유").length,
   };
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 overflow-x-hidden">
-      {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+    <div className="w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+      <FadeInSection>
+        <header className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate("/")}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+                className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-all hover:scale-105"
               >
                 <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-black text-gray-900">실시간 인구 혼잡도</h1>
-                <p className="text-sm text-gray-500">전국 지역 실시간 인구 밀집도 모니터링</p>
+                <h1 className="text-3xl font-black text-gray-900 tracking-tight">실시간 인구 혼잡도</h1>
+                <p className="text-sm font-medium text-indigo-600">전국 주요 지역의 현재 유동인구를 분석합니다</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 rounded-full">
-                <span className="text-sm font-bold text-indigo-700">{getCurrentTimeString()}</span>
+            <div className="flex flex-wrap gap-3">
+              <div className="bg-indigo-600/10 px-6 py-3 rounded-2xl border border-indigo-200 shadow-sm">
+                <span className="text-sm font-black text-indigo-700">{currentTime.toLocaleTimeString()}</span>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* 실시간 표시 (모바일) */}
-        <FadeInSection className="md:hidden mb-6">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl text-center">
-            <p className="text-sm opacity-90">실시간 기준</p>
-            <p className="text-2xl font-black">{getCurrentTimeString()}</p>
-          </div>
-        </FadeInSection>
-
-        {/* 통계 카드 - Merge 애니메이션 적용 */}
-        <MergeCardGrid columns={4} className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-red-200">
-            <p className="text-sm text-gray-500 mb-1">매우혼잡</p>
-            <p className="text-4xl font-black text-red-600">{stats.veryBusy}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-pink-200">
-            <p className="text-sm text-gray-500 mb-1">혼잡</p>
-            <p className="text-4xl font-black text-pink-600">{stats.busy}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-orange-200">
-            <p className="text-sm text-gray-500 mb-1">보통</p>
-            <p className="text-4xl font-black text-orange-600">{stats.normal}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-200">
-            <p className="text-sm text-gray-500 mb-1">여유</p>
-            <p className="text-4xl font-black text-green-600">{stats.free}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-indigo-200">
-            <p className="text-sm text-gray-500 mb-1">전국 평균</p>
-            <p className="text-4xl font-black text-indigo-600">{stats.avgPopulation.toLocaleString()}</p>
-            <p className="text-xs text-gray-400">명</p>
-          </div>
-        </MergeCardGrid>
-
-        {/* 검색바 */}
-        <div className="mb-8">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              placeholder="지역을 검색하세요 (예: 강남역, 명동, 해운대)"
-              className="flex-1 px-6 py-4 rounded-full border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-lg shadow-md"
-            />
-            <button
-              onClick={() => {
-                if (!searchKeyword.trim() || !mapRef.current) return;
-                const ps = new window.kakao.maps.services.Places();
-                ps.keywordSearch(searchKeyword, (data: any, status: any) => {
-                  if (status === window.kakao.maps.services.Status.OK && data.length > 0) {
-                    const result = data[0];
-                    const lat = parseFloat(result.y);
-                    const lng = parseFloat(result.x);
-                    mapRef.current.setCenter(new window.kakao.maps.LatLng(lat, lng));
-                    mapRef.current.setLevel(6);
-                    const locationData = generateLocationData(result.place_name, lat, lng);
-                    setSelectedLocation(locationData);
-                  }
-                });
-              }}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-            >
-              검색
-            </button>
-          </div>
-        </div>
-        {/* 메인 컨텐츠 - Merge 애니메이션 적용 */}
-        <MergeSection
-          className="mb-8"
-          gap="gap-8"
-          leftContent={
-            <div className="space-y-8">
-              {/* 지도 */}
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 relative group">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                  <h2 className="text-white font-bold text-xl">전국 실시간 혼잡도 지도</h2>
-                  <p className="text-indigo-100 text-sm">마커를 클릭하여 상세 정보를 확인하세요</p>
-                </div>
-                <div ref={mapContainerRef} className="w-full h-[500px]" />
-
-                {/* Custom Zoom Controls (Bottom Left) */}
-                <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
-                  <button
-                    onClick={handleZoomIn}
-                    className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
-                    title="확대"
-                  >
-                    <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
-                  </button>
-                  <button
-                    onClick={handleZoomOut}
-                    className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
-                    title="축소"
-                  >
-                    <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
-                  </button>
-                </div>
-              </div>
-
-              {/* 24시간 평균 혼잡도 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-indigo-100">
-                <h3 className="text-2xl font-black text-gray-900 mb-6">24시간 평균 혼잡도 추이</h3>
-                <div className="space-y-2">
-                  {Array.from({ length: 24 }, (_, hour) => {
-                    const currentHour = currentTime.getHours();
-                    const isCurrentHour = hour === currentHour;
-                    const basePopulation = HOURLY_POPULATIONS[hour];
-                    const level = basePopulation > 4000 ? "매우혼잡" : basePopulation > 2500 ? "혼잡" : basePopulation > 1000 ? "보통" : "여유";
-                    const color = getLevelColor(level);
-                    const maxPopulation = 5000;
-                    const barWidth = (basePopulation / maxPopulation) * 100;
-
-                    return (
-                      <div
-                        key={hour}
-                        className={`flex items-center gap-3 p-2 rounded-lg transition-all ${isCurrentHour ? "bg-indigo-100 ring-2 ring-indigo-500" : "hover:bg-gray-50"
-                          }`}
-                      >
-                        <div className="w-16 text-sm font-bold text-gray-700">
-                          {hour.toString().padStart(2, "0")}:00
-                          {isCurrentHour && <span className="text-indigo-600 ml-1">●</span>}
-                        </div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all flex items-center justify-end pr-2"
-                            style={{ width: `${barWidth}%`, backgroundColor: color }}
-                          >
-                            <span className="text-xs font-bold text-white drop-shadow">
-                              {Math.round(basePopulation).toLocaleString()}명
-                            </span>
-                          </div>
-                        </div>
-                        <div className={`w-16 text-xs font-bold ${getLevelBgColor(level)} px-2 py-1 rounded-full text-center`}>
-                          {level}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+          <div className="lg:col-span-1 grid grid-cols-2 gap-4">
+            <div className="bg-red-50 p-6 rounded-3xl border-2 border-red-200 shadow-sm">
+              <p className="text-xs font-bold text-red-600 mb-1">매우혼잡</p>
+              <p className="text-4xl font-black text-red-700">{stats.veryBusy}</p>
             </div>
-          }
-          rightContent={
-            <div className="space-y-6">
-              {/* 선택된 지역 정보 */}
-              {selectedLocation ? (
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 sticky top-24">
-                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-white font-bold text-xl">{selectedLocation.name}</h2>
-                      <button
-                        onClick={() => setSelectedLocation(null)}
-                        className="text-white hover:bg-white/20 rounded-full p-1 transition"
-                      >
-                        <span className="text-xl">×</span>
-                      </button>
-                    </div>
+            <div className="bg-orange-50 p-6 rounded-3xl border-2 border-orange-200 shadow-sm">
+              <p className="text-xs font-bold text-orange-600 mb-1">혼잡</p>
+              <p className="text-4xl font-black text-orange-700">{stats.busy}</p>
+            </div>
+            <div className="bg-yellow-50 p-6 rounded-3xl border-2 border-yellow-200 shadow-sm">
+              <p className="text-xs font-bold text-yellow-600 mb-1">보통</p>
+              <p className="text-4xl font-black text-yellow-700">{stats.normal}</p>
+            </div>
+            <div className="bg-green-50 p-6 rounded-3xl border-2 border-green-200 shadow-sm">
+              <p className="text-xs font-bold text-green-600 mb-1">여유</p>
+              <p className="text-4xl font-black text-green-700">{stats.free}</p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl border-4 border-indigo-100 overflow-hidden relative group">
+              <div ref={mapContainerRef} className="w-full h-[500px]" />
+
+              <div className="absolute bottom-10 left-10 z-20 flex flex-col gap-4">
+                <button
+                  onClick={handleZoomIn}
+                  className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center hover:bg-indigo-50 transition-all hover:scale-110 active:scale-95 border-2 border-indigo-50 z-30 !p-0"
+                >
+                  <PlusIcon className="w-8 h-8 text-black" />
+                </button>
+                <button
+                  onClick={handleZoomOut}
+                  className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center hover:bg-indigo-50 transition-all hover:scale-110 active:scale-95 border-2 border-indigo-50 z-30 !p-0"
+                >
+                  <MinusIcon className="w-8 h-8 text-black" />
+                </button>
+              </div>
+
+              {selectedLocation && (
+                <div className="absolute top-6 right-6 z-20 bg-white/95 backdrop-blur-md p-6 rounded-3xl shadow-2xl border-2 border-indigo-100 w-72 animate-slideInRight">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-black text-gray-900">{selectedLocation.name}</h3>
+                    <span className="text-[10px] font-black px-3 py-1 rounded-full" style={{ backgroundColor: getLevelColor(selectedLocation.currentLevel) + '22', color: getLevelColor(selectedLocation.currentLevel) }}>
+                      {selectedLocation.currentLevel}
+                    </span>
                   </div>
-                  <div className="p-6 space-y-6">
-                    {/* 현재 혼잡도 */}
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border-2 border-indigo-200 text-center">
-                      <p className="text-sm text-gray-600 mb-2">현재 혼잡도</p>
-                      <p className="text-5xl font-black" style={{ color: getLevelColor(selectedLocation.currentLevel) }}>
-                        {selectedLocation.currentPopulation.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">예상 방문객 (명)</p>
-                      <span className={`inline-block mt-3 px-6 py-2 rounded-full text-lg font-black ${getLevelBgColor(selectedLocation.currentLevel)}`}>
-                        {selectedLocation.currentLevel}
-                      </span>
-                    </div>
-
-                    {/* 24시간 그래프 */}
+                  <div className="space-y-4">
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-3">24시간 혼잡도 추이</h4>
-                      <div className="bg-gray-50 p-4 rounded-xl">
-                        <div className="flex items-end justify-between gap-1 h-32">
-                          {selectedLocation.hourlyData.map((data) => {
-                            const maxPop = Math.max(...selectedLocation.hourlyData.map(d => d.population));
-                            const height = (data.population / maxPop) * 100;
-                            const color = getLevelColor(data.level);
-                            const isCurrentHour = data.hour === currentTime.getHours();
-
-                            return (
-                              <div key={data.hour} className="flex-1 flex flex-col items-center gap-1">
-                                <div
-                                  className="w-full rounded-t transition-all"
-                                  style={{
-                                    height: `${height}%`,
-                                    backgroundColor: color,
-                                    boxShadow: isCurrentHour ? '0 0 10px rgba(99, 102, 241, 0.8)' : 'none',
-                                    border: isCurrentHour ? '2px solid #4F46E5' : 'none'
-                                  }}
-                                />
-                                <span className={`text-xs ${isCurrentHour ? 'font-bold text-indigo-600' : 'text-gray-400'}`}>
-                                  {data.hour}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <p className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-widest">현재 유동인구</p>
+                      <p className="text-3xl font-black" style={{ color: getLevelColor(selectedLocation.currentLevel) }}>
+                        {selectedLocation.currentPopulation.toLocaleString()}<span className="text-sm font-normal text-gray-400 ml-1">명</span>
+                      </p>
                     </div>
-
-                    {/* 추천 시간 */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border-2 border-green-200">
-                      <h4 className="font-bold text-gray-900 mb-3">추천 방문 시간</h4>
-                      <div className="space-y-2">
-                        {selectedLocation.hourlyData
-                          .filter(d => d.level === "여유")
-                          .slice(0, 3)
-                          .map(d => (
-                            <div key={d.hour} className="flex items-center gap-2 bg-white p-3 rounded-lg">
-                              <span className="text-green-600 font-bold">{d.hour}:00</span>
-                              <span className="text-sm text-gray-500">- {d.population.toLocaleString()}명 예상</span>
-                            </div>
-                          ))}
+                    <div className="pt-4 border-t border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest">24시간 추이</p>
+                      <div className="flex items-end gap-1 h-20">
+                        {selectedLocation.hourlyData.slice(6, 22).map((h, i) => {
+                          const height = (h.population / 5000) * 100;
+                          return (
+                            <div
+                              key={i}
+                              className="flex-1 rounded-t-sm transition-all"
+                              style={{ height: `${height}%`, backgroundColor: getLevelColor(h.level), opacity: h.hour === currentTime.getHours() ? 1 : 0.4 }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-indigo-100 text-center">
-                  <div className="text-6xl mb-4">🗺️</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">지역을 선택해주세요</h3>
-                  <p className="text-sm text-gray-600">
-                    지도에서 마커를 클릭하거나<br />
-                    상단 검색창에서 지역을 검색하세요
-                  </p>
                 </div>
               )}
-
-              {/* 혼잡도 범례 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-indigo-100">
-                <h3 className="font-bold text-gray-900 mb-4">혼잡도 안내</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
-                    <div className="w-4 h-4 rounded-full bg-red-600"></div>
-                    <div>
-                      <span className="font-bold text-red-700">매우혼잡</span>
-                      <p className="text-xs text-gray-500">4,000명 이상</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
-                    <div className="w-4 h-4 rounded-full bg-pink-500"></div>
-                    <div>
-                      <span className="font-bold text-pink-700">혼잡</span>
-                      <p className="text-xs text-gray-500">2,500명 ~ 4,000명</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                    <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-                    <div>
-                      <span className="font-bold text-orange-700">보통</span>
-                      <p className="text-xs text-gray-500">1,000명 ~ 2,500명</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                    <div>
-                      <span className="font-bold text-green-700">여유</span>
-                      <p className="text-xs text-gray-500">1,000명 미만</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top 5 혼잡 지역 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-indigo-100">
-                <h3 className="font-bold text-gray-900 mb-4">현재 혼잡 지역 Top 5</h3>
-                <div className="space-y-3">
-                  {allLocationsData
-                    .sort((a, b) => b.currentPopulation - a.currentPopulation)
-                    .slice(0, 5)
-                    .map((loc, index) => (
-                      <div
-                        key={loc.name}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          if (mapRef.current) {
-                            mapRef.current.setCenter(new window.kakao.maps.LatLng(loc.lat, loc.lng));
-                            mapRef.current.setLevel(6);
-                          }
-                        }}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-indigo-50 transition"
-                      >
-                        <span className="text-2xl font-black text-gray-300">#{index + 1}</span>
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-900">{loc.name}</p>
-                          <p className="text-sm text-gray-500">{loc.currentPopulation.toLocaleString()}명</p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${getLevelBgColor(loc.currentLevel)}`}>
-                          {loc.currentLevel}
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          }
-        />
-
-        {/* 이용 안내 */}
-        <FadeInSection className="mt-8">
-          <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-3xl p-8 text-white">
-            <h3 className="text-2xl font-black mb-6">서비스 이용 안내</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="text-4xl mb-4">📊</div>
-                <h4 className="font-bold text-lg mb-2">실시간 데이터</h4>
-                <p className="text-sm opacity-80">
-                  1초 단위로 실시간 업데이트되는 정확한 혼잡도 정보를 제공합니다.
-                </p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="text-4xl mb-4">🗺️</div>
-                <h4 className="font-bold text-lg mb-2">전국 커버리지</h4>
-                <p className="text-sm opacity-80">
-                  서울, 부산, 대구 등 전국 주요 도시의 혼잡도를 확인할 수 있습니다.
-                </p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-                <div className="text-4xl mb-4">⏰</div>
-                <h4 className="font-bold text-lg mb-2">최적 시간 추천</h4>
-                <p className="text-sm opacity-80">
-                  24시간 데이터를 분석하여 가장 여유로운 방문 시간을 추천해드립니다.
-                </p>
-              </div>
             </div>
           </div>
-        </FadeInSection>
-      </main>
-
-      {/* 푸터 */}
-      <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="w-full px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-400">© 2024 Flow - 실시간 인구 혼잡도 모니터링 서비스</p>
         </div>
-      </footer>
+      </FadeInSection>
     </div>
   );
 }

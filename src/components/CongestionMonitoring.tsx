@@ -94,7 +94,8 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
     { name: "부평역", lat: 37.4895, lng: 126.7226 },
     { name: "동성로", lat: 35.8714, lng: 128.6014 },
     { name: "반월당역", lat: 35.8580, lng: 128.5944 },
-    { name: "대전역", lat: 36.3504, lng: 127.3845 },
+    { name: "대구역", lat: 35.8755, lng: 128.5944 },
+    { name: "대전역", lat: 36.3312, lng: 127.4333 },
     { name: "유성온천", lat: 36.3539, lng: 127.3435 },
     { name: "광주 금남로", lat: 35.1546, lng: 126.9161 },
   ];
@@ -119,76 +120,58 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
   const getLevelColor = (level: string) => {
     switch (level) {
       case "매우혼잡": return "#DC2626";
-      case "혼잡": return "#FF6B6B";
-      case "보통": return "#F97316";
-      case "여유": return "#10B981";
-      default: return "#6B7280";
+      case "혼잡": return "#EA580C";
+      case "보통": return "#CA8A04";
+      case "여유": return "#16A34A";
+      default: return "#9CA3AF";
     }
   };
 
-  // 지도 초기화
   useEffect(() => {
     const initializeMap = () => {
-      window.kakao.maps.load(() => {
-        if (mapContainerRef.current && !mapRef.current) {
-          const center = new window.kakao.maps.LatLng(36.5, 127.5);
-          const options = {
-            center: center,
-            level: 13,
-          };
-          const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-          mapRef.current = map;
+      if (!mapContainerRef.current) return;
 
-          // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-          map.setZoomable(false);
+      const options = {
+        center: new window.kakao.maps.LatLng(37.5665, 126.978),
+        level: 11,
+      };
 
-          // 모든 지역에 혼잡도 마커 표시
-          majorLocations.forEach((loc) => {
-            const data = generateLocationData(loc.name, loc.lat, loc.lng);
-            const color = getLevelColor(data.currentLevel);
-            const radius = data.currentLevel === "매우혼잡" ? 45 :
-              data.currentLevel === "혼잡" ? 38 :
-                data.currentLevel === "보통" ? 32 : 28;
+      const map = new window.kakao.maps.Map(mapContainerRef.current, options);
+      mapRef.current = map;
 
-            const markerContent = document.createElement('div');
-            markerContent.style.cssText = `position: relative; width: ${radius}px; height: ${radius}px; cursor: pointer;`;
-            markerContent.innerHTML = `
-              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; border-radius: 50%; background: ${color}; border: 3px solid white; box-shadow: 0 0 15px ${color}, 0 4px 10px rgba(0,0,0,0.3);"></div>
-                <div style="position: absolute; font-size: 10px; font-weight: bold; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${loc.name}</div>
-              </div>
-            `;
+      // 마커 및 오버레이 생성
+      majorLocations.forEach((loc) => {
+        const data = generateLocationData(loc.name, loc.lat, loc.lng);
+        const color = getLevelColor(data.currentLevel);
 
-            markerContent.onclick = () => {
-              setSelectedLocation(data);
-              map.setCenter(new window.kakao.maps.LatLng(loc.lat, loc.lng));
-              map.setLevel(8);
-            };
+        const content = document.createElement("div");
+        content.className = "relative group cursor-pointer";
+        content.innerHTML = `
+          <div class="flex flex-col items-center">
+            <div class="px-2 py-1 bg-white rounded-lg shadow-lg border-2 text-[10px] font-bold mb-1 whitespace-nowrap" style="border-color: ${color}">
+              ${loc.name}
+            </div>
+            <div class="w-4 h-4 rounded-full border-2 border-white shadow-lg animate-pulse" style="background-color: ${color}"></div>
+          </div>
+        `;
 
-            const customOverlay = new window.kakao.maps.CustomOverlay({
-              position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
-              content: markerContent,
-              yAnchor: 0.5,
-            });
-            customOverlay.setMap(map);
-          });
-        }
+        const overlay = new window.kakao.maps.CustomOverlay({
+          position: new window.kakao.maps.LatLng(loc.lat, loc.lng),
+          content: content,
+          yAnchor: 1.2,
+        });
+
+        overlay.setMap(map);
+
+        content.onclick = () => {
+          setSelectedLocation(data);
+          map.panTo(new window.kakao.maps.LatLng(loc.lat, loc.lng));
+        };
       });
     };
 
-    const scriptId = "kakao-map-sdk";
-    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+    if (window.kakao && window.kakao.maps) {
       initializeMap();
-    } else {
-      const existingScript = document.getElementById(scriptId);
-      if (!existingScript) {
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=03d04dc86a7d0b4c4da076a9690cf5c6&autoload=false&libraries=services`;
-        script.async = true;
-        script.onload = initializeMap;
-        document.head.appendChild(script);
-      }
     }
   }, [currentTime]);
 
@@ -228,44 +211,56 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
     <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
       <div className="w-full w-full mb-8">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
-            📊 혼잡도 모니터링
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
-            전국 주요 지역의 실시간 인구 밀집도를 확인하고 최적의 방문 시간을 계획하세요
-          </p>
-        </div>
-      </div>
-
-      {/* 통계 카드 */}
-      <div className="w-full w-full mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
-            <p className="text-sm font-semibold mb-2">모니터링 지역</p>
-            <p className="text-4xl font-black">{majorLocations.length}곳</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-xl border-2 border-indigo-100">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900">혼잡도 모니터링</h1>
+              <p className="text-sm font-medium text-gray-500">전국 주요 지역 실시간 유동인구 분석</p>
+            </div>
           </div>
-          <div className="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-xl">
-            <p className="text-sm font-semibold mb-2">전국 평균 인구</p>
-            <p className="text-4xl font-black">{avgPopulation.toLocaleString()}</p>
-          </div>
-          <div className="bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-2xl shadow-xl">
-            <p className="text-sm font-semibold mb-2">혼잡 지역</p>
-            <p className="text-4xl font-black">{levelCounts["매우혼잡"] + levelCounts["혼잡"]}곳</p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-2xl shadow-xl">
-            <p className="text-sm font-semibold mb-2">여유 지역</p>
-            <p className="text-4xl font-black">{levelCounts["여유"]}곳</p>
+          <div className="flex flex-wrap gap-3">
+            <div className="bg-indigo-600/10 px-4 py-2 rounded-2xl border border-indigo-100">
+              <span className="text-sm font-bold text-indigo-700">{currentTime.toLocaleString()}</span>
+            </div>
+            <div className="bg-purple-600/10 px-4 py-2 rounded-2xl border border-purple-100">
+              <span className="text-sm font-bold text-purple-700">평균 유동인구: {avgPopulation.toLocaleString()}명</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 지도 + 선택된 지역 정보 */}
-      <div className="w-full w-full mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 지도 */}
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 p-6 relative group">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">실시간 혼잡도 지도</h3>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* 통계 요약 */}
+        <div className="lg:col-span-1 grid grid-cols-2 gap-4">
+          <div className="bg-red-50 p-6 rounded-3xl border-2 border-red-200">
+            <p className="text-xs font-bold text-red-600 mb-1">매우혼잡</p>
+            <p className="text-3xl font-black text-red-700">{levelCounts.매우혼잡}</p>
+          </div>
+          <div className="bg-orange-50 p-6 rounded-3xl border-2 border-orange-200">
+            <p className="text-xs font-bold text-orange-600 mb-1">혼잡</p>
+            <p className="text-3xl font-black text-orange-700">{levelCounts.혼잡}</p>
+          </div>
+          <div className="bg-yellow-50 p-6 rounded-3xl border-2 border-yellow-200">
+            <p className="text-xs font-bold text-yellow-600 mb-1">보통</p>
+            <p className="text-3xl font-black text-yellow-700">{levelCounts.보통}</p>
+          </div>
+          <div className="bg-green-50 p-6 rounded-3xl border-2 border-green-200">
+            <p className="text-xs font-bold text-green-600 mb-1">여유</p>
+            <p className="text-3xl font-black text-green-700">{levelCounts.여유}</p>
+          </div>
+        </div>
+
+        {/* 메인 지도부 */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="relative bg-white rounded-3xl shadow-2xl border-2 border-indigo-200 overflow-hidden">
             <div
               ref={mapContainerRef}
               className="w-full h-[400px] rounded-lg shadow-lg"
@@ -273,38 +268,38 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
             />
 
             {/* Custom Zoom Controls (Bottom Left) */}
-            <div className="absolute bottom-10 left-10 z-20 flex flex-col gap-[30px]">
+            <div className="absolute bottom-10 left-10 z-20 flex flex-col gap-4">
               <button
                 onClick={handleZoomIn}
-                className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0"
                 title="확대"
               >
-                <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
+                <PlusIcon className="w-7 h-7 text-black relative z-40" />
               </button>
               <button
                 onClick={handleZoomOut}
-                className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0"
                 title="축소"
               >
-                <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
+                <MinusIcon className="w-7 h-7 text-black relative z-40" />
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 mt-3">
-              * 지역을 클릭하면 상세 정보를 확인할 수 있습니다
+            <p className="text-xs text-gray-500 mt-3 p-4">
+              * 지도 위 마커를 클릭하면 상세 정보를 확인하실 수 있습니다.
             </p>
           </div>
 
           {/* 선택된 지역 상세 정보 */}
           <div className="bg-white rounded-2xl shadow-2xl border-2 border-purple-200 p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              {selectedLocation ? `${selectedLocation.name} 상세 정보` : "지역을 선택하세요"}
+              {selectedLocation ? `${selectedLocation.name} 상세 정보` : "지도에서 지역을 선택하세요"}
             </h3>
             {selectedLocation ? (
               <div className="space-y-4">
                 {/* 현재 혼잡도 */}
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border-2 border-indigo-200">
-                  <p className="text-sm font-semibold text-gray-700 mb-2 text-center">현재 혼잡도</p>
+                  <p className="text-sm font-semibold text-gray-700 mb-2 text-center">현재 유동인구</p>
                   <p className="text-5xl font-black text-center mb-2" style={{ color: getLevelColor(selectedLocation.currentLevel) }}>
                     {selectedLocation.currentPopulation.toLocaleString()}
                   </p>
@@ -341,8 +336,8 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
                                 opacity: isCurrentHour ? 1 : 0.6,
                               }}
                             />
-                            {data.hour % 3 === 0 && (
-                              <span className="text-xs text-gray-500">{data.hour}</span>
+                            {data.hour % 6 === 0 && (
+                              <span className="text-[8px] text-gray-500">{data.hour}h</span>
                             )}
                           </div>
                         );
@@ -356,9 +351,9 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
                   <p className="text-sm font-bold text-gray-900 mb-3">추천 방문 시간 (여유로운 시간대)</p>
                   <div className="flex gap-2 justify-center">
                     {getOptimalTime(selectedLocation).map((time) => (
-                      <div key={time.hour} className="bg-white px-4 py-2 rounded-lg border border-green-300">
-                        <p className="text-2xl font-black text-green-600">{time.hour}시</p>
-                        <p className="text-xs text-gray-600">{time.level}</p>
+                      <div key={time.hour} className="bg-white px-3 py-2 rounded-lg border border-green-300">
+                        <p className="text-xl font-black text-green-600">{time.hour}시</p>
+                        <p className="text-[10px] text-gray-600">{time.level}</p>
                       </div>
                     ))}
                   </div>
@@ -366,9 +361,9 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
               </div>
             ) : (
               <div className="flex items-center justify-center h-[400px] text-gray-400">
-                <p className="text-center">
-                  지도에서 지역을 선택하면<br />
-                  상세한 혼잡도 정보를 확인할 수 있습니다
+                <p className="text-center italic">
+                  지도에서 특정 마커를 선택하시면<br />
+                  상세한 인구 밀집도를 분석해 드립니다.
                 </p>
               </div>
             )}
@@ -376,10 +371,10 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
         </div>
       </div>
 
-      {/* 전체 지역 혼잡도 순위 */}
+      {/* 전체 실시간 혼잡도 순위 */}
       <div className="w-full w-full mb-8">
-        <div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">지역별 혼잡도 순위</h3>
+        <div className="bg-white rounded-3xl shadow-2xl border-2 border-pink-200 p-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">지역별 실시간 혼잡 순위</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {allLocations
               .sort((a, b) => b.currentPopulation - a.currentPopulation)
@@ -388,21 +383,23 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
                 return (
                   <div
                     key={location.name}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border-2 hover:shadow-lg transition-all cursor-pointer"
-                    style={{ borderColor: color }}
-                    onClick={() => setSelectedLocation(location)}
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border-2 hover:shadow-lg transition-all cursor-pointer group"
+                    style={{ borderColor: color + "44" }}
+                    onClick={() => {
+                      setSelectedLocation(location);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl font-black text-gray-400">#{index + 1}</span>
-                      <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: color + "22", color }}>
+                      <span className="text-xl font-black text-gray-400 group-hover:text-indigo-400 transition-colors">#{index + 1}</span>
+                      <span className="text-[10px] font-bold px-2 py-1 rounded" style={{ backgroundColor: color + "22", color }}>
                         {location.currentLevel}
                       </span>
                     </div>
                     <p className="text-lg font-bold text-gray-900 mb-1">{location.name}</p>
                     <p className="text-2xl font-black" style={{ color }}>
-                      {location.currentPopulation.toLocaleString()}
+                      {location.currentPopulation.toLocaleString()}<span className="text-sm font-normal text-gray-400 ml-1">명</span>
                     </p>
-                    <p className="text-xs text-gray-500">명</p>
                   </div>
                 );
               })}
@@ -414,9 +411,9 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       <div className="mb-8">
         <button
           onClick={onBack}
-          className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+          className="bg-gradient-to-r from-indigo-700 to-purple-800 text-white px-12 py-4 rounded-full font-bold text-xl hover:shadow-2xl hover:scale-105 transition-all active:scale-95"
         >
-          홈으로 돌아가기
+          돌아가기
         </button>
       </div>
     </div>

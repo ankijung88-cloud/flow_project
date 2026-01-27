@@ -79,8 +79,8 @@ export default function Hero() {
                 Flow
               </h1>
               <p className="text-base xs:text-lg md:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl max-w-3xl 3xl:max-w-4xl 4xl:max-w-6xl 5xl:max-w-[80rem] text-center font-medium opacity-90">
-                흡연부스 회피 네비게이션과 실시간 환경 정보로<br />
-                더 쾌적한 도시 생활을 경험하세요
+                흡연부스 회피 내비게이션과 실시간 환경 정보를 통해 <br />
+                더 쾌적한 도시 생활을 경험하세요.
               </p>
               <button
                 onClick={() => navigate("/service")}
