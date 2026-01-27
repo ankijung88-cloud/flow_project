@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PlusIcon, MinusIcon } from "@heroicons/react/24/solid";
 
 declare global {
   interface Window {
@@ -660,14 +661,14 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
               className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
               title="확대"
             >
-              <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
+              <PlusIcon className="w-6 h-6 text-gray-700" />
             </button>
             <button
               onClick={handleZoomOut}
               className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
               title="축소"
             >
-              <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
+              <MinusIcon className="w-6 h-6 text-gray-700" />
             </button>
           </div>
         </div>
