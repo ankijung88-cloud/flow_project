@@ -955,17 +955,17 @@ export default function GuideVd() {
             <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
               <button
                 onClick={handleZoomIn}
-                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30"
+                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0"
                 title="확대"
               >
-                <PlusIcon className="w-7 h-7 text-gray-800 relative z-40" />
+                <PlusIcon className="w-7 h-7 text-black relative z-40" />
               </button>
               <button
                 onClick={handleZoomOut}
-                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30"
+                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0"
                 title="축소"
               >
-                <MinusIcon className="w-7 h-7 text-gray-800 relative z-40" />
+                <MinusIcon className="w-7 h-7 text-black relative z-40" />
               </button>
             </div>
 
