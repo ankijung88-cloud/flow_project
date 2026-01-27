@@ -974,20 +974,26 @@ export default function GuideVd() {
                 {error}
               </div>
             )}
-            {/* 주변 흡연부스 개수 표시 */}
-            {currentPosition && (
-              <div className="absolute top-4 left-4 bg-white px-4 py-3 rounded-lg shadow-lg border-2 border-orange-400">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🚬</span>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1">주변 500m 이내</p>
-                    <p className="text-xl font-bold text-orange-600">
-                      {nearbyBoothsCount}개
-                    </p>
-                  </div>
+            {/* 주변 흡연부스 개수 표시 (상시 또는 현재 위치 기준) */}
+            <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-orange-400 min-w-[180px]">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">🚬</span>
+                <h4 className="text-sm font-bold text-gray-900">주변 흡연구역</h4>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                  <span className="text-[10px] font-bold text-orange-700">반경 500m</span>
+                  <span className="text-sm font-black text-orange-900">{nearbyBoothsCount}개</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg">
+                  <span className="text-[10px] font-bold text-yellow-700">전국 합계</span>
+                  <span className="text-sm font-black text-yellow-900">{smokingBooths.length}개</span>
                 </div>
               </div>
-            )}
+              <p className="text-[9px] text-gray-400 mt-2 text-center">
+                {currentPosition ? "실시간 근처 수량" : "위치 탐색 대기 중"}
+              </p>
+            </div>
 
             <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-gray-100 z-50">
               <p className="text-xs font-semibold text-gray-700 mb-2">범례</p>

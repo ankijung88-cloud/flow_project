@@ -35,6 +35,19 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   const mapRef1 = useRef<any>(null);
   const mapRef2 = useRef<any>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
+  const [stats, setStats] = useState({ within500m: 0, within1km: 0, within2km: 0 });
+
+  // 거리 계산 유틸리티 (필요시)
+  const calculateDist = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371000;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   // 지역별 중심 좌표 및 zoom level 설정
   const getRegionInfo = (regionName: string) => {
@@ -378,6 +391,28 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
                 className="w-full h-[350px] rounded-lg shadow-lg mb-3"
                 style={{ border: "2px solid #dbeafe" }}
               />
+
+              {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
+              <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-lg border border-blue-100 min-w-[150px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">📍</span>
+                  <h4 className="text-xs font-bold text-gray-900">주변 현황</h4>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between p-1.5 bg-blue-50 rounded-lg">
+                    <span className="text-[9px] font-bold text-blue-700">500m</span>
+                    <span className="text-xs font-black text-blue-900">{stats.within500m}개</span>
+                  </div>
+                  <div className="flex items-center justify-between p-1.5 bg-indigo-50 rounded-lg">
+                    <span className="text-[9px] font-bold text-indigo-700">1km</span>
+                    <span className="text-xs font-black text-indigo-900">{stats.within1km}개</span>
+                  </div>
+                  <div className="flex items-center justify-between p-1.5 bg-purple-50 rounded-lg">
+                    <span className="text-[9px] font-bold text-purple-700">2km</span>
+                    <span className="text-xs font-black text-purple-900">{stats.within2km}개</span>
+                  </div>
+                </div>
+              </div>
 
               {/* Custom Zoom Controls (Bottom Left) */}
               <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
