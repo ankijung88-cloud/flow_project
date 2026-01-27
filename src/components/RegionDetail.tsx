@@ -448,14 +448,14 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
               <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
                 <button
                   onClick={handleZoomIn1}
-                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                 </button>
                 <button
                   onClick={handleZoomOut1}
-                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="축소"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
@@ -487,14 +487,14 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
               <div className="absolute bottom-6 left-6 z-20 flex flex-col gap-[30px]">
                 <button
                   onClick={handleZoomIn2}
-                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
                 </button>
                 <button
                   onClick={handleZoomOut2}
-                  className="w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                   title="축소"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />

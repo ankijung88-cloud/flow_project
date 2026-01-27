@@ -313,13 +313,13 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                     )}
 
                     {/* Custom Zoom Controls (Bottom Left) */}
-                    <div className="absolute bottom-4 left-4 z-40 flex flex-col gap-[30px] pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-6 left-6 z-40 flex flex-col gap-[30px] pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           index === 0 ? handleZoomIn1() : handleZoomIn2();
                         }}
-                        className="w-8 h-8 bg-white/90 rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                        className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                         title="확대"
                       >
                         <img src={`${import.meta.env.BASE_URL}image/zoom-plus.jpg`} alt="확대" className="w-full h-full object-contain" />
@@ -329,7 +329,7 @@ export default function SmokingBooth({ onShowMap, onShowCrowdMap }: SmokingBooth
                           e.stopPropagation();
                           index === 0 ? handleZoomOut1() : handleZoomOut2();
                         }}
-                        className="w-8 h-8 bg-white/90 rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
+                        className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 overflow-hidden"
                         title="축소"
                       >
                         <img src={`${import.meta.env.BASE_URL}image/zoom-minus.png`} alt="축소" className="w-full h-full object-contain" />
