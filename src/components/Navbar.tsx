@@ -89,9 +89,9 @@ export default function Navbar() {
                       filter: "blur(0px)",
                       transition: {
                         type: "spring",
-                        stiffness: 300,
-                        damping: 25,
-                        delay: index * 0.05
+                        stiffness: 180, // 강도를 낮춤 (부드럽게)
+                        damping: 24, // 제동을 높임 (덜 튕기게)
+                        delay: index * 0.04 // 딜레이를 약간 줄임 (빠릿하면서 부드럽게)
                       }
                     },
                     closed: {
