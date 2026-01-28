@@ -8,6 +8,8 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0); // 0: Video only, 1: Text revealed
   const lastScrollTime = useRef(0);
+  const scrollAccumulator = useRef(0);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -15,20 +17,61 @@ export default function Hero() {
 
     const handleWheel = (e: WheelEvent) => {
       const now = Date.now();
-      if (now - lastScrollTime.current < 500) return; // Debounce
 
-      if (step === 0 && e.deltaY > 0) {
-        // First scroll down: reveal text
-        e.preventDefault();
-        setStep(1);
-        lastScrollTime.current = now;
-      } else if (step === 1 && e.deltaY < 0) {
-        // Scroll up: hide text
-        e.preventDefault();
-        setStep(0);
-        lastScrollTime.current = now;
+      // Allow default scroll if at step 0 and scrolling up
+      if (step === 0 && e.deltaY < 0) return;
+
+      // CRITICAL: Prevent default for internal step control
+      e.preventDefault();
+
+      if (now - lastScrollTime.current < 200) return;
+
+      // Clear existing reset timeout
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
       }
-      // If step === 1 and deltaY > 0, we don't preventDefault, so it scrolls to next section
+
+      // Reset accumulator if scrolling stops for 100ms
+      scrollTimeout.current = setTimeout(() => {
+        scrollAccumulator.current = 0;
+      }, 100);
+
+      // Accumulate deltaY
+      scrollAccumulator.current += e.deltaY;
+
+      if (e.deltaY > 0) {
+        // --- SCROLL DOWN ---
+        if (scrollAccumulator.current > 20) { // Threshold Minimal (50 -> 20)
+          if (step < 2) {
+            // Step 0->1: Video -> Text (Locked)
+            // Step 1->2: Text (Locked) -> Text (Ready)
+            setStep((prev) => prev + 1);
+            lastScrollTime.current = now;
+            scrollAccumulator.current = 0;
+          } else {
+            // Step 2 -> Next Section (3rd Scroll: Move)
+            const nextSection = document.getElementById("section-guidevd");
+            if (nextSection) {
+              nextSection.scrollIntoView({ behavior: "smooth" });
+            }
+            lastScrollTime.current = now;
+            scrollAccumulator.current = 0;
+          }
+        }
+      } else {
+        // --- SCROLL UP ---
+        if (scrollAccumulator.current < -20) { // Threshold Minimal (100 -> 20)
+          if (step > 0) {
+            // Step 3->2, 2->1, 1->0
+            if (step === 1) {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+            setStep((prev) => prev - 1);
+            lastScrollTime.current = now;
+            scrollAccumulator.current = 0;
+          }
+        }
+      }
     };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
@@ -37,13 +80,32 @@ export default function Hero() {
 
   useEffect(() => {
     if (videoRef.current) {
-      if (step === 1) {
+      if (step >= 1) {
         videoRef.current.pause();
       } else {
         videoRef.current.play().catch(() => { });
       }
     }
   }, [step]);
+
+  // Detect visibility to reset/play video when fully in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If >80% visible, reset to initial state (video playing, no text)
+        if (entry.isIntersecting && entry.intersectionRatio > 0.8) {
+          setStep(0);
+        }
+      },
+      { threshold: 0.8 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
@@ -67,7 +129,7 @@ export default function Hero() {
       {/* Content Layer */}
       <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
         <AnimatePresence>
-          {step === 1 && (
+          {step >= 1 && (
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -75,10 +137,10 @@ export default function Hero() {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="flex flex-col items-center w-full px-4 md:px-8 max-w-[90%] 3xl:max-w-[1600px] 4xl:max-w-[2200px] 5xl:max-w-[3200px] text-center text-white gap-5 4xl:gap-8 5xl:gap-12 pointer-events-auto"
             >
-              <h1 className="text-4xl xs:text-5xl md:text-7xl 3xl:text-8xl 4xl:text-9xl 5xl:text-[10rem] font-bold leading-tight">
+              <h1 className="text-4xl xs:text-5xl md:text-7xl 3xl:text-8xl 4xl:text-9xl 5xl:text-[10rem] font-bold leading-tight !text-white">
                 Flow
               </h1>
-              <p className="text-base xs:text-lg md:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl max-w-3xl 3xl:max-w-4xl 4xl:max-w-6xl 5xl:max-w-[80rem] text-center font-medium opacity-90">
+              <p className="text-base xs:text-lg md:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl max-w-3xl 3xl:max-w-4xl 4xl:max-w-6xl 5xl:max-w-[80rem] text-center font-medium opacity-90 !text-white">
                 흡연부스 회피 내비게이션과 실시간 환경 정보를 통해 <br />
                 더 쾌적한 도시 생활을 경험하세요.
               </p>

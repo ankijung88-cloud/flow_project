@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import type { SmokingBooth } from "../services/smokingBoothService";
 
@@ -13,6 +14,7 @@ interface LocationServiceProps {
 }
 
 export default function LocationService({ onBack }: LocationServiceProps) {
+  const navigate = useNavigate();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [nationalBooths] = useState<SmokingBooth[]>(getNationalSmokingBooths());
@@ -20,6 +22,14 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   const [stats, setStats] = useState({ within500m: 0, within1km: 0, within2km: 0 });
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapStatus, setMapStatus] = useState<string>("준비 중...");
+
+  // 스크롤 잠금 해제 지원
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+    return () => {
+      // 컴포넌트가 사라질 때의 부작용 방지 (필요 시)
+    };
+  }, []);
 
   // 사용자 위치 가져오기
   useEffect(() => {
@@ -239,7 +249,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
       <div className="w-full w-full mb-8">
         <div className="text-center mb-6">
@@ -334,7 +344,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
               <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
                 <button
                   onClick={handleZoomIn}
-                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
                   title="확대"
                 >
                   <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
@@ -402,7 +412,10 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       {/* 하단 버튼 */}
       <div className="mb-8">
         <button
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            navigate("/#section-guide");
+          }}
           className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
         >
           홈으로 돌아가기

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { getNationalSmokingBooths } from "../services/smokingBoothService";
 import type { SmokingBooth } from "../services/smokingBoothService";
 
@@ -29,6 +30,7 @@ interface LocationData {
 }
 
 export default function RegionDetail({ region, onBack }: RegionDetailProps) {
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const mapContainerRef1 = useRef<HTMLDivElement>(null);
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
@@ -467,7 +469,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 overflow-y-auto">
+    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 overflow-y-auto">
       {/* 헤더 */}
       <div className="w-full w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-6">
@@ -689,7 +691,10 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       <div className="w-full w-full px-4 sm:px-6 lg:px-8 pb-12">
         <div className="flex justify-center">
           <button
-            onClick={onBack}
+            onClick={() => {
+              onBack();
+              navigate("/#section-guide");
+            }}
             className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
           >
             홈으로 돌아가기

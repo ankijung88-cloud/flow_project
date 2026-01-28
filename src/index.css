@@ -15,6 +15,7 @@
 html {
   scroll-snap-type: y mandatory !important;
   scroll-behavior: smooth !important;
+  height: 100%;
 }
 
 body,
@@ -22,9 +23,18 @@ body,
   margin: 0 !important;
   padding: 0 !important;
   width: 100%;
-  min-height: 100vh;
-  background-color: #ffffff;
+  min-height: 100%;
+  background-color: transparent;
+  @apply bg-white dark:bg-slate-950 text-gray-900 dark:text-gray-100 transition-colors duration-300;
   font-family: "Plus Jakarta Sans", system-ui, sans-serif !important;
+  overflow-x: hidden;
+}
+
+/* Global Typography Accessibility */
+h1,
+h2,
+h3 {
+  @apply text-gray-900 dark:text-gray-50 transition-colors duration-300;
 }
 
 /* ====== 2. TAILWIND IMPORTS ====== */
@@ -45,7 +55,7 @@ nav {
   right: 0 !important;
   width: 100% !important;
   background-color: transparent !important;
-  z-index: 1000 !important;
+  z-index: 9000 !important;
   border-bottom: none !important;
   box-shadow: none !important;
 }
@@ -61,6 +71,11 @@ nav>div {
   width: 100% !important;
   margin: 0 !important;
   padding: 0 16px !important;
+  min-height: 100vh !important;
+  scroll-snap-align: start !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 /* Hero Section - 전체화면, 패딩 제외 (Pinning 지원을 위해 높이 제한 완화) */
@@ -70,10 +85,10 @@ nav>div {
   min-height: 100vh !important;
 }
 
-/* Footer Section - 패딩 제외 */
+/* Footer Section - Full Width, No Zoom */
 #section-footer {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  width: 100% !important;
+  position: relative;
 }
 
 /* ====== 5. SCROLL SNAP CONTAINER (LEGACY) ====== */
@@ -109,14 +124,14 @@ nav>div {
 /* ====== 7. FOOTER PROTECTION - 글자 잘림 방지 ====== */
 footer {
   width: 100% !important;
-  padding: 32px 16px 80px 16px !important;
+  padding: 16px 16px 24px 16px !important;
   min-height: auto !important;
 }
 
 /* Safe Area 지원 (노치 디바이스) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   footer {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
   }
 }
 

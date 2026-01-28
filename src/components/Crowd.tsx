@@ -278,30 +278,30 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
   };
 
   return (
-    <section className="w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 py-20 md:py-32 lg:py-40 4xl:py-52 5xl:py-64 px-4 5xl:px-12 flex items-center justify-center">
-      <div className="w-full max-w-6xl 3xl:max-w-7xl 4xl:max-w-[90%] mx-auto">
+    <section className="w-full bg-transparent py-20 md:py-32 lg:py-40 4xl:py-52 5xl:py-64 px-4 5xl:px-12 flex items-center justify-center transition-colors duration-500">
+      <div className="w-full max-w-[1400px] mx-auto">
         {/* 제목 및 설명 */}
         <div className="flex flex-col items-center text-center mb-16 gap-5 4xl:gap-10 5xl:gap-16">
-          <h2 className="text-3xl xs:text-4xl md:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl 5xl:text-9xl font-bold text-gray-900">
+          <h2 className="text-3xl xs:text-4xl md:text-5xl lg:text-6xl 3xl:text-7xl 4xl:text-8xl 5xl:text-9xl font-bold">
             실시간 혼잡도 모니터링
           </h2>
-          <p className="text-base xs:text-lg md:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl text-gray-600 max-w-3xl 3xl:max-w-4xl 4xl:max-w-6xl 5xl:max-w-7xl text-center">
+          <p className="text-base xs:text-lg md:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl text-gray-600 dark:text-gray-400 max-w-3xl 3xl:max-w-4xl 4xl:max-w-6xl 5xl:max-w-7xl text-center">
             전국 주요 지역의 인구 밀집도를 확인하고<br />
             최적의 방문 시간을 계획하세요
           </p>
         </div>
 
         {/* 전국 혼잡도 현황 - 실시간 지도 + 분포도 그래프 */}
-        <div className="mb-16 4xl:mb-32 5xl:mb-40 bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 p-8 md:p-12 4xl:p-16 5xl:p-24">
+        <div className="mb-16 4xl:mb-32 5xl:mb-40 bg-white/80 dark:bg-white/5 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-indigo-200 dark:border-indigo-900 p-8 md:p-12 4xl:p-16 5xl:p-24">
           <div className="flex flex-col items-center justify-center text-center w-full mb-16 4xl:mb-24 5xl:mb-32">
-            <h3 className="text-xl xs:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl 4xl:text-6xl 5xl:text-7xl font-bold text-gray-900">전국 혼잡도 현황</h3>
+            <h3 className="text-xl xs:text-2xl md:text-3xl lg:text-4xl 3xl:text-5xl 4xl:text-6xl 5xl:text-7xl font-bold">전국 혼잡도 현황</h3>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 4xl:gap-20 5xl:gap-32">
             {/* 좌측: 실시간 지도 */}
             <div className="w-full">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-indigo-200 relative group">
-                <h4 className="text-lg font-bold text-gray-900 mb-3 text-center">실시간 혼잡도 지도</h4>
+              <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border-2 border-indigo-200 dark:border-indigo-800 relative group">
+                <h4 className="text-lg font-bold mb-3 text-center">실시간 혼잡도 지도</h4>
                 <div className="relative">
                   <div
                     ref={mapContainerRef}
@@ -311,14 +311,14 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
 
                   {/* 진단 오버레이 */}
                   {(mapError || mapStatus !== "완료") && (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center rounded-lg">
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 dark:bg-slate-900/90 backdrop-blur-sm p-6 text-center rounded-lg">
                       <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">지도 진단 중...</h3>
-                      <p className="text-base text-gray-600 mb-2">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                      <h3 className="text-xl font-bold mb-2">지도 진단 중...</h3>
+                      <p className="text-base text-gray-600 dark:text-gray-400 mb-2">상태: <span className="font-mono text-blue-600 dark:text-blue-400">{mapStatus}</span></p>
                       {mapError && (
-                        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                          <p className="text-sm font-bold text-red-600 mb-1">오류 발생</p>
-                          <p className="text-sm text-red-500">{mapError}</p>
+                        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                          <p className="text-sm font-bold text-red-600 dark:text-red-400 mb-1">오류 발생</p>
+                          <p className="text-sm text-red-500 dark:text-red-300">{mapError}</p>
                         </div>
                       )}
                     </div>
@@ -351,8 +351,8 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
 
             {/* 우측: 분포도 그래프 */}
             <div className="w-full">
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">혼잡도 분포</h4>
+              <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
+                <h4 className="text-lg font-bold mb-4 text-center">혼잡도 분포</h4>
 
                 {/* 혼잡도별 지역 개수 */}
                 <div className="space-y-3 mb-6">
@@ -372,7 +372,7 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
                       return (
                         <div key={level}>
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-bold text-gray-700">{level}</span>
+                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{level}</span>
                             <span className="text-sm font-bold" style={{ color }}>{count}개 지역 ({percentage.toFixed(0)}%)</span>
                           </div>
                           <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
@@ -391,8 +391,8 @@ export default function Crowd({ onShowRegionDetail }: CrowdProps) {
                 </div>
 
                 {/* Top 5 혼잡 지역 - 1시간 단위 업데이트 */}
-                <div className="bg-white rounded-lg p-4 border border-purple-200">
-                  <h5 className="text-sm font-bold text-gray-900 mb-3">Top 5 혼잡 지역</h5>
+                <div className="bg-white/50 dark:bg-black/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <h5 className="text-sm font-bold mb-3">Top 5 혼잡 지역</h5>
                   <div className="space-y-2">
                     {hourlyTop5Data.map((location, index) => {
                       const color = getLevelColor(location.currentLevel);

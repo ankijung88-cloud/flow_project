@@ -40,6 +40,11 @@ export default function CrowdDetailPage() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  // 스크롤 잠금 해제
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -307,23 +312,23 @@ export default function CrowdDetailPage() {
   };
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 overflow-x-hidden">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950 overflow-x-hidden transition-colors duration-500">
       {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100 dark:border-slate-800 transition-colors duration-300">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/")}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+                onClick={() => navigate("/#section-location")}
+                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black transition-all shadow-lg"
               >
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-black text-gray-900">실시간 인구 혼잡도</h1>
-                <p className="text-sm text-gray-500">전국 지역 실시간 인구 밀집도 모니터링</p>
+                <h1 className="text-2xl font-black text-gray-900 dark:text-white">실시간 인구 혼잡도</h1>
+                <p className="text-sm text-gray-800 dark:text-gray-300 font-bold">전국 지역 실시간 인구 밀집도 모니터링</p>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-4">
@@ -335,7 +340,7 @@ export default function CrowdDetailPage() {
         </div>
       </header>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="w-full max-w-7xl mx-auto px-6 md:px-12 py-8">
         {/* 실시간 표시 (모바일) */}
         <FadeInSection className="md:hidden mb-6">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl text-center">
@@ -345,31 +350,31 @@ export default function CrowdDetailPage() {
         </FadeInSection>
 
         {/* 통계 카드 - Merge 애니메이션 적용 */}
-        <MergeCardGrid columns={4} className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-red-200">
-            <p className="text-sm text-gray-500 mb-1">매우혼잡</p>
-            <p className="text-4xl font-black text-red-600">{stats.veryBusy}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
+        <MergeCardGrid columns={5} className="mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-red-200 dark:border-red-900/30 transition-colors text-center">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-1 font-bold">매우혼잡</p>
+            <p className="text-2xl sm:text-3xl font-black text-red-600 dark:text-red-400">{stats.veryBusy}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold">개 지역</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-pink-200">
-            <p className="text-sm text-gray-500 mb-1">혼잡</p>
-            <p className="text-4xl font-black text-pink-600">{stats.busy}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-pink-200 dark:border-pink-900/30 transition-colors text-center">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-1 font-bold">혼잡</p>
+            <p className="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400">{stats.busy}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold">개 지역</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-orange-200">
-            <p className="text-sm text-gray-500 mb-1">보통</p>
-            <p className="text-4xl font-black text-orange-600">{stats.normal}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-orange-200 dark:border-orange-900/30 transition-colors text-center">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-1 font-bold">보통</p>
+            <p className="text-2xl sm:text-3xl font-black text-orange-600 dark:text-orange-400">{stats.normal}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold">개 지역</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-200">
-            <p className="text-sm text-gray-500 mb-1">여유</p>
-            <p className="text-4xl font-black text-green-600">{stats.free}</p>
-            <p className="text-xs text-gray-400">개 지역</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-green-200 dark:border-green-900/30 transition-colors text-center">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-1 font-bold">여유</p>
+            <p className="text-2xl sm:text-3xl font-black text-green-600 dark:text-green-400">{stats.free}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold">개 지역</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-indigo-200">
-            <p className="text-sm text-gray-500 mb-1">전국 평균</p>
-            <p className="text-4xl font-black text-indigo-600">{stats.avgPopulation.toLocaleString()}</p>
-            <p className="text-xs text-gray-400">명</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-3 sm:p-4 border-2 border-indigo-200 dark:border-indigo-900/30 transition-colors text-center">
+            <p className="text-xs text-gray-700 dark:text-gray-300 mb-1 font-bold">전국 평균</p>
+            <p className="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400">{stats.avgPopulation.toLocaleString()}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400 font-bold">명</p>
           </div>
         </MergeCardGrid>
 
@@ -381,7 +386,7 @@ export default function CrowdDetailPage() {
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="지역을 검색하세요 (예: 강남역, 명동, 해운대)"
-              className="flex-1 px-6 py-4 rounded-full border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-lg shadow-md"
+              className="flex-1 px-6 py-4 rounded-full border-2 border-indigo-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none text-lg shadow-md transition-colors"
             />
             <button
               onClick={() => {
@@ -412,7 +417,7 @@ export default function CrowdDetailPage() {
           leftContent={
             <div className="space-y-8">
               {/* 지도 */}
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 relative group">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 dark:border-slate-800 relative group transition-colors">
                 <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
                   <h2 className="text-white font-bold text-xl">전국 실시간 혼잡도 지도</h2>
                   <p className="text-indigo-100 text-sm">마커를 클릭하여 상세 정보를 확인하세요</p>
@@ -425,7 +430,7 @@ export default function CrowdDetailPage() {
                     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
                       <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                       <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
-                      <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                      <p className="text-[11px] text-gray-800 mb-1 font-bold">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
                       {mapError && (
                         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                           <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
@@ -456,12 +461,13 @@ export default function CrowdDetailPage() {
               </div>
 
               {/* 24시간 평균 혼잡도 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-indigo-100">
-                <h3 className="text-2xl font-black text-gray-900 mb-6">24시간 평균 혼잡도 추이</h3>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border-2 border-indigo-100 dark:border-slate-800 transition-colors">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6">24시간 평균 혼잡도 추이</h3>
                 <div className="space-y-2">
-                  {Array.from({ length: 24 }, (_, hour) => {
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const hour = i * 2;
                     const currentHour = currentTime.getHours();
-                    const isCurrentHour = hour === currentHour;
+                    const isCurrentBlock = currentHour >= hour && currentHour < hour + 2;
                     const basePopulation = HOURLY_POPULATIONS[hour];
                     const level = basePopulation > 4000 ? "매우혼잡" : basePopulation > 2500 ? "혼잡" : basePopulation > 1000 ? "보통" : "여유";
                     const color = getLevelColor(level);
@@ -471,12 +477,12 @@ export default function CrowdDetailPage() {
                     return (
                       <div
                         key={hour}
-                        className={`flex items-center gap-3 p-2 rounded-lg transition-all ${isCurrentHour ? "bg-indigo-100 ring-2 ring-indigo-500" : "hover:bg-gray-50"
+                        className={`flex items-center gap-3 p-2 rounded-lg transition-all ${isCurrentBlock ? "bg-indigo-100 dark:bg-indigo-900/40 ring-2 ring-indigo-500" : "hover:bg-gray-50 dark:hover:bg-slate-800"
                           }`}
                       >
-                        <div className="w-16 text-sm font-bold text-gray-700">
+                        <div className="w-16 text-sm font-black text-gray-800">
                           {hour.toString().padStart(2, "0")}:00
-                          {isCurrentHour && <span className="text-indigo-600 ml-1">●</span>}
+                          {isCurrentBlock && <span className="text-indigo-600 ml-1">●</span>}
                         </div>
                         <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
                           <div
@@ -502,7 +508,7 @@ export default function CrowdDetailPage() {
             <div className="space-y-6">
               {/* 선택된 지역 정보 */}
               {selectedLocation ? (
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 sticky top-24">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100 dark:border-slate-800 sticky top-24 transition-colors">
                   <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
                     <div className="flex justify-between items-center">
                       <h2 className="text-white font-bold text-xl">{selectedLocation.name}</h2>
@@ -516,12 +522,12 @@ export default function CrowdDetailPage() {
                   </div>
                   <div className="p-6 space-y-6">
                     {/* 현재 혼잡도 */}
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border-2 border-indigo-200 text-center">
-                      <p className="text-sm text-gray-600 mb-2">현재 혼잡도</p>
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/30 text-center">
+                      <p className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">현재 혼잡도</p>
                       <p className="text-5xl font-black" style={{ color: getLevelColor(selectedLocation.currentLevel) }}>
                         {selectedLocation.currentPopulation.toLocaleString()}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">예상 방문객 (명)</p>
+                      <p className="text-sm font-bold text-gray-700 dark:text-gray-400 mt-2">예상 방문객 (명)</p>
                       <span className={`inline-block mt-3 px-6 py-2 rounded-full text-lg font-black ${getLevelBgColor(selectedLocation.currentLevel)}`}>
                         {selectedLocation.currentLevel}
                       </span>
@@ -529,8 +535,8 @@ export default function CrowdDetailPage() {
 
                     {/* 24시간 그래프 */}
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-3">24시간 혼잡도 추이</h4>
-                      <div className="bg-gray-50 p-4 rounded-xl">
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-3">24시간 혼잡도 추이</h4>
+                      <div className="bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl">
                         <div className="flex items-end justify-between gap-1 h-32">
                           {selectedLocation.hourlyData.map((data) => {
                             const maxPop = Math.max(...selectedLocation.hourlyData.map(d => d.population));
@@ -549,7 +555,7 @@ export default function CrowdDetailPage() {
                                     border: isCurrentHour ? '2px solid #4F46E5' : 'none'
                                   }}
                                 />
-                                <span className={`text-xs ${isCurrentHour ? 'font-bold text-indigo-600' : 'text-gray-400'}`}>
+                                <span className={`text-xs ${isCurrentHour ? 'font-black text-indigo-700' : 'font-bold text-gray-700'}`}>
                                   {data.hour}
                                 </span>
                               </div>
@@ -560,16 +566,16 @@ export default function CrowdDetailPage() {
                     </div>
 
                     {/* 추천 시간 */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border-2 border-green-200">
-                      <h4 className="font-bold text-gray-900 mb-3">추천 방문 시간</h4>
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-5 rounded-2xl border-2 border-green-200 dark:border-green-800/30">
+                      <h4 className="font-bold text-gray-900 dark:text-white mb-3">추천 방문 시간</h4>
                       <div className="space-y-2">
                         {selectedLocation.hourlyData
                           .filter(d => d.level === "여유")
                           .slice(0, 3)
                           .map(d => (
                             <div key={d.hour} className="flex items-center gap-2 bg-white p-3 rounded-lg">
-                              <span className="text-green-600 font-bold">{d.hour}:00</span>
-                              <span className="text-sm text-gray-500">- {d.population.toLocaleString()}명 예상</span>
+                              <span className="text-green-600 font-black">{d.hour}:00</span>
+                              <span className="text-sm text-gray-800 font-bold">- {d.population.toLocaleString()}명 예상</span>
                             </div>
                           ))}
                       </div>
@@ -577,10 +583,10 @@ export default function CrowdDetailPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-3xl shadow-2xl p-8 border-2 border-indigo-100 text-center">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border-2 border-indigo-100 dark:border-slate-800 text-center transition-colors">
                   <div className="text-6xl mb-4">🗺️</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">지역을 선택해주세요</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">지역을 선택해주세요</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     지도에서 마커를 클릭하거나<br />
                     상단 검색창에서 지역을 검색하세요
                   </p>
@@ -588,43 +594,43 @@ export default function CrowdDetailPage() {
               )}
 
               {/* 혼잡도 범례 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-indigo-100">
-                <h3 className="font-bold text-gray-900 mb-4">혼잡도 안내</h3>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 border-2 border-indigo-100 dark:border-slate-800 transition-colors">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-4">혼잡도 안내</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
                     <div className="w-4 h-4 rounded-full bg-red-600"></div>
                     <div>
                       <span className="font-bold text-red-700">매우혼잡</span>
-                      <p className="text-xs text-gray-500">4,000명 이상</p>
+                      <p className="text-xs text-gray-800 font-medium">4,000명 이상</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl">
                     <div className="w-4 h-4 rounded-full bg-pink-500"></div>
                     <div>
                       <span className="font-bold text-pink-700">혼잡</span>
-                      <p className="text-xs text-gray-500">2,500명 ~ 4,000명</p>
+                      <p className="text-xs text-gray-800 font-medium">2,500명 ~ 4,000명</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
                     <div className="w-4 h-4 rounded-full bg-orange-500"></div>
                     <div>
                       <span className="font-bold text-orange-700">보통</span>
-                      <p className="text-xs text-gray-500">1,000명 ~ 2,500명</p>
+                      <p className="text-xs text-gray-800 font-medium">1,000명 ~ 2,500명</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
                     <div className="w-4 h-4 rounded-full bg-green-500"></div>
                     <div>
                       <span className="font-bold text-green-700">여유</span>
-                      <p className="text-xs text-gray-500">1,000명 미만</p>
+                      <p className="text-xs text-gray-800 font-medium">1,000명 미만</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Top 5 혼잡 지역 */}
-              <div className="bg-white rounded-3xl shadow-2xl p-6 border-2 border-indigo-100">
-                <h3 className="font-bold text-gray-900 mb-4">현재 혼잡 지역 Top 5</h3>
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 border-2 border-indigo-100 dark:border-slate-800 transition-colors">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-4">현재 혼잡 지역 Top 5</h3>
                 <div className="space-y-3">
                   {allLocationsData
                     .sort((a, b) => b.currentPopulation - a.currentPopulation)
@@ -639,12 +645,12 @@ export default function CrowdDetailPage() {
                             mapRef.current.setLevel(6);
                           }
                         }}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-indigo-50 transition"
+                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-indigo-50 dark:hover:bg-slate-700 transition"
                       >
                         <span className="text-2xl font-black text-gray-300">#{index + 1}</span>
                         <div className="flex-1">
-                          <p className="font-bold text-gray-900">{loc.name}</p>
-                          <p className="text-sm text-gray-500">{loc.currentPopulation.toLocaleString()}명</p>
+                          <p className="font-bold text-gray-900 dark:text-white">{loc.name}</p>
+                          <p className="text-sm text-gray-800 dark:text-gray-300 font-bold">{loc.currentPopulation.toLocaleString()}명</p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-sm font-bold ${getLevelBgColor(loc.currentLevel)}`}>
                           {loc.currentLevel}
@@ -665,21 +671,21 @@ export default function CrowdDetailPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-4xl mb-4">📊</div>
                 <h4 className="font-bold text-lg mb-2">실시간 데이터</h4>
-                <p className="text-sm opacity-80">
+                <p className="text-sm opacity-100 font-medium">
                   1초 단위로 실시간 업데이트되는 정확한 혼잡도 정보를 제공합니다.
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-4xl mb-4">🗺️</div>
                 <h4 className="font-bold text-lg mb-2">전국 커버리지</h4>
-                <p className="text-sm opacity-80">
+                <p className="text-sm opacity-100 font-medium">
                   서울, 부산, 대구 등 전국 주요 도시의 혼잡도를 확인할 수 있습니다.
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                 <div className="text-4xl mb-4">⏰</div>
                 <h4 className="font-bold text-lg mb-2">최적 시간 추천</h4>
-                <p className="text-sm opacity-80">
+                <p className="text-sm opacity-100 font-medium">
                   24시간 데이터를 분석하여 가장 여유로운 방문 시간을 추천해드립니다.
                 </p>
               </div>
@@ -688,10 +694,20 @@ export default function CrowdDetailPage() {
         </FadeInSection>
       </main>
 
+      {/* 홈으로 돌아가기 버튼 */}
+      <div className="w-full flex justify-center mt-12 mb-16 px-4">
+        <button
+          onClick={() => navigate("/#section-location")}
+          className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-12 py-4 rounded-full font-bold text-xl hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
+        >
+          홈으로 돌아가기
+        </button>
+      </div>
+
       {/* 푸터 */}
       <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="w-full px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-400">© 2024 Flow - 실시간 인구 혼잡도 모니터링 서비스</p>
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 text-center">
+          <p className="text-gray-400 font-bold">© 2024 Flow - 실시간 인구 혼잡도 모니터링 서비스</p>
         </div>
       </footer>
     </div>

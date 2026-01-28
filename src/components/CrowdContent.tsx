@@ -3,7 +3,20 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 
 export default function CrowdContent() {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
 
     // Track scroll progress as the section traverses the viewport
     // "start end": Top of section enters bottom of viewport
@@ -24,7 +37,7 @@ export default function CrowdContent() {
     const textY = useTransform(scrollYProgress, [0.6, 0.9], [-100, 0]);
 
     return (
-        <section ref={containerRef} className="relative w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 py-20 lg:py-32">
+        <section ref={containerRef} className="relative w-full bg-transparent py-20 lg:py-32 transition-colors duration-500">
             <div className="w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20 px-4">
 
                 {/* Left: Interactive Card Content (Appears Second) */}
@@ -37,15 +50,15 @@ export default function CrowdContent() {
                         className={`
                             group cursor-pointer p-8 md:p-10 rounded-[2rem] transition-all duration-500
                             ${isExpanded
-                                ? "bg-white shadow-2xl border-2 border-primary/20 scale-[1.02]"
-                                : "bg-white/60 hover:bg-white shadow-xl hover:shadow-2xl border-2 border-transparent hover:border-primary/10"}
+                                ? "bg-white shadow-2xl border-2 border-primary/40 scale-[1.02] dark:bg-white/10"
+                                : "bg-white hover:bg-gray-50 shadow-xl hover:shadow-2xl border-2 border-transparent hover:border-primary/20 dark:bg-white/5 dark:hover:bg-white/10"}
                         `}
                     >
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
                                 <span className={`
                                     text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full
-                                    ${isExpanded ? "bg-primary text-white" : "bg-primary/10 text-primary"}
+                                    ${isExpanded ? "bg-primary text-white" : "bg-primary/20 text-primary"}
                                 `}>
                                     Smart Monitoring
                                 </span>
@@ -60,7 +73,7 @@ export default function CrowdContent() {
                             </div>
 
                             <h2 className="flex flex-col gap-1">
-                                <span className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">
+                                <span className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white leading-tight transition-colors duration-300">
                                     실시간 인구 혼잡도
                                 </span>
                                 <span className="text-3xl md:text-5xl font-black text-primary leading-tight">
@@ -77,7 +90,7 @@ export default function CrowdContent() {
                                         transition={{ duration: 0.6, ease: "circOut" }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="pt-6 flex flex-col gap-6 text-lg text-gray-600 leading-relaxed word-keep-all border-t border-gray-100 mt-2">
+                                        <div className="pt-6 flex flex-col gap-6 text-lg text-gray-600 dark:text-gray-300 leading-relaxed word-keep-all border-t border-gray-200 dark:border-white/10 mt-2 transition-colors duration-300">
                                             <p className="font-medium">
                                                 AI 기반의 정밀한 분석을 통해 실시간으로 변화하는 도시의 인구 밀집도를 직관적으로 확인하세요.
                                             </p>
@@ -98,9 +111,10 @@ export default function CrowdContent() {
                     style={{ opacity: videoOpacity, y: videoY }}
                     className="lg:w-[55%] w-full"
                 >
-                    <div className="w-full aspect-[1900/1060] bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-indigo-200 relative group">
+                    <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-indigo-200 relative group">
                         <video
-                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500"
+                            ref={videoRef}
+                            className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500 scale-110"
                             autoPlay
                             muted
                             loop
@@ -111,6 +125,24 @@ export default function CrowdContent() {
                                 <p className="text-xl">Crowd Analysis Video</p>
                             </div>
                         </video>
+
+                        {/* Play/Pause Button Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                            <button
+                                onClick={togglePlay}
+                                className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/40 transition-all pointer-events-auto active:scale-95"
+                            >
+                                {isPlaying ? (
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                    </svg>
+                                ) : (
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </motion.div>
 

@@ -12,6 +12,8 @@ export default function GuideVd() {
   const polylineRef = useRef<any>(null);
   const watchIdRef = useRef<number | null>(null);
   const smokingMarkersRef = useRef<any[]>([]);
+  const turnOverlaysRef = useRef<any[]>([]);
+  const destOverlayRef = useRef<any>(null);
 
   const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [startPosition, setStartPosition] = useState<{ lat: number; lng: number; name: string } | null>(null);
@@ -462,6 +464,7 @@ export default function GuideVd() {
           yAnchor: 1.5,
         });
         turnOverlay.setMap(kakaoMapRef.current);
+        turnOverlaysRef.current.push(turnOverlay);
       }
     });
 
@@ -484,11 +487,13 @@ export default function GuideVd() {
       </div>
     `;
 
-    new window.kakao.maps.CustomOverlay({
+    const destOverlay = new window.kakao.maps.CustomOverlay({
       position: new window.kakao.maps.LatLng(destination.lat, destination.lng),
       content: destContent,
       yAnchor: 1.3,
-    }).setMap(kakaoMapRef.current);
+    });
+    destOverlay.setMap(kakaoMapRef.current);
+    destOverlayRef.current = destOverlay;
 
     // 초기 방향 및 거리 계산
     if (avoidancePath.length > 1) {
@@ -512,6 +517,31 @@ export default function GuideVd() {
         );
         setNextTurn({ direction: nextTurnSegment.instruction, distance: distToTurn });
       }
+    }
+  };
+
+  // 경로 안내 취소
+  const stopNavigation = () => {
+    setNavigationActive(false);
+    setRoutePath([]);
+    setDirection("");
+    setDistance(0);
+    setNextTurn(null);
+
+    // 경로선 제거
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
+
+    // 회전 안내 오버레이 제거
+    turnOverlaysRef.current.forEach(overlay => overlay.setMap(null));
+    turnOverlaysRef.current = [];
+
+    // 목적지 마커 제거
+    if (destOverlayRef.current) {
+      destOverlayRef.current.setMap(null);
+      destOverlayRef.current = null;
     }
   };
 
@@ -776,7 +806,52 @@ export default function GuideVd() {
           },
           (err) => {
             console.error("초기 위치 가져오기 오류:", err);
-            if (err.code === err.PERMISSION_DENIED) {
+            if (err.code === err.TIMEOUT) {
+              console.log("[DEBUG] Geolocation timeout with high accuracy. Retrying with high accuracy disabled...");
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  const lat = pos.coords.latitude;
+                  const lng = pos.coords.longitude;
+                  setStartPosition({ lat, lng, name: "현재 위치" });
+                  if (window.kakao && window.kakao.maps) {
+                    window.kakao.maps.load(() => {
+                      try {
+                        const container = mapRef.current;
+                        const options = {
+                          center: new window.kakao.maps.LatLng(lat, lng),
+                          level: 3,
+                        };
+                        const map = new window.kakao.maps.Map(container, options);
+                        kakaoMapRef.current = map;
+                        // ... (rest of init logic or trigger refetch)
+                      } catch (e) { console.error(e); }
+                    });
+                  }
+                },
+                (err2) => {
+                  console.error("재시도 위치 가져오기 오류:", err2);
+                  console.log("[DEBUG] Geolocation failed completely. Falling back to default (Seoul)...");
+                  const fallbackLat = 37.5665;
+                  const fallbackLng = 126.978;
+                  setStartPosition({ lat: fallbackLat, lng: fallbackLng, name: "서울 (기본 위치)" });
+
+                  if (window.kakao && window.kakao.maps) {
+                    window.kakao.maps.load(() => {
+                      try {
+                        const container = mapRef.current;
+                        const options = {
+                          center: new window.kakao.maps.LatLng(fallbackLat, fallbackLng),
+                          level: 3,
+                        };
+                        const map = new window.kakao.maps.Map(container, options);
+                        kakaoMapRef.current = map;
+                      } catch (e) { console.error(e); }
+                    });
+                  }
+                },
+                { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
+              );
+            } else if (err.code === err.PERMISSION_DENIED) {
               setError("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
             } else {
               setError("위치 정보를 가져올 수 없습니다. 위치 권한을 허용해주세요.");
@@ -784,7 +859,7 @@ export default function GuideVd() {
           },
           {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: 5000, // Timeout을 조금 줄이고 재시도를 유도
             maximumAge: 0,
           }
         );
@@ -829,11 +904,11 @@ export default function GuideVd() {
   };
 
   return (
-    <section className="w-full bg-gradient-to-br from-green-50 via-white to-blue-50 py-0 flex items-center justify-center">
-      <div className="w-full max-w-6xl mx-auto px-4 flex flex-col space-y-12">
+    <section className="w-full py-0 flex items-center justify-center">
+      <div className="w-full max-w-[1400px] mx-auto px-4 flex flex-col space-y-12">
         {/* 검색 및 네비게이션 컨트롤 */}
-        <div className="bg-white p-6 rounded-2xl shadow-2xl border-2 border-green-200 w-full text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">흡연부스 회피 네비게이션</h2>
+        <div className="bg-white/80 dark:bg-white/5 backdrop-blur-md p-6 rounded-2xl shadow-2xl border-2 border-green-200 dark:border-green-900 w-full text-center">
+          <h2 className="text-2xl font-bold mb-4">흡연부스 회피 네비게이션</h2>
 
           {/* 출발지 검색 */}
           <div className="mb-4">
@@ -845,7 +920,7 @@ export default function GuideVd() {
                 onChange={(e) => setUseCurrentLocation(e.target.checked)}
                 className="w-4 h-4 text-blue-600"
               />
-              <label htmlFor="useCurrentLocation" className="text-sm font-medium text-gray-700">
+              <label htmlFor="useCurrentLocation" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 현재 위치를 출발지로 사용
               </label>
             </div>
@@ -855,7 +930,7 @@ export default function GuideVd() {
                 <input
                   type="text"
                   placeholder="출발지를 검색하세요 (예: 서울역)"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 dark:bg-black/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={startKeyword}
                   onChange={(e) => setStartKeyword(e.target.value)}
                 />
@@ -869,8 +944,8 @@ export default function GuideVd() {
             )}
 
             {startPosition && (
-              <p className="mt-2 text-sm text-gray-600">
-                출발지: <span className="font-semibold text-green-700">{startPosition.name}</span>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                출발지: <span className="font-semibold text-green-700 dark:text-green-400">{startPosition.name}</span>
               </p>
             )}
           </div>
@@ -880,7 +955,7 @@ export default function GuideVd() {
             <input
               type="text"
               placeholder="목적지를 검색하세요 (예: 강남역)"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 dark:bg-black/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
             />
@@ -894,17 +969,27 @@ export default function GuideVd() {
 
           {destination && (
             <div className="flex items-center justify-center gap-4">
-              <p className="text-gray-700">목적지: <span className="font-semibold">{destination.name}</span></p>
-              <button
-                onClick={startNavigation}
-                disabled={navigationActive}
-                className={`px-6 py-3 rounded-lg font-semibold ${navigationActive
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-green-500 text-white hover:bg-green-600"
-                  }`}
-              >
-                {navigationActive ? "안내 중" : "경로 안내 시작"}
-              </button>
+              <p className="text-gray-700 dark:text-gray-300">목적지: <span className="font-semibold">{destination.name}</span></p>
+              <div className="flex gap-2">
+                <button
+                  onClick={startNavigation}
+                  disabled={navigationActive}
+                  className={`px-6 py-3 rounded-lg font-semibold ${navigationActive
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                    }`}
+                >
+                  {navigationActive ? "안내 중" : "경로 안내 시작"}
+                </button>
+                {navigationActive && (
+                  <button
+                    onClick={stopNavigation}
+                    className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold transition-all shadow-md active:scale-95"
+                  >
+                    경로안내취소
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

@@ -34,8 +34,13 @@ export default function SmokingBoothDetailPage() {
   const [selectedBooth, setSelectedBooth] = useState<(SmokingBooth & { distance: number }) | null>(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [mapError, setMapError] = useState<string | null>(null);
+  // 스크롤 잠금 해제
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
+
   const [mapStatus, setMapStatus] = useState<string>("준비 중...");
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // 1초마다 현재 시각 업데이트
   useEffect(() => {
@@ -238,23 +243,23 @@ export default function SmokingBoothDetailPage() {
   };
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 overflow-x-hidden">
+    <div className="w-full min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden transition-colors duration-500">
       {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+      <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100 dark:border-slate-800 transition-colors duration-300">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/")}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+                onClick={() => navigate("/#section-location")}
+                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-black transition-all shadow-lg"
               >
-                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-black text-gray-900">흡연부스 위치 안내</h1>
-                <p className="text-sm text-gray-500">전국 흡연부스 위치 및 피해 경로 안내</p>
+                <h1 className="text-2xl font-black text-gray-900 dark:text-white">흡연부스 위치 안내</h1>
+                <p className="text-sm text-gray-700 dark:text-gray-300 font-bold">전국 흡연부스 위치 및 피해 경로 안내</p>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-4">
@@ -266,7 +271,7 @@ export default function SmokingBoothDetailPage() {
         </div>
       </header>
 
-      <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="w-full max-w-7xl mx-auto px-6 md:px-12 py-8">
         {/* 실시간 표시 (모바일) */}
         <FadeInSection className="md:hidden mb-6">
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-2xl text-center">
@@ -277,25 +282,25 @@ export default function SmokingBoothDetailPage() {
 
         {/* 통계 카드 - Merge 애니메이션 적용 */}
         <MergeCardGrid columns={4} className="mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-green-200">
-            <p className="text-sm text-gray-500 mb-1">반경 500m</p>
-            <p className="text-4xl font-black text-green-600">{stats.within500m}</p>
-            <p className="text-xs text-gray-400">개의 흡연부스</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border-2 border-green-200 dark:border-green-900/30 transition-colors">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-1 font-bold">반경 500m</p>
+            <p className="text-4xl font-black text-green-600 dark:text-green-400">{stats.within500m}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold">개의 흡연부스</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-emerald-200">
-            <p className="text-sm text-gray-500 mb-1">반경 1km</p>
-            <p className="text-4xl font-black text-emerald-600">{stats.within1km}</p>
-            <p className="text-xs text-gray-400">개의 흡연부스</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border-2 border-emerald-200 dark:border-emerald-900/30 transition-colors">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-1 font-bold">반경 1km</p>
+            <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400">{stats.within1km}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold">개의 흡연부스</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-teal-200">
-            <p className="text-sm text-gray-500 mb-1">반경 2km</p>
-            <p className="text-4xl font-black text-teal-600">{stats.within2km}</p>
-            <p className="text-xs text-gray-400">개의 흡연부스</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border-2 border-teal-200 dark:border-teal-900/30 transition-colors">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-1 font-bold">반경 2km</p>
+            <p className="text-4xl font-black text-teal-600 dark:text-teal-400">{stats.within2km}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold">개의 흡연부스</p>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-blue-200">
-            <p className="text-sm text-gray-500 mb-1">전국 총</p>
-            <p className="text-4xl font-black text-blue-600">{stats.total}</p>
-            <p className="text-xs text-gray-400">개의 흡연부스</p>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border-2 border-blue-200 dark:border-blue-900/30 transition-colors">
+            <p className="text-sm text-gray-800 dark:text-gray-300 mb-1 font-bold">전국 총</p>
+            <p className="text-4xl font-black text-blue-600 dark:text-blue-400">{stats.total}</p>
+            <p className="text-xs text-gray-700 dark:text-gray-400 font-bold">개의 흡연부스</p>
           </div>
         </MergeCardGrid>
 
@@ -307,7 +312,7 @@ export default function SmokingBoothDetailPage() {
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder="목적지를 검색하세요 (예: 강남역, 서울역)"
-              className="flex-1 px-6 py-4 rounded-full border-2 border-green-200 focus:border-green-500 focus:outline-none text-lg shadow-md"
+              className="flex-1 px-6 py-4 rounded-full border-2 border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-green-500 focus:outline-none text-lg shadow-md transition-colors"
             />
             <button
               type="submit"
@@ -324,7 +329,7 @@ export default function SmokingBoothDetailPage() {
           leftContent={
             <div className="space-y-8">
               {/* 지도 */}
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-green-100 relative group">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border-2 border-green-100 dark:border-slate-800 relative group transition-colors">
                 <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
                   <h2 className="text-white font-bold text-xl">실시간 흡연부스 지도</h2>
                   <p className="text-green-100 text-sm">내 위치 기준 주변 흡연부스가 표시됩니다</p>
@@ -337,7 +342,7 @@ export default function SmokingBoothDetailPage() {
                     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
                       <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
                       <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
-                      <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                      <p className="text-[11px] text-gray-800 mb-1 font-medium">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
                       {mapError && (
                         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                           <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
@@ -349,23 +354,23 @@ export default function SmokingBoothDetailPage() {
                 </div>
 
                 {/* 거리별 흡연구역 수량 박스 (Top Left Overlay) */}
-                <div className="absolute top-[80px] left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-green-100 min-w-[180px]">
+                <div className="absolute top-[80px] left-4 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-green-100 dark:border-slate-700 min-w-[180px] transition-colors">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl">📊</span>
-                    <h4 className="text-sm font-bold text-gray-900 text-left">주변 흡연구역</h4>
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white text-left">주변 흡연구역</h4>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                      <span className="text-[10px] font-bold text-green-700">반경 500m</span>
-                      <span className="text-sm font-black text-green-900">{stats.within500m}개</span>
+                    <div className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <span className="text-[10px] font-bold text-green-700 dark:text-green-400">반경 500m</span>
+                      <span className="text-sm font-black text-green-900 dark:text-green-100">{stats.within500m}개</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg">
-                      <span className="text-[10px] font-bold text-emerald-700">반경 1km</span>
-                      <span className="text-sm font-black text-emerald-900">{stats.within1km}개</span>
+                    <div className="flex items-center justify-between p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">반경 1km</span>
+                      <span className="text-sm font-black text-emerald-900 dark:text-emerald-100">{stats.within1km}개</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 bg-teal-50 rounded-lg">
-                      <span className="text-[10px] font-bold text-teal-700">반경 2km</span>
-                      <span className="text-sm font-black text-teal-900">{stats.within2km}개</span>
+                    <div className="flex items-center justify-between p-2 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
+                      <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400">반경 2km</span>
+                      <span className="text-sm font-black text-teal-900 dark:text-teal-100">{stats.within2km}개</span>
                     </div>
                   </div>
                 </div>
@@ -432,7 +437,7 @@ export default function SmokingBoothDetailPage() {
                         mapRef.current.setLevel(4);
                       }
                     }}
-                    className={`p-4 border-b border-gray-100 cursor-pointer transition-all hover:bg-green-50 ${selectedBooth?.id === booth.id ? "bg-green-100" : ""
+                    className={`p-4 border-b border-gray-100 dark:border-slate-800 cursor-pointer transition-all hover:bg-green-50 dark:hover:bg-green-900/20 ${selectedBooth?.id === booth.id ? "bg-green-100 dark:bg-green-900/40" : ""
                       }`}
                   >
                     <div className="flex items-center gap-4">
@@ -440,8 +445,8 @@ export default function SmokingBoothDetailPage() {
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-gray-900">{booth.name}</h4>
-                        <p className="text-sm text-gray-500">{booth.address}</p>
+                        <h4 className="font-bold text-gray-900 dark:text-white">{booth.name}</h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-400 font-medium">{booth.address}</p>
                       </div>
                       <div className="text-right">
                         <span className={`text-lg font-black ${booth.distance <= 500 ? "text-green-600" :
@@ -461,31 +466,31 @@ export default function SmokingBoothDetailPage() {
 
         {/* 선택된 흡연부스 상세 정보 */}
         {selectedBooth && (
-          <div className="mt-8 bg-white rounded-3xl shadow-2xl p-8 border-2 border-green-200">
+          <div className="mt-8 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 border-2 border-green-200 dark:border-green-900/30 transition-colors">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-3xl font-black text-gray-900">{selectedBooth.name}</h3>
-                <p className="text-lg text-gray-500">{selectedBooth.address}</p>
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white">{selectedBooth.name}</h3>
+                <p className="text-lg text-gray-800 dark:text-gray-300 font-bold">{selectedBooth.address}</p>
               </div>
               <button
                 onClick={() => setSelectedBooth(null)}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+                className="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-800 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-slate-700 transition"
               >
-                <span className="text-2xl text-gray-500">×</span>
+                <span className="text-2xl text-gray-700 dark:text-gray-300">×</span>
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl border-2 border-green-200">
-                <p className="text-sm text-gray-500 mb-2">거리</p>
-                <p className="text-4xl font-black text-green-600">{formatDistance(selectedBooth.distance)}</p>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-2xl border-2 border-green-200 dark:border-green-800/30">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-bold">거리</p>
+                <p className="text-4xl font-black text-green-600 dark:text-green-400">{formatDistance(selectedBooth.distance)}</p>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-200">
-                <p className="text-sm text-gray-500 mb-2">지역</p>
-                <p className="text-4xl font-black text-blue-600">{selectedBooth.city}</p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-2xl border-2 border-blue-200 dark:border-blue-800/30">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-bold">지역</p>
+                <p className="text-4xl font-black text-blue-600 dark:text-blue-400">{selectedBooth.city}</p>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border-2 border-purple-200">
-                <p className="text-sm text-gray-500 mb-2">도보 예상 시간</p>
-                <p className="text-4xl font-black text-purple-600">
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-2xl border-2 border-purple-200 dark:border-purple-800/30">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 font-bold">도보 예상 시간</p>
+                <p className="text-4xl font-black text-purple-600 dark:text-purple-400">
                   {Math.ceil(selectedBooth.distance / 80)}분
                 </p>
               </div>
@@ -500,21 +505,21 @@ export default function SmokingBoothDetailPage() {
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
               <div className="text-4xl mb-4">📍</div>
               <h4 className="font-bold text-lg mb-2">위치 기반 서비스</h4>
-              <p className="text-sm opacity-80">
+              <p className="text-sm opacity-100 font-medium">
                 현재 위치를 기반으로 가장 가까운 흡연부스를 자동으로 찾아드립니다.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
               <div className="text-4xl mb-4">🗺️</div>
               <h4 className="font-bold text-lg mb-2">전국 커버리지</h4>
-              <p className="text-sm opacity-80">
+              <p className="text-sm opacity-100 font-medium">
                 전국 {stats.total}개 이상의 흡연부스 위치 정보를 제공합니다.
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
               <div className="text-4xl mb-4">⏱️</div>
               <h4 className="font-bold text-lg mb-2">실시간 업데이트</h4>
-              <p className="text-sm opacity-80">
+              <p className="text-sm opacity-100 font-medium">
                 위치 정보는 실시간으로 업데이트되어 정확한 정보를 제공합니다.
               </p>
             </div>
@@ -522,10 +527,20 @@ export default function SmokingBoothDetailPage() {
         </div>
       </main>
 
+      {/* 홈으로 돌아가기 버튼 */}
+      <div className="w-full flex justify-center mt-12 mb-16 px-4">
+        <button
+          onClick={() => navigate("/#section-location")}
+          className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-12 py-4 rounded-full font-bold text-xl hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
+        >
+          홈으로 돌아가기
+        </button>
+      </div>
+
       {/* 푸터 */}
       <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="w-full px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-400">© 2024 Flow - 흡연부스 위치 안내 서비스</p>
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 text-center">
+          <p className="text-gray-500 font-medium">© 2024 Flow - 흡연부스 위치 안내 서비스</p>
         </div>
       </footer>
     </div>

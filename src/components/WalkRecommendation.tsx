@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface WalkRecommendationProps {
   onBack: () => void;
@@ -21,6 +22,12 @@ interface Course {
 }
 
 export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecommendationProps) {
+  const navigate = useNavigate();
+  // 스크롤 잠금 해제 지원
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState<"all" | "easy" | "medium" | "hard">("all");
   const [selectedTime, setSelectedTime] = useState<"all" | "morning" | "afternoon" | "evening">("all");
 
@@ -178,7 +185,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
       <div className="w-full w-full mb-8">
         <div className="text-center mb-6">
@@ -231,11 +238,10 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
                   <button
                     key={option.value}
                     onClick={() => setSelectedCategory(option.value as any)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                      selectedCategory === option.value
-                        ? "bg-green-600 text-white shadow-lg"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${selectedCategory === option.value
+                      ? "bg-green-600 text-white shadow-lg"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -256,11 +262,10 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
                   <button
                     key={option.value}
                     onClick={() => setSelectedTime(option.value as any)}
-                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                      selectedTime === option.value
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-all ${selectedTime === option.value
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -361,7 +366,10 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       {/* 하단 버튼 */}
       <div className="mb-8">
         <button
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            navigate("/#section-guide");
+          }}
           className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
         >
           홈으로 돌아가기

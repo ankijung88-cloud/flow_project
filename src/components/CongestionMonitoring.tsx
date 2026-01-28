@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 declare global {
   interface Window {
@@ -26,12 +27,18 @@ interface LocationData {
 }
 
 export default function CongestionMonitoring({ onBack }: CongestionMonitoringProps) {
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapStatus, setMapStatus] = useState<string>("준비 중...");
+
+  // 스크롤 잠금 해제 지원
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
 
   // 1분마다 현재 시각 업데이트
   useEffect(() => {
@@ -260,7 +267,7 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
       <div className="w-full w-full mb-8">
         <div className="text-center mb-6">
@@ -465,7 +472,10 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       {/* 하단 버튼 */}
       <div className="mb-8">
         <button
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            navigate("/#section-guide");
+          }}
           className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
         >
           홈으로 돌아가기

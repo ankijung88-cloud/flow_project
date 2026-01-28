@@ -74,6 +74,11 @@ export default function ServicePage() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
+  // 스크롤 잠금 해제
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+  }, []);
+
   /**
    * 실시간 시간 업데이트
    */
@@ -390,7 +395,7 @@ export default function ServicePage() {
               </p>
             </div>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/#section-guide")}
               className="bg-gray-800 hover:bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
             >
               홈으로

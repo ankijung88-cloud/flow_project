@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Course {
@@ -24,6 +25,7 @@ export default function WalkCourseList({
   onBack: () => void;
   onSelect: (c: Course) => void;
 }) {
+  const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortedCourses, setSortedCourses] = useState<CourseWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -270,8 +272,8 @@ export default function WalkCourseList({
               key={f}
               onClick={() => setFilter(f as typeof filter)}
               className={`px-6 py-2 rounded-full font-bold transition-all ${filter === f
-                  ? "bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-400"
+                ? "bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg"
+                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-green-400"
                 }`}
             >
               {f === "all" ? "전체" : f}
@@ -373,7 +375,10 @@ export default function WalkCourseList({
           className="mt-12 text-center"
         >
           <button
-            onClick={onBack}
+            onClick={() => {
+              onBack();
+              navigate("/#section-guide");
+            }}
             className="px-12 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl"
           >
             돌아가기

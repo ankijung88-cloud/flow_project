@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
 import SmokingMap from "../components/SmokingMap";
 import CrowdMap from "../components/CrowdMap";
@@ -8,6 +8,7 @@ import Hero from "../components/Hero";
 import SmokingBooth from "../components/SmokingBooth";
 import Crowd from "../components/Crowd";
 import GuideVd from "../components/GuidVd";
+import SectionDivider from "../components/SectionDivider";
 import Guide from "../components/Guide";
 import Footer from "../components/footer";
 import ScrollNavigator from "../components/ScrollNavigator";
@@ -42,22 +43,63 @@ export default function Home() {
   const [showCongestionMonitoring, setShowCongestionMonitoring] = useState(false);
   const [showWalkRecommendation, setShowWalkRecommendation] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [isJumping, setIsJumping] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    // RegionDetail은 스크롤 가능하도록 overflow를 hidden으로 설정하지 않음
-    if (showMap || showCrowdMap || showWalkList || selectedCourse || showLocationService || showCongestionMonitoring || showWalkRecommendation) {
+    // 풀스크린으로 표시되는 컴포넌트들이나 모달이 띄워질 때 스크롤 제어
+    // 단, 상세 페이지 성격의 컴포넌트들은 내부 스크롤이 필요하므로 hidden 처리를 신중히 함
+    if (showWalkList || selectedCourse) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [showMap, showCrowdMap, showWalkList, selectedCourse, showLocationService, showCongestionMonitoring, showWalkRecommendation]);
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showWalkList, selectedCourse]);
+
+  // URL 해시(#) 감지 및 해당 섹션으로 스크롤
+  useEffect(() => {
+    const handleHashScroll = (isMount: boolean = false) => {
+      const hash = window.location.hash;
+      if (hash) {
+        if (isMount) setIsJumping(true);
+
+        const targetId = hash.split('#').pop();
+        const element = targetId ? document.getElementById(targetId) : null;
+
+        if (element) {
+          const delay = isMount ? 300 : 0;
+          const behavior = isMount ? "auto" : "smooth";
+
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: behavior as ScrollBehavior, block: "start" });
+            if (isMount) {
+              setTimeout(() => setIsJumping(false), 200);
+            }
+          }, delay);
+        } else {
+          if (isMount) setIsJumping(false);
+        }
+      }
+    };
+
+    handleHashScroll(true);
+    isInitialMount.current = false;
+
+    const onHashChange = () => handleHashScroll(false);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   // 지도를 닫을 때 특정 섹션으로 복귀하는 핸들러
   const handleCloseSmokingMap = () => {
     setShowMap(false);
     setTimeout(() => {
       document
-        .getElementById("section-smoking")
+        .getElementById("section-location")
         ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
@@ -68,6 +110,21 @@ export default function Home() {
     setTimeout(() => {
       document
         .getElementById("section-crowd")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  // 가이드 섹션으로 복귀하는 통합 핸들러 (내부 뷰 전용)
+  const handleBackToGuide = () => {
+    setShowLocationService(false);
+    setShowCongestionMonitoring(false);
+    setShowWalkRecommendation(false);
+    setSelectedRegion(null);
+    setShowWalkList(false);
+
+    setTimeout(() => {
+      document
+        .getElementById("section-guide")
         ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
@@ -83,76 +140,75 @@ export default function Home() {
   if (showWalkList)
     return (
       <WalkCourseList
-        onBack={() => setShowWalkList(false)}
+        onBack={handleBackToGuide}
         onSelect={(course) => setSelectedCourse(course)}
       />
     );
   if (showMap) return <SmokingMap onBack={handleCloseSmokingMap} />;
   if (showCrowdMap) return <CrowdMap onBack={handleCloseCrowdMap} initialKeyword={crowdSearchKeyword} />;
-  if (showLocationService) return <LocationService onBack={() => setShowLocationService(false)} />;
-  if (showCongestionMonitoring) return <CongestionMonitoring onBack={() => setShowCongestionMonitoring(false)} />;
-  if (showWalkRecommendation) return <WalkRecommendation onBack={() => setShowWalkRecommendation(false)} onShowWalkList={() => setShowWalkList(true)} />;
-  if (selectedRegion) return <RegionDetail region={selectedRegion} onBack={() => setSelectedRegion(null)} />;
+  if (showLocationService) return <LocationService onBack={handleBackToGuide} />;
+  if (showCongestionMonitoring) return <CongestionMonitoring onBack={handleBackToGuide} />;
+  if (showWalkRecommendation) return <WalkRecommendation onBack={handleBackToGuide} onShowWalkList={() => setShowWalkList(true)} />;
+  if (selectedRegion) return <RegionDetail region={selectedRegion} onBack={handleBackToGuide} />;
 
   return (
-    <div className="relative w-full min-h-screen bg-white overflow-x-hidden">
+    <div className="relative w-full min-h-screen overflow-x-hidden">
+      {/* Global Fixed Background (Premium Mesh Gradient) */}
+      {/* Global Fixed Background (Dynamic Light/Dark) */}
+      <div className="fixed inset-0 z-[-1] transition-colors duration-500
+        bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-200 via-slate-100 to-teal-200 opacity-80
+        dark:bg-none dark:bg-gradient-to-b dark:from-slate-900 dark:via-[#0B1120] dark:to-black dark:opacity-100"
+      />
+
+      {/* 초기 점프 커튼 (플래시 방지) */}
+      {isJumping && (
+        <div className="fixed inset-0 z-[100] bg-white dark:bg-slate-950 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-gray-500 dark:text-gray-400 font-bold animate-pulse">잠시만 기다려주세요...</p>
+          </div>
+        </div>
+      )}
+
       <main className="w-full">
         {/* Navbar 연동 */}
         <Navbar />
 
         {/* Hero 섹션 - 영상 사이즈에 맞춰 고정 (내부에서 휠 인터랙션 처리) */}
-        <section id="section-hero" style={{ scrollSnapAlign: "start" }} className="relative w-full h-screen">
+        <section id="section-hero" className="relative w-full h-screen">
           <Hero />
+          <SectionDivider type="wave" position="bottom" color="text-gray-100/60 dark:text-slate-900/40" />
         </section>
 
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
-
-        {/* GuideVd 섹션 - 흡연부스 회피 네비게이션 (여기서 Snap을 걸어 히어로 종료 후 정착 지원) */}
-        <section id="section-guidevd" style={{ scrollSnapAlign: "start" }} className="relative w-full px-4 page-section">
+        {/* GuideVd 섹션 - 흡연부스 회피 네비게이션 */}
+        <section id="section-guidevd" className="relative w-full page-section min-h-[600px]">
           <GuideVd />
+          <SectionDivider type="curve" position="bottom" color="text-blue-100/60 dark:text-blue-900/30" />
         </section>
-
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
 
         {/* ServiceVideo 섹션 - 서비스 소개 영상 */}
-        <section id="section-servicevideo" className="relative w-full px-4 page-section">
+        <section id="section-servicevideo" className="relative w-full page-section min-h-[400px]">
           <ServiceVideo />
+          <SectionDivider type="wave" position="bottom" color="text-purple-100/60 dark:text-purple-900/30" />
         </section>
-
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
 
         {/* SmokingBooth 섹션 */}
-        <section id="section-smoking" className="relative w-full px-4 page-section">
+        <section id="section-location" className="relative w-full page-section min-h-[500px]">
           <SmokingBooth onShowMap={() => setShowMap(true)} onShowCrowdMap={() => setShowCrowdMap(true)} />
+          <SectionDivider type="slant" position="bottom" color="text-green-100/60 dark:text-green-900/30" />
         </section>
-
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
 
         {/* Crowd 섹션 */}
-        <section id="section-crowd" className="relative w-full px-4 page-section">
+        <section id="section-crowd" className="relative w-full page-section min-h-[500px]">
           <Crowd onBack={() => { }} onShowRegionDetail={(region: string) => setSelectedRegion(region)} />
+          <SectionDivider type="curve" position="bottom" color="text-indigo-100/60 dark:text-indigo-900/30" />
         </section>
-
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
 
         {/* New Crowd Sibling Section */}
-        <section className="relative w-full px-4 page-section">
+        <section id="section-crowdcontent" className="relative w-full page-section">
           <CrowdContent />
+          <SectionDivider type="slant" position="bottom" color="text-slate-100/60 dark:text-slate-900/30" />
         </section>
-
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
 
         {/* Guide 섹션 */}
         <section id="section-guide" className="relative w-full page-section">
@@ -163,16 +219,13 @@ export default function Home() {
             onWalkRecommendationClick={() => setShowWalkRecommendation(true)}
             onRegionClick={(region) => setSelectedRegion(region)}
           />
+          <SectionDivider type="wave" position="bottom" color="text-indigo-100/60 dark:text-gray-800/40" />
         </section>
 
-        {/* Spacer for 20px gap */}
-        <div className="w-full h-[20px]" />
-        <div className="w-full h-[20px]" />
-
         {/* FAQ 섹션 */}
-        <section id="section-faq" className="relative w-full px-4 page-section">
-          <div className="w-full max-w-4xl mx-auto pt-[32px] pb-[51px] mb-32">
-            <h2 className="text-4xl md:text-5xl font-black text-center relative -top-[50px] mb-[128px] bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <section id="section-faq" className="relative w-full page-section bg-transparent transition-colors duration-500">
+          <div className="w-full max-w-[1400px] mx-auto pt-[32px] pb-[51px] mb-32">
+            <h2 className="text-4xl md:text-5xl font-black text-center relative -top-[50px] mb-[128px] bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
               자주 묻는 질문 (FAQ)
             </h2>
             <div className="space-y-[30px]">
@@ -194,22 +247,23 @@ export default function Home() {
                   a: "Flow는 웹 기반 반응형 서비스로 제공되어, 앱 설치 없이 브라우저에서 바로 모든 기능을 이용할 수 있습니다."
                 }
               ].map((faq, idx) => (
-                <div key={idx} className="bg-white rounded-2xl border-2 border-gray-100 p-8 shadow-md hover:shadow-lg transition-all">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 flex gap-3">
-                    <span className="text-blue-600 font-black">Q.</span>
+                <div key={idx} className="bg-white/80 dark:bg-white/5 backdrop-blur-md rounded-2xl border-2 border-gray-100 dark:border-white/10 p-8 shadow-md hover:shadow-lg transition-all">
+                  <h3 className="text-xl font-bold mb-3 flex gap-3">
+                    <span className="text-blue-600 dark:text-blue-400 font-black">Q.</span>
                     {faq.q}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed font-medium pl-8">
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed font-medium pl-8">
                     {faq.a}
                   </p>
                 </div>
               ))}
             </div>
           </div>
+          <SectionDivider type="slant" position="bottom" color="text-blue-50/60 dark:text-blue-900/30" />
         </section>
 
         {/* Footer 섹션 */}
-        <section id="section-footer" className="relative w-full page-section">
+        <section id="section-footer" className="relative w-full">
           <Footer />
         </section>
 
