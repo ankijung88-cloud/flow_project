@@ -114,7 +114,7 @@ export default function Navbar() {
                   ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
                   : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
                 }
-                z-40 transition-all duration-300
+                z-40
               `}
             >
               {menuItems.map((item, index) => (
