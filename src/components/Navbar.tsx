@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 // 1. 인터페이스에 부모(App.tsx)로부터 받는 함수 타입을 정의합니다.
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
