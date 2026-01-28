@@ -29,8 +29,7 @@ export default function GuideVd() {
   const [nextTurn, setNextTurn] = useState<{ direction: string; distance: number } | null>(null);
   const [error, setError] = useState<string>("");
   const [nearbyBoothsCount, setNearbyBoothsCount] = useState<number>(0);
-  const [, setMapStatus] = useState<string>("준비 중...");
-  const [, setMapError] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
   // 실제 흡연구역 위치 데이터 (지정된 실제 흡연구역)
   const generateSmokingBooths = (): SmokingBooth[] => {
@@ -761,7 +760,7 @@ export default function GuideVd() {
           }
         } catch (e) {
           console.error("Map init error:", e);
-          setMapError("지도 로드에 실패했습니다.");
+          setError("지도 로드에 실패했습니다.");
         }
       });
     };
@@ -1021,6 +1020,11 @@ export default function GuideVd() {
                 <span className="text-xs text-gray-600">안전 경로</span>
               </div>
             </div>
+            {mapStatus !== "완료" && mapStatus !== "완료 (기본 위치)" && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/60 text-white px-4 py-2 rounded-full backdrop-blur-md z-[60] text-sm font-medium">
+                {mapStatus}
+              </div>
+            )}
           </div>
         </div>
 
