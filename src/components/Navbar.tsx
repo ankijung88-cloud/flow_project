@@ -97,12 +97,14 @@ export default function Navbar() {
                 open: {
                   opacity: 1,
                   scale: 1,
+                  x: isMobile ? 0 : "-50%", // 데스크탑에서 수평 중앙 정렬 적용
                   pointerEvents: "auto",
                   transition: { duration: 0.3 }
                 },
                 closed: {
                   opacity: isMobile ? 0 : 1,
                   scale: isMobile ? 0.95 : 1,
+                  x: isMobile ? 0 : "-50%", // 닫혔을 때도 위치는 유지 (개별 아이콘이 움직임)
                   pointerEvents: isMobile ? "none" : "auto",
                   transition: { duration: 0.3 }
                 }
@@ -110,8 +112,8 @@ export default function Navbar() {
               className={`
                 ${isMobile
                   ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
-                  : "flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                } 
+                  : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
+                }
                 z-40 transition-all duration-300
               `}
             >
