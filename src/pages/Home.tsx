@@ -63,6 +63,18 @@ export default function Home() {
   // URL 해시(#) 감지 및 해당 섹션으로 스크롤
   useEffect(() => {
     const handleHashScroll = (isMount: boolean = false) => {
+      // 1. 새로고침(reload) 또는 첫 접속인지 확인
+      const navigationEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+      const isReload = navigationEntries.length > 0 && navigationEntries[0].type === "reload";
+
+      // 2. 만약 새로고침이거나, 마운트 시점에 해시가 없는 순수 첫 진입이라면 최상단으로 강제 이동
+      if (isMount && (isReload || !window.location.hash)) {
+        window.scrollTo(0, 0);
+        setIsJumping(false);
+        isInitialMount.current = false;
+        return;
+      }
+
       const hash = window.location.hash;
       if (hash) {
         if (isMount) setIsJumping(true);
