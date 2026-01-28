@@ -632,257 +632,166 @@ export default function GuideVd() {
   useEffect(() => {
     let intervalId: number | null = null;
 
-    const initMap = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            const initialPosition = { lat: latitude, lng: longitude };
-            setCurrentPosition(initialPosition);
+    // 마커 생성 유틸리티
+    const createMarkers = (map: any, lat: number, lng: number, booths: SmokingBooth[]) => {
+      // 1. 사용자 마커
+      const markerImage = new window.kakao.maps.MarkerImage(
+        `${import.meta.env.BASE_URL}image/user-marker.svg`,
+        new window.kakao.maps.Size(40, 50),
+        { offset: new window.kakao.maps.Point(20, 50) }
+      );
 
-            // 실제 흡연부스 데이터 생성
-            const booths = generateSmokingBooths();
-            setSmokingBooths(booths);
+      const marker = new window.kakao.maps.Marker({
+        position: new window.kakao.maps.LatLng(lat, lng),
+        map: map,
+        image: markerImage,
+        zIndex: 10,
+      });
+      currentMarkerRef.current = marker;
 
-            if (mapRef.current && window.kakao && window.kakao.maps) {
-              setMapStatus("SDK 로드 중...");
-              window.kakao.maps.load(() => {
-                try {
-                  setMapStatus("지도 초기화 중...");
-                  const options = {
-                    center: new window.kakao.maps.LatLng(latitude, longitude),
-                    level: 5, // 레벨을 5로 올려서 더 넓은 영역 표시
-                  };
-                  const map = new window.kakao.maps.Map(mapRef.current!, options);
-                  kakaoMapRef.current = map;
+      // 2. 흡연부스 마커 및 원
+      booths.forEach((booth) => {
+        const circle = new window.kakao.maps.Circle({
+          center: new window.kakao.maps.LatLng(booth.lat, booth.lng),
+          radius: 50,
+          strokeWeight: 2,
+          strokeColor: '#ff6b35',
+          strokeOpacity: 0.6,
+          strokeStyle: 'dashed',
+          fillColor: '#ff6b35',
+          fillOpacity: 0.15,
+        });
+        circle.setMap(map);
 
-                  // 회색 화면 방지를 위한 레이아웃 갱신
-                  setTimeout(() => {
-                    map.relayout();
-                    map.setCenter(new window.kakao.maps.LatLng(latitude, longitude));
-                    setMapStatus("완료");
-                  }, 500);
+        const content = document.createElement('div');
+        content.innerHTML = `
+          <div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 8px rgba(0,0,0,0.3); border: 2px solid #ff6b35;">
+              <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" style="width: 24px; height: 24px; object-fit: contain; mix-blend-mode: multiply; background: transparent;" />
+            </div>
+            <div style="position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff4444; border-radius: 50%; border: 2px solid white; animation: pulse 1.5s infinite;"></div>
+          </div>
+        `;
 
-                  // 줌 컨트롤 비활성화 (마우스 휠 확대/축소 금지)
-                  map.setZoomable(false);
+        const customOverlay = new window.kakao.maps.CustomOverlay({
+          position: new window.kakao.maps.LatLng(booth.lat, booth.lng),
+          content: content,
+          map: map,
+          yAnchor: 0.5,
+          zIndex: 3,
+        });
 
-                  console.log('지도 초기화 완료');
-
-                  // 현재 위치 마커 (3D 남자 캐릭터)
-                  const markerImage = new window.kakao.maps.MarkerImage(
-                    `${import.meta.env.BASE_URL}image/user-marker.svg`,
-                    new window.kakao.maps.Size(40, 50),
-                    {
-                      offset: new window.kakao.maps.Point(20, 50)
-                    }
-                  );
-
-                  const marker = new window.kakao.maps.Marker({
-                    position: new window.kakao.maps.LatLng(latitude, longitude),
-                    map: map,
-                    image: markerImage,
-                  });
-                  currentMarkerRef.current = marker;
-
-                  // 흡연부스 마커 표시 (담배꽁초 아이콘)
-                  console.log(`흡연부스 마커 생성 시작: ${booths.length}개`);
-                  booths.forEach((booth) => {
-                    // 흡연부스 영향 반경 표시 (50m)
-                    const circle = new window.kakao.maps.Circle({
-                      center: new window.kakao.maps.LatLng(booth.lat, booth.lng),
-                      radius: 50, // 50미터 반경
-                      strokeWeight: 2,
-                      strokeColor: '#ff6b35',
-                      strokeOpacity: 0.6,
-                      strokeStyle: 'dashed',
-                      fillColor: '#ff6b35',
-                      fillOpacity: 0.15,
-                    });
-                    circle.setMap(map);
-
-                    // 흡연부스 아이콘 마커 생성 (smokeIcon.png)
-                    const content = document.createElement('div');
-                    content.innerHTML = `
-                    <div style="
-                      position: relative;
-                      width: 40px;
-                      height: 40px;
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                    ">
-                      <div style="
-                        width: 36px;
-                        height: 36px;
-                        background: white;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-                        border: 2px solid #ff6b35;
-                      ">
-                        <img src="${import.meta.env.BASE_URL}image/smoke_icon.png" style="width: 24px; height: 24px; object-fit: contain; mix-blend-mode: multiply; background: transparent;" />
-                      </div>
-                      <div style="
-                        position: absolute;
-                        top: -2px;
-                        right: -2px;
-                        width: 12px;
-                        height: 12px;
-                        background: #ff4444;
-                        border-radius: 50%;
-                        border: 2px solid white;
-                        animation: pulse 1.5s infinite;
-                      "></div>
-                    </div>
-                  `;
-
-                    // CSS 애니메이션 추가
-                    const style = document.createElement('style');
-                    style.textContent = `
-                    @keyframes pulse {
-                      0%, 100% { opacity: 1; transform: scale(1); }
-                      50% { opacity: 0.6; transform: scale(1.1); }
-                    }
-                  `;
-                    if (!document.querySelector('style[data-smoking-animation]')) {
-                      style.setAttribute('data-smoking-animation', 'true');
-                      document.head.appendChild(style);
-                    }
-
-                    const customOverlay = new window.kakao.maps.CustomOverlay({
-                      position: new window.kakao.maps.LatLng(booth.lat, booth.lng),
-                      content: content,
-                      map: map,
-                      yAnchor: 0.5,
-                      zIndex: 3,
-                    });
-
-                    smokingMarkersRef.current.push(customOverlay);
-                    smokingMarkersRef.current.push(circle);
-                  });
-
-                  // 실시간 위치 추적
-                  watchIdRef.current = navigator.geolocation.watchPosition(
-                    (pos) => {
-                      const newLat = pos.coords.latitude;
-                      const newLng = pos.coords.longitude;
-                      const newPosition = { lat: newLat, lng: newLng };
-
-                      setCurrentPosition(newPosition);
-
-                      const newMarkerPosition = new window.kakao.maps.LatLng(newLat, newLng);
-                      marker.setPosition(newMarkerPosition);
-
-                      if (navigationActive) {
-                        map.setCenter(newMarkerPosition);
-                      }
-                    },
-                    (err) => {
-                      console.error("위치 추적 오류:", err);
-                      if (err.code === err.PERMISSION_DENIED) {
-                        setError("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
-                      } else if (err.code === err.POSITION_UNAVAILABLE) {
-                        setError("위치 정보를 사용할 수 없습니다.");
-                      } else if (err.code === err.TIMEOUT) {
-                        setError("위치 요청 시간이 초과되었습니다.");
-                      } else {
-                        setError("위치 추적 중 오류가 발생했습니다.");
-                      }
-                    },
-                    {
-                      enableHighAccuracy: true,
-                      maximumAge: 10000,
-                      timeout: 10000,
-                    }
-                  );
-                } catch (err) {
-                  console.error(err);
-                  setMapError("지도 생성 중 오류가 발생했습니다: " + (err as Error).message);
-                }
-              });
-            }
-          },
-          (err) => {
-            console.error("초기 위치 가져오기 오류:", err);
-            if (err.code === err.TIMEOUT) {
-              console.log("[DEBUG] Geolocation timeout with high accuracy. Retrying with high accuracy disabled...");
-              navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                  const lat = pos.coords.latitude;
-                  const lng = pos.coords.longitude;
-                  setStartPosition({ lat, lng, name: "현재 위치" });
-                  if (window.kakao && window.kakao.maps) {
-                    window.kakao.maps.load(() => {
-                      try {
-                        const container = mapRef.current;
-                        const options = {
-                          center: new window.kakao.maps.LatLng(lat, lng),
-                          level: 3,
-                        };
-                        const map = new window.kakao.maps.Map(container, options);
-                        kakaoMapRef.current = map;
-                        // ... (rest of init logic or trigger refetch)
-                      } catch (e) { console.error(e); }
-                    });
-                  }
-                },
-                (err2) => {
-                  console.error("재시도 위치 가져오기 오류:", err2);
-                  console.log("[DEBUG] Geolocation failed completely. Falling back to default (Seoul)...");
-                  const fallbackLat = 37.5665;
-                  const fallbackLng = 126.978;
-                  setStartPosition({ lat: fallbackLat, lng: fallbackLng, name: "서울 (기본 위치)" });
-
-                  if (window.kakao && window.kakao.maps) {
-                    window.kakao.maps.load(() => {
-                      try {
-                        const container = mapRef.current;
-                        const options = {
-                          center: new window.kakao.maps.LatLng(fallbackLat, fallbackLng),
-                          level: 3,
-                        };
-                        const map = new window.kakao.maps.Map(container, options);
-                        kakaoMapRef.current = map;
-                      } catch (e) { console.error(e); }
-                    });
-                  }
-                },
-                { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
-              );
-            } else if (err.code === err.PERMISSION_DENIED) {
-              setError("위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.");
-            } else {
-              setError("위치 정보를 가져올 수 없습니다. 위치 권한을 허용해주세요.");
-            }
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000, // Timeout을 조금 줄이고 재시도를 유도
-            maximumAge: 0,
-          }
-        );
-      } else {
-        setError("이 브라우저는 위치 서비스를 지원하지 않습니다.");
-      }
+        smokingMarkersRef.current.push(customOverlay);
+        smokingMarkersRef.current.push(circle);
+      });
     };
+
+    const startTracking = (map: any) => {
+      if (watchIdRef.current) return;
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setCurrentPosition({ lat, lng });
+          const movePos = new window.kakao.maps.LatLng(lat, lng);
+          if (currentMarkerRef.current) {
+            currentMarkerRef.current.setPosition(movePos);
+          }
+          if (navigationActive) {
+            map.setCenter(movePos);
+          }
+        },
+        (err) => console.error("Tracking error:", err),
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+      );
+    };
+
+    const initMap = () => {
+      const booths = generateSmokingBooths();
+      setSmokingBooths(booths);
+
+      // 기본 위치 (서울) 설정
+      const defaultLat = 37.5665;
+      const defaultLng = 126.978;
+
+      if (!mapRef.current || !window.kakao || !window.kakao.maps) return;
+
+      window.kakao.maps.load(() => {
+        try {
+          setMapStatus("초기화 중...");
+          const options = {
+            center: new window.kakao.maps.LatLng(defaultLat, defaultLng),
+            level: 5,
+            scrollwheel: false,
+          };
+          const map = new window.kakao.maps.Map(mapRef.current!, options);
+          map.setZoomable(false);
+          kakaoMapRef.current = map;
+
+          // 즉시 마커 생성 (기본 위치 기준)
+          createMarkers(map, defaultLat, defaultLng, booths);
+
+          setTimeout(() => {
+            map.relayout();
+            setMapStatus("위치 동기화 중...");
+          }, 100);
+
+          // 비동기로 실제 위치 가져오기
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords;
+                const newPos = new window.kakao.maps.LatLng(latitude, longitude);
+                setCurrentPosition({ lat: latitude, lng: longitude });
+                map.setCenter(newPos);
+                if (currentMarkerRef.current) {
+                  currentMarkerRef.current.setPosition(newPos);
+                }
+                setMapStatus("완료");
+
+                // 위치 추적 시작
+                startTracking(map);
+              },
+              (err) => {
+                console.warn("Geolocation failed, using default center.", err);
+                setMapStatus("완료 (기본 위치)");
+              },
+              { enableHighAccuracy: true, timeout: 5000, maximumAge: 10000 }
+            );
+          }
+        } catch (e) {
+          console.error("Map init error:", e);
+          setMapError("지도 로드에 실패했습니다.");
+        }
+      });
+    };
+
+    // CSS 애니메이션 추가 (한 번만)
+    if (!document.querySelector('style[data-smoking-animation]')) {
+      const style = document.createElement('style');
+      style.setAttribute('data-smoking-animation', 'true');
+      style.textContent = `
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     if (window.kakao && window.kakao.maps) {
       initMap();
     } else {
-      intervalId = setInterval(() => {
+      intervalId = window.setInterval(() => {
         if (window.kakao && window.kakao.maps) {
-          clearInterval(intervalId!);
+          if (intervalId) clearInterval(intervalId);
           initMap();
         }
       }, 100);
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (intervalId) clearInterval(intervalId);
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
