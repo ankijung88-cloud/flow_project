@@ -6,7 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,11 +73,40 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* 데스크탑 메뉴 */}
-            <ul className="hidden xl:flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap z-40">
-              {menuItems.map((item) => (
-                <li
+            {/* 데스크탑 메뉴 - 이제 상시 노출 및 애니메이션 적용 */}
+            <ul className="flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap z-40">
+              {menuItems.map((item, index) => (
+                <motion.li
                   key={item.name}
+                  initial="open"
+                  animate={menuOpen ? "open" : "closed"}
+                  variants={{
+                    open: {
+                      opacity: 1,
+                      x: 0,
+                      y: 0,
+                      scale: 1,
+                      filter: "blur(0px)",
+                      transition: {
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 25,
+                        delay: index * 0.05
+                      }
+                    },
+                    closed: {
+                      opacity: 0,
+                      x: 450 + (index * 20), // 더 급격하게 이동
+                      y: -60,
+                      scale: 0, // 완전히 사라지게
+                      filter: "blur(12px)",
+                      transition: {
+                        duration: 0.3, // 더 빠르게
+                        ease: [0.32, 0, 0.67, 0], // 진입은 부드럽게 끝은 빠르게 (suck-in)
+                        delay: (menuItems.length - 1 - index) * 0.03
+                      }
+                    }
+                  }}
                   onClick={() => handleScrollToSection(item.target)}
                   className="cursor-pointer hover:text-primary transition font-bold text-2xl text-white"
                 >
@@ -85,7 +114,7 @@ export default function Navbar() {
                     {item.name}
                     <span className="absolute left-0 bottom-0.5 w-full h-[3px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   </span>
-                </li>
+                </motion.li>
               ))}
             </ul>
 
@@ -93,32 +122,7 @@ export default function Navbar() {
             <div className="w-12 h-12"></div>
           </div>
 
-          {/* 메뉴 오버레이 (모바일용 + 데스크탑용) - Still inside nav to scroll with it or absolute position relative to it */}
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute top-full right-0 w-full md:w-80 bg-white/70 backdrop-blur-2xl border border-white/40 shadow-2xl z-[10000] rounded-[30px]"
-              >
-                <ul className="flex flex-col items-center py-8 gap-8">
-                  {menuItems.map((item) => (
-                    <motion.li
-                      key={item.name}
-                      whileHover={{ scale: 1.1, color: "#3B82F6" }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleScrollToSection(item.target)}
-                      className="text-2xl cursor-pointer font-bold text-gray-900 transition-colors drop-shadow-sm"
-                    >
-                      {item.name}
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* 기존 드롭다운 메뉴 삭제됨 */}
         </div>
       </nav>
 
