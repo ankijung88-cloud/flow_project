@@ -90,13 +90,31 @@ export default function Navbar() {
             </div>
 
             {/* 데스크탑/모바일 통합 메뉴 - 조건부 레이아웃 및 애니메이션 */}
-            <ul className={`
-              ${isMobile
-                ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
-                : "flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-              } 
-              z-40 transition-all duration-300
-            `}>
+            <motion.ul
+              initial={isMobile ? "closed" : "open"}
+              animate={menuOpen ? "open" : "closed"}
+              variants={{
+                open: {
+                  opacity: 1,
+                  scale: 1,
+                  pointerEvents: "auto",
+                  transition: { duration: 0.3 }
+                },
+                closed: {
+                  opacity: isMobile ? 0 : 1,
+                  scale: isMobile ? 0.95 : 1,
+                  pointerEvents: isMobile ? "none" : "auto",
+                  transition: { duration: 0.3 }
+                }
+              }}
+              className={`
+                ${isMobile
+                  ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
+                  : "flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+                } 
+                z-40 transition-all duration-300
+              `}
+            >
               {menuItems.map((item, index) => (
                 <motion.li
                   key={item.name}
@@ -143,7 +161,7 @@ export default function Navbar() {
                   </span>
                 </motion.li>
               ))}
-            </ul>
+            </motion.ul>
 
             {/* Right side placeholder to maintain spacing if needed */}
             <div className="w-12 h-12"></div>
