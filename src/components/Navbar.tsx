@@ -6,10 +6,26 @@ import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1280);
+  const [menuOpen, setMenuOpen] = useState(window.innerWidth >= 1280);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1280;
+      setIsMobile(mobile);
+      if (mobile) {
+        setMenuOpen(false);
+      } else {
+        setMenuOpen(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,15 +89,22 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* 데스크탑 메뉴 - 이제 상시 노출 및 애니메이션 적용 */}
-            <ul className="flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap z-40">
+            {/* 데스크탑/모바일 통합 메뉴 - 조건부 레이아웃 및 애니메이션 */}
+            <ul className={`
+              ${isMobile
+                ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
+                : "flex items-center justify-center gap-[150px] absolute left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+              } 
+              z-40 transition-all duration-300
+            `}>
               {menuItems.map((item, index) => (
                 <motion.li
                   key={item.name}
-                  initial="open"
+                  custom={index}
+                  initial={isMobile ? "closed" : "open"}
                   animate={menuOpen ? "open" : "closed"}
                   variants={{
-                    open: {
+                    open: (i: number) => ({
                       opacity: 1,
                       x: 0,
                       y: 0,
@@ -89,30 +112,34 @@ export default function Navbar() {
                       filter: "blur(0px)",
                       transition: {
                         type: "spring",
-                        stiffness: 180, // 강도를 낮춤 (부드럽게)
-                        damping: 24, // 제동을 높임 (덜 튕기게)
-                        delay: index * 0.04 // 딜레이를 약간 줄임 (빠릿하면서 부드럽게)
+                        stiffness: 180,
+                        damping: 24,
+                        delay: i * 0.04
                       }
-                    },
-                    closed: {
+                    }),
+                    closed: (i: number) => ({
                       opacity: 0,
-                      x: 450 + (index * 20), // 더 급격하게 이동
-                      y: -60,
-                      scale: 0, // 완전히 사라지게
+                      // 데스크탑: 중앙에서 우측 버튼으로 / 모바일: 드롭다운 위치에서 위쪽 버튼으로
+                      x: isMobile ? 0 : 600 - (i - 2) * 150,
+                      y: isMobile ? -100 - (i * 50) : 20,
+                      scale: 0,
                       filter: "blur(12px)",
                       transition: {
-                        duration: 0.3, // 더 빠르게
-                        ease: [0.32, 0, 0.67, 0], // 진입은 부드럽게 끝은 빠르게 (suck-in)
-                        delay: (menuItems.length - 1 - index) * 0.03
+                        duration: 0.3,
+                        ease: [0.32, 0, 0.67, 0],
+                        delay: (menuItems.length - 1 - i) * 0.03
                       }
                     }
+                    )
                   }}
                   onClick={() => handleScrollToSection(item.target)}
-                  className="cursor-pointer hover:text-primary transition font-bold text-2xl text-white"
+                  className={`cursor-pointer transition font-bold text-2xl ${isMobile ? "text-white" : "text-white"} hover:text-primary hover:scale-[1.1]`}
                 >
-                  <span className="relative inline-block group transition-transform duration-300 hover:scale-[1.2] hover:z-50">
+                  <span className="relative inline-block group">
                     {item.name}
-                    <span className="absolute left-0 bottom-0.5 w-full h-[3px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    {!isMobile && (
+                      <span className="absolute left-0 bottom-0.5 w-full h-[3px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                    )}
                   </span>
                 </motion.li>
               ))}
