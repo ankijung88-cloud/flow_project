@@ -44,7 +44,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
               <img
                 src={`${import.meta.env.BASE_URL}image/혼잡도모니터링.png`}
                 alt="혼잡도 모니터링 아이콘"
-                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md mix-blend-multiply"
+                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
               />
             </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">혼잡도 모니터링</h3>
@@ -80,7 +80,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
           <div className="grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
             {[
               { name: "서울", image: "image/서울.png", color: "from-red-500/20 to-orange-500/20 border-red-300" },
-              { name: "경기", image: "image/경기.jpg", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
+              { name: "경기", image: "image/경기.png", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
               { name: "인천", image: "image/인천.png", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
               { name: "부산", image: "image/부산.png", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
               { name: "대구", image: "image/대구.png", color: "from-green-500/20 to-lime-500/20 border-green-300" },
@@ -98,7 +98,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
                     <img
                       src={`${import.meta.env.BASE_URL}${region.image}`}
                       alt={`${region.name} 아이콘`}
-                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md mix-blend-multiply"
+                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
                     />
                   </div>
                   <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-lg mb-2">{region.name}</h4>
