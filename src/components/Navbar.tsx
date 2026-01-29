@@ -12,6 +12,19 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isHome = location.pathname === "/";
+  const isHeroMode = isHome && !isScrolled;
+  const useDropdown = !isHeroMode || isMobile;
+
+  // Hero 모드에서 벗어나면 메뉴 닫기 (데스크탑)
+  useEffect(() => {
+    if (!isHeroMode && !isMobile) {
+      setMenuOpen(false);
+    } else if (isHeroMode && !isMobile) {
+      setMenuOpen(true);
+    }
+  }, [isHeroMode, isMobile]);
+
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1280;
@@ -19,7 +32,8 @@ export default function Navbar() {
       if (mobile) {
         setMenuOpen(false);
       } else {
-        setMenuOpen(true);
+        // 리사이즈 시 Hero 모드면 열기, 아니면 닫기
+        setMenuOpen(location.pathname === "/" && window.scrollY <= 50);
       }
     };
 
@@ -91,27 +105,27 @@ export default function Navbar() {
 
             {/* 데스크탑/모바일 통합 메뉴 - 조건부 레이아웃 및 애니메이션 */}
             <motion.ul
-              initial={isMobile ? "closed" : "open"}
+              initial={useDropdown ? "closed" : "open"}
               animate={menuOpen ? "open" : "closed"}
               variants={{
                 open: {
                   opacity: 1,
                   scale: 1,
-                  x: isMobile ? 0 : "-50%", // 데스크탑에서 수평 중앙 정렬 적용
+                  x: useDropdown ? 0 : "-50%", // 데스크탑 Hero 모드에서만 중앙 정렬
                   pointerEvents: "auto",
                   transition: { duration: 0.3 }
                 },
                 closed: {
-                  opacity: isMobile ? 0 : 1,
-                  scale: isMobile ? 0.95 : 1,
-                  x: isMobile ? 0 : "-50%", // 닫혔을 때도 위치는 유지 (개별 아이콘이 움직임)
-                  pointerEvents: isMobile ? "none" : "auto",
+                  opacity: useDropdown ? 0 : 1,
+                  scale: useDropdown ? 0.95 : 1,
+                  x: useDropdown ? 0 : "-50%",
+                  pointerEvents: useDropdown ? "none" : "auto",
                   transition: { duration: 0.3 }
                 }
               }}
               className={`
-                ${isMobile
-                  ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl rounded-[30px]"
+                ${useDropdown
+                  ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-gray-900/90 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
                   : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
                 }
                 z-40
@@ -121,7 +135,7 @@ export default function Navbar() {
                 <motion.li
                   key={item.name}
                   custom={index}
-                  initial={isMobile ? "closed" : "open"}
+                  initial={useDropdown ? "closed" : "open"}
                   animate={menuOpen ? "open" : "closed"}
                   variants={{
                     open: (i: number) => ({
@@ -139,9 +153,9 @@ export default function Navbar() {
                     }),
                     closed: (i: number) => ({
                       opacity: 0,
-                      // 데스크탑: 중앙에서 우측 버튼으로 / 모바일: 드롭다운 위치에서 위쪽 버튼으로
-                      x: isMobile ? 0 : 600 - (i - 2) * 150,
-                      y: isMobile ? -100 - (i * 50) : 20,
+                      // Dropdown 모드: 위쪽으로 사라짐 / Hero 모드: 중앙 버튼으로 모임
+                      x: useDropdown ? 0 : 600 - (i - 2) * 150,
+                      y: useDropdown ? -50 : 20,
                       scale: 0,
                       filter: "blur(12px)",
                       transition: {
@@ -153,7 +167,7 @@ export default function Navbar() {
                     )
                   }}
                   onClick={() => handleScrollToSection(item.target)}
-                  className={`cursor-pointer transition font-bold text-2xl ${isMobile ? "text-white" : "text-white"} hover:text-primary hover:scale-[1.1]`}
+                  className={`cursor-pointer transition font-bold text-2xl ${useDropdown ? "text-white" : "text-white"} hover:text-indigo-400 hover:scale-[1.1]`}
                 >
                   <span className="relative inline-block group">
                     {item.name}
