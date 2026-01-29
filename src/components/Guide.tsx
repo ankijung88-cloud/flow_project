@@ -29,11 +29,11 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onLocationServiceClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
               <img
                 src={`${import.meta.env.BASE_URL}image/위치서비스.png`}
                 alt="위치 서비스 아이콘"
-                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
               />
             </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">위치 서비스</h3>
@@ -46,11 +46,11 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onCongestionMonitoringClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
               <img
                 src={`${import.meta.env.BASE_URL}image/혼잡도모니터링.png`}
                 alt="혼잡도 모니터링 아이콘"
-                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
               />
             </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">혼잡도 모니터링</h3>
@@ -63,11 +63,11 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onWalkRecommendationClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
               <img
                 src={`${import.meta.env.BASE_URL}image/산책코스추천.png`}
                 alt="산책 코스 추천 아이콘"
-                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
               />
             </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">산책 코스 추천</h3>
@@ -106,11 +106,11 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
                 className={`bg-gradient-to-br ${region.color} backdrop-blur-md rounded-2xl p-6 md:p-8 4xl:p-12 border-2 hover:bg-white/30 transition-all duration-300 hover:scale-105 cursor-pointer`}
               >
                 <div className="text-center">
-                  <div className="mb-3 4xl:mb-6 flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+                  <div className="mb-3 4xl:mb-6 flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
                     <img
                       src={`${import.meta.env.BASE_URL}${region.image}`}
                       alt={`${region.name} 아이콘`}
-                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                      className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
                     />
                   </div>
                   <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-lg mb-2">{region.name}</h4>
