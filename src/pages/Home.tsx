@@ -231,8 +231,8 @@ export default function Home() {
 
         {/* FAQ 섹션 */}
         <section id="section-faq" className="relative w-full page-section bg-transparent transition-colors duration-500">
-          <div className="w-full max-w-[1400px] mx-auto pt-[32px] pb-[51px] mb-32">
-            <h2 className="text-4xl md:text-5xl font-black text-center relative -top-[50px] mb-[128px] bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+          <div className="w-full max-w-[1400px] mx-auto pt-[60px] pb-[20px] mb-32 flex flex-col gap-[60px]">
+            <h2 className="text-4xl md:text-5xl font-black text-center bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
               자주 묻는 질문 (FAQ)
             </h2>
             <div className="space-y-[30px]">
