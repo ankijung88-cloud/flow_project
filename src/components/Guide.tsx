@@ -73,14 +73,14 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
 
           <div className="grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
             {[
-              { name: "서울", image: "/image/서울.png", color: "from-red-500/20 to-orange-500/20 border-red-300" },
-              { name: "경기", image: "/image/경기.jpg", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
-              { name: "인천", image: "/image/인천.png", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
-              { name: "부산", image: "/image/부산.png", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
-              { name: "대구", image: "/image/대구.png", color: "from-green-500/20 to-lime-500/20 border-green-300" },
-              { name: "광주", image: "/image/광주.png", color: "from-lime-500/20 to-yellow-500/20 border-lime-300" },
-              { name: "대전", image: "/image/대전.png", color: "from-yellow-500/20 to-amber-500/20 border-yellow-300" },
-              { name: "제주", image: "/image/제주.png", color: "from-pink-500/20 to-rose-500/20 border-pink-300" },
+              { name: "서울", image: "image/서울.png", color: "from-red-500/20 to-orange-500/20 border-red-300" },
+              { name: "경기", image: "image/경기.jpg", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
+              { name: "인천", image: "image/인천.png", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
+              { name: "부산", image: "image/부산.png", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
+              { name: "대구", image: "image/대구.png", color: "from-green-500/20 to-lime-500/20 border-green-300" },
+              { name: "광주", image: "image/광주.png", color: "from-lime-500/20 to-yellow-500/20 border-lime-300" },
+              { name: "대전", image: "image/대전.png", color: "from-yellow-500/20 to-amber-500/20 border-yellow-300" },
+              { name: "제주", image: "image/제주.png", color: "from-pink-500/20 to-rose-500/20 border-pink-300" },
             ].map((region) => (
               <div
                 key={region.name}
@@ -90,7 +90,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
                 <div className="text-center">
                   <div className="mb-3 4xl:mb-6 flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
                     <img
-                      src={region.image}
+                      src={`${import.meta.env.BASE_URL}${region.image}`}
                       alt={`${region.name} 아이콘`}
                       className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
                     />
