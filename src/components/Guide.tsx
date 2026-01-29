@@ -89,35 +89,44 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
-            {[
-              { name: "서울", image: "image/서울.png", color: "from-red-500/20 to-orange-500/20 border-red-300" },
-              { name: "경기", image: "image/경기.png", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
-              { name: "인천", image: "image/인천.png", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
-              { name: "부산", image: "image/부산.png", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
-              { name: "대구", image: "image/대구.png", color: "from-green-500/20 to-lime-500/20 border-green-300" },
-              { name: "광주", image: "image/광주.png", color: "from-lime-500/20 to-yellow-500/20 border-lime-300" },
-              { name: "대전", image: "image/대전.png", color: "from-yellow-500/20 to-amber-500/20 border-yellow-300" },
-              { name: "제주", image: "image/제주.png", color: "from-pink-500/20 to-rose-500/20 border-pink-300" },
-            ].map((region) => (
-              <div
-                key={region.name}
-                onClick={() => onRegionClick(region.name)}
-                className={`bg-gradient-to-br ${region.color} backdrop-blur-md rounded-2xl p-6 md:p-8 4xl:p-12 border-2 hover:bg-white/30 transition-all duration-300 hover:scale-105 cursor-pointer`}
-              >
-                <div className="text-center">
-                  <div className="mb-3 4xl:mb-6 flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
-                    <img
-                      src={`${import.meta.env.BASE_URL}${region.image}`}
-                      alt={`${region.name} 아이콘`}
-                      className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
-                    />
+          {/* Unified Flow Background Container */}
+          <div className="relative rounded-[40px] p-8 md:p-12 overflow-hidden bg-gradient-to-br from-emerald-50/80 via-cyan-50/80 to-blue-50/80 dark:from-emerald-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 shadow-xl border border-white/40 dark:border-white/5">
+            {/* Decorative Flow Patterns (Air/Wave effect) */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+              <div className="absolute top-[-50%] left-[-20%] w-[150%] h-[150%] bg-gradient-to-r from-transparent via-white/40 to-transparent rotate-45 blur-3xl opacity-50 dark:opacity-10 animate-pulse" style={{ animationDuration: '8s' }} />
+              <div className="absolute bottom-[-50%] right-[-20%] w-[150%] h-[150%] bg-gradient-to-l from-transparent via-blue-100/40 to-transparent rotate-45 blur-3xl opacity-50 dark:opacity-10" />
+            </div>
+
+            <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
+              {[
+                { name: "서울", image: "image/서울.png" },
+                { name: "경기", image: "image/경기.png" },
+                { name: "인천", image: "image/인천.png" },
+                { name: "부산", image: "image/부산.png" },
+                { name: "대구", image: "image/대구.png" },
+                { name: "광주", image: "image/광주.png" },
+                { name: "대전", image: "image/대전.png" },
+                { name: "제주", image: "image/제주.png" },
+              ].map((region) => (
+                <div
+                  key={region.name}
+                  onClick={() => onRegionClick(region.name)}
+                  className="bg-white/30 dark:bg-black/20 backdrop-blur-md rounded-2xl p-6 md:p-8 4xl:p-12 border border-white/50 dark:border-white/10 shadow-sm hover:shadow-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 cursor-pointer group"
+                >
+                  <div className="text-center">
+                    <div className="mb-3 4xl:mb-6 flex justify-center items-center h-24 md:h-32 4xl:h-48 5xl:h-56">
+                      <img
+                        src={`${import.meta.env.BASE_URL}${region.image}`}
+                        alt={`${region.name} 아이콘`}
+                        className="w-20 h-20 md:w-28 md:h-28 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                    <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-sm mb-2">{region.name}</h4>
+                    <p className="text-xs md:text-sm 4xl:text-xl 5xl:text-2xl text-gray-700 dark:text-gray-300 mt-2 4xl:mt-4 opacity-80 group-hover:opacity-100 transition-opacity">클릭하여 상세보기</p>
                   </div>
-                  <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-lg mb-2">{region.name}</h4>
-                  <p className="text-xs md:text-sm 4xl:text-xl 5xl:text-2xl text-gray-700 dark:text-gray-200 mt-2 4xl:mt-4">클릭하여 상세보기</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
