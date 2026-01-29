@@ -283,7 +283,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-screen min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-center w-full max-w-[1440px] mx-auto min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
       {/* 1. 상단 검색 바 영역 (지도 프레임 밖) */}
       <div className="w-full mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
@@ -420,7 +420,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
       <div className="mt-4 sm:mt-6 flex justify-center">
         <button
           onClick={onBack}
-          className="bg-gray-900 hover:bg-black text-white px-8 sm:px-10 py-2.5 sm:py-3 rounded-full shadow-lg transition-transform active:scale-95 text-sm sm:text-base"
+          className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 sm:px-10 py-2.5 sm:py-3 rounded-full shadow-lg transition-transform active:scale-95 text-sm sm:text-base hover:from-blue-700 hover:to-green-700"
         >
           홈으로 돌아가기
         </button>
