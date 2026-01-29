@@ -13,7 +13,7 @@
 
 /* Restore necessary paddings */
 html {
-  scroll-snap-type: y mandatory !important;
+  /* scroll-snap-type: y mandatory !important; REMOVED to fix flicker */
   scroll-behavior: smooth !important;
   height: 100%;
 }
