@@ -14,7 +14,7 @@
 /* Restore necessary paddings */
 html {
   /* scroll-snap-type: y mandatory !important; REMOVED to fix flicker */
-  scroll-behavior: smooth !important;
+  /* scroll-behavior: smooth !important; REMOVED to fix unnatural scroll */
   height: 100%;
 }
 
