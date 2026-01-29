@@ -27,7 +27,7 @@ export default function Footer() {
           {/* SERVICE */}
           <div>
             <h4 className="text-white font-semibold mb-2 text-sm">서비스</h4>
-            <ul className="space-y-1 text-xs">
+            <ul className="space-y-3 text-xs">
               <li>
                 <a href="#" className="text-blue-500 hover:text-blue-400 transition">
                   서비스 소개
@@ -49,7 +49,7 @@ export default function Footer() {
           {/* SUPPORT */}
           <div>
             <h4 className="text-white font-semibold mb-2 text-sm">고객지원</h4>
-            <ul className="space-y-1 text-xs">
+            <ul className="space-y-3 text-xs">
               <li>
                 <a href="#" className="text-blue-500 hover:text-blue-400 transition">
                   FAQ
@@ -71,7 +71,7 @@ export default function Footer() {
           {/* CONTACT */}
           <div>
             <h4 className="text-white font-semibold mb-2 text-sm">문의</h4>
-            <ul className="space-y-1 text-xs">
+            <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-2">
                 <span className="text-pink-500">📞</span> 1588-0000
               </li>
