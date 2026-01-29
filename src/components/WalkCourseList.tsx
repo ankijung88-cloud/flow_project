@@ -26,6 +26,10 @@ export default function WalkCourseList({
   onSelect: (c: Course) => void;
 }) {
   const navigate = useNavigate();
+  // 스크롤 초기화
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortedCourses, setSortedCourses] = useState<CourseWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -242,7 +246,7 @@ export default function WalkCourseList({
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-green-50 via-white to-blue-50 z-[9999] overflow-y-auto overflow-x-hidden">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 헤더 */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -379,7 +383,7 @@ export default function WalkCourseList({
               onBack();
               navigate("/#section-guide");
             }}
-            className="px-12 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl"
+            className="px-12 py-4 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full font-bold text-lg hover:from-blue-700 hover:to-green-700 transition-all shadow-xl hover:shadow-2xl"
           >
             돌아가기
           </button>

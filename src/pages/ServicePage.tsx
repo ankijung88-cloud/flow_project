@@ -74,9 +74,10 @@ export default function ServicePage() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapStatus, setMapStatus] = useState<string>("준비 중...");
 
-  // 스크롤 잠금 해제
+  // 스크롤 잠금 해제 & 최상단 이동
   useEffect(() => {
     document.body.style.overflow = "auto";
+    window.scrollTo(0, 0);
   }, []);
 
   /**
@@ -380,7 +381,7 @@ export default function ServicePage() {
   };
 
   return (
-    <div className="flex flex-col w-screen h-screen min-h-screen bg-gradient-to-br from-blue-50 to-green-50 overflow-x-hidden overflow-y-auto">
+    <div className="flex flex-col w-full max-w-[1440px] mx-auto h-screen min-h-screen bg-gradient-to-br from-blue-50 to-green-50 overflow-x-hidden overflow-y-auto">
       {/* ========== 섹션 1: 헤더 및 검색 영역 ========== */}
       <section className="w-full px-4 py-6 md:px-8 lg:px-16">
         {/* 상단 헤더 */}
@@ -396,7 +397,7 @@ export default function ServicePage() {
             </div>
             <button
               onClick={() => navigate("/#section-guide")}
-              className="bg-gray-800 hover:bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
+              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
             >
               홈으로
             </button>

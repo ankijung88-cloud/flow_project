@@ -26,6 +26,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
   // 스크롤 잠금 해제 지원
   useEffect(() => {
     document.body.style.overflow = "auto";
+    window.scrollTo(0, 0);
   }, []);
 
   const [selectedCategory, setSelectedCategory] = useState<"all" | "easy" | "medium" | "hard">("all");
@@ -364,13 +365,13 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       </div>
 
       {/* 하단 버튼 */}
-      <div className="w-full max-w-7xl mb-8">
+      <div className="w-full max-w-[1440px] mb-8">
         <button
           onClick={() => {
             onBack();
             navigate("/#section-guide");
           }}
-          className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+          className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-blue-700 hover:to-green-700 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
         >
           홈으로 돌아가기
         </button>

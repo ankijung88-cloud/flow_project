@@ -31,6 +31,10 @@ interface LocationData {
 
 export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   const navigate = useNavigate();
+  // 스크롤 초기화
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [currentTime, setCurrentTime] = useState(new Date());
   const mapContainerRef1 = useRef<HTMLDivElement>(null);
   const mapContainerRef2 = useRef<HTMLDivElement>(null);
@@ -471,7 +475,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
   return (
     <div className="flex flex-col items-center justify-start w-full min-h-screen bg-transparent transition-colors duration-500 overflow-y-auto">
       {/* 헤더 */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
             🏙️ {region} 지역 정보
@@ -483,7 +487,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       </div>
 
       {/* 요약 통계 */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mb-8">
+      <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
             <p className="text-sm font-semibold mb-2">흡연부스</p>
@@ -501,7 +505,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       </div>
 
       {/* 지도 섹션 - 가로 배치 */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mb-12">
+      <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 mb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 흡연부스 지도 섹션 */}
           <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-200 p-5">
@@ -646,7 +650,7 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       </div>
 
       {/* 추천 산책코스 섹션 */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mb-12">
+      <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 mb-12">
         <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6">
           <h2 className="text-3xl font-black text-gray-900 mb-4">🚶 {region} 추천 산책코스</h2>
           <p className="text-gray-600 mb-6">
@@ -688,14 +692,14 @@ export default function RegionDetail({ region, onBack }: RegionDetailProps) {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 pb-12">
         <div className="flex justify-center">
           <button
             onClick={() => {
               onBack();
               navigate("/#section-guide");
             }}
-            className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+            className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-10 py-3 rounded-full font-bold text-lg hover:from-blue-700 hover:to-green-700 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
           >
             홈으로 돌아가기
           </button>
