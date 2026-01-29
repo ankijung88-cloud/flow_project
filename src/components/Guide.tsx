@@ -29,7 +29,13 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onLocationServiceClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="text-5xl 4xl:text-7xl 5xl:text-8xl mb-6 4xl:mb-10 text-center">🗺️</div>
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+              <img
+                src={`${import.meta.env.BASE_URL}image/위치서비스.png`}
+                alt="위치 서비스 아이콘"
+                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+              />
+            </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">위치 서비스</h3>
             <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
               전국 300개 이상의 흡연부스 위치를 실시간으로 확인하고 가장 가까운 곳을 찾아보세요
@@ -57,7 +63,13 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onWalkRecommendationClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="text-5xl 4xl:text-7xl 5xl:text-8xl mb-6 4xl:mb-10 text-center">🚶</div>
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+              <img
+                src={`${import.meta.env.BASE_URL}image/산책코스추천.png`}
+                alt="산책 코스 추천 아이콘"
+                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+              />
+            </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">산책 코스 추천</h3>
             <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
               건강하고 쾌적한 산책 코스를 추천받아 여유로운 시간을 보내세요
