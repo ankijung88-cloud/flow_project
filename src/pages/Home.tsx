@@ -165,12 +165,7 @@ export default function Home() {
 
   return (
     <div className="relative w-full min-h-screen overflow-x-hidden">
-      {/* Global Fixed Background (Premium Mesh Gradient) */}
-      {/* Global Fixed Background (Dynamic Light/Dark) */}
-      <div className="fixed inset-0 z-[-1] transition-colors duration-500
-        bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-200 via-slate-100 to-teal-200 opacity-80
-        dark:bg-none dark:bg-gradient-to-b dark:from-slate-900 dark:via-[#0B1120] dark:to-black dark:opacity-100"
-      />
+
 
       {/* 초기 점프 커튼 (플래시 방지) */}
       {isJumping && (

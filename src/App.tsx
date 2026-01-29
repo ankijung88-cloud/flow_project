@@ -3,14 +3,18 @@ import Home from "./pages/Home";
 import ServicePage from "./pages/ServicePage";
 import SmokingBoothDetailPage from "./pages/SmokingBoothDetailPage";
 import CrowdDetailPage from "./pages/CrowdDetailPage";
+import FlowBackground from "./components/FlowBackground";
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/service" element={<ServicePage />} />
-      <Route path="/smoking-booth" element={<SmokingBoothDetailPage />} />
-      <Route path="/crowd" element={<CrowdDetailPage />} />
-    </Routes>
+    <>
+      <FlowBackground />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/service" element={<ServicePage />} />
+        <Route path="/smoking-booth" element={<SmokingBoothDetailPage />} />
+        <Route path="/crowd" element={<CrowdDetailPage />} />
+      </Routes>
+    </>
   );
 }
