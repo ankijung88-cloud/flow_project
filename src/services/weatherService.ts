@@ -1,11 +1,11 @@
-// Korea Meteorological Administration API Service
-const API_KEY = "ymoHff2O+GPqWZ9psSt2T2+oloa34elsshwdTp4esIJzGE8S8FsAIkVsK+0F7D7LG0lJ+cH784/fl5mfKxoWMg==";
-const BASE_URL = "https://apis.data.go.kr/1360000/MidFcstInfoService";
+// Open-Meteo Free API Service
+const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
+const AIR_QUALITY_API_URL = "https://air-quality-api.open-meteo.com/v1/air-quality";
 
 export interface WeatherData {
   airQuality: {
     level: string;
-    value: number;
+    value: number; // PM10 기준
     color: string;
   };
   weather: {
@@ -17,92 +17,100 @@ export interface WeatherData {
   windSpeed: number;
 }
 
-// 대기질 데이터 가져오기 (임시 - 추후 실제 API로 대체)
-export async function getAirQuality(): Promise<{ level: string; value: number; color: string }> {
-  // TODO: 실제 대기질 API 연동
-  // 현재는 더미 데이터 반환
-  return {
-    level: "좋음",
-    value: Math.floor(Math.random() * 50) + 10, // 10-60 랜덤
-    color: "#10B981",
-  };
+// WMO Weather Code Mapping
+function getWeatherCondition(code: number): { condition: string; icon: string } {
+  // 0: Clear
+  if (code === 0) return { condition: "맑음", icon: "☀️" };
+  // 1-3: Partly Cloudy
+  if (code >= 1 && code <= 3) return { condition: "구름 조금", icon: "⛅" };
+  // 45, 48: Fog
+  if (code === 45 || code === 48) return { condition: "안개", icon: "🌫️" };
+  // 51-55: Drizzle
+  if (code >= 51 && code <= 55) return { condition: "이슬비", icon: "🌦️" };
+  // 61-65: Rain
+  if (code >= 61 && code <= 65) return { condition: "비", icon: "🌧️" };
+  // 66-67: Freezing Rain
+  if (code === 66 || code === 67) return { condition: "진눈깨비", icon: "🌨️" };
+  // 71-75: Snow
+  if (code >= 71 && code <= 75) return { condition: "눈", icon: "❄️" };
+  // 77: Snow grains
+  if (code === 77) return { condition: "눈 날림", icon: "❄️" };
+  // 80-82: Rain showers
+  if (code >= 80 && code <= 82) return { condition: "소나기", icon: "☔" };
+  // 85-86: Snow showers
+  if (code >= 85 && code <= 86) return { condition: "눈 소나기", icon: "❄️" };
+  // 95-99: Thunderstorm
+  if (code >= 95 && code <= 99) return { condition: "뇌우", icon: "⚡" };
+
+  return { condition: "맑음", icon: "☀️" };
 }
 
-// 중기예보 데이터 가져오기
-export async function getMidTermForecast(regId: string = "11B00000"): Promise<unknown> {
+// Korea PM10 Standard Mapping
+function getAirQualityLevel(pm10: number): { level: string; color: string } {
+  if (pm10 <= 30) return { level: "좋음", color: "#10B981" }; // Green
+  if (pm10 <= 80) return { level: "보통", color: "#FBBF24" }; // Yellow
+  if (pm10 <= 150) return { level: "나쁨", color: "#F97316" }; // Orange
+  return { level: "매우 나쁨", color: "#EF4444" }; // Red
+}
+
+// Fetch Real Environment Data
+export async function getEnvironmentData(lat: number = 37.5665, lng: number = 126.9780): Promise<WeatherData> {
   try {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    const hour = String(today.getHours()).padStart(2, "0");
-    const minute = String(today.getMinutes()).padStart(2, "0");
+    // 1. Fetch Weather
+    const weatherRes = await fetch(
+      `${WEATHER_API_URL}?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`
+    );
+    const weatherJson = await weatherRes.json();
 
-    const tmFc = `${year}${month}${day}${hour}${minute}`;
+    // 2. Fetch Air Quality
+    const airRes = await fetch(
+      `${AIR_QUALITY_API_URL}?latitude=${lat}&longitude=${lng}&current=pm10,pm2_5`
+    );
+    const airJson = await airRes.json();
 
-    const url = `${BASE_URL}/getMidFcst?serviceKey=${encodeURIComponent(API_KEY)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${regId}&tmFc=${tmFc}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
+    if (!weatherRes.ok || !airRes.ok) {
+      throw new Error("API response error");
     }
 
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Weather API error:", error);
-    return null;
-  }
-}
+    // Process Weather
+    const current = weatherJson.current;
+    const weatherInfo = getWeatherCondition(current.weather_code);
 
-// 날씨 아이콘 매핑
-function getWeatherIcon(condition: string): string {
-  const iconMap: { [key: string]: string } = {
-    맑음: "☀️",
-    구름: "☁️",
-    흐림: "☁️",
-    비: "🌧️",
-    눈: "❄️",
-    default: "☀️",
-  };
-
-  return iconMap[condition] || iconMap.default;
-}
-
-// 환경 데이터 종합 가져오기
-export async function getEnvironmentData(): Promise<WeatherData> {
-  try {
-    // 대기질 데이터
-    const airQuality = await getAirQuality();
-
-    // 중기예보 데이터 (서울 기준)
-    // TODO: 중기예보 API 응답 파싱하여 실제 데이터 사용
-    await getMidTermForecast("11B00000");
-
-    // 임시 날씨 데이터 (API 응답 구조에 따라 수정 필요)
-    const weatherCondition = "맑음";
-    const temperature = Math.floor(Math.random() * 15) + 10; // 10-25도 랜덤
+    // Process Air Quality (PM10)
+    const pm10 = airJson.current.pm10;
+    const airInfo = getAirQualityLevel(pm10);
 
     return {
-      airQuality,
-      weather: {
-        condition: weatherCondition,
-        temp: temperature,
-        icon: getWeatherIcon(weatherCondition),
+      airQuality: {
+        level: airInfo.level,
+        value: pm10,
+        color: airInfo.color,
       },
-      humidity: Math.floor(Math.random() * 30) + 40, // 40-70% 랜덤
-      windSpeed: Math.random() * 3 + 1, // 1-4 m/s 랜덤
+      weather: {
+        condition: weatherInfo.condition,
+        temp: Math.round(current.temperature_2m),
+        icon: weatherInfo.icon,
+      },
+      humidity: current.relative_humidity_2m,
+      windSpeed: current.wind_speed_10m,
     };
-  } catch (error) {
-    console.error("Failed to fetch environment data:", error);
 
-    // 에러 발생 시 기본값 반환
+  } catch (error) {
+    console.warn("Failed to fetch real data, using fallback:", error);
+    // Fallback Mock Data
     return {
-      airQuality: { level: "보통", value: 50, color: "#FBBF24" },
-      weather: { condition: "맑음", temp: 18, icon: "☀️" },
-      humidity: 45,
-      windSpeed: 2.3,
+      airQuality: { level: "보통", value: 45, color: "#FBBF24" },
+      weather: { condition: "맑음", temp: 20, icon: "☀️" },
+      humidity: 50,
+      windSpeed: 2.5,
     };
   }
+}
+
+// Deprecated functions kept for compatibility if imported elsewhere, but redirecting to new logic or mock
+export async function getAirQuality() {
+  return { level: "보통", value: 45, color: "#FBBF24" };
+}
+export async function getMidTermForecast() {
+  return null;
 }
