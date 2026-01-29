@@ -853,7 +853,7 @@ export default function CrowdMap({ onBack, initialKeyword }: CrowdMapProps) {
       {/* 홈으로 돌아가기 버튼 */}
       <button
         onClick={onBack}
-        className="mt-8 bg-gradient-to-r from-gray-800 to-gray-900 text-white px-12 py-4 rounded-full text-lg font-bold hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+        className="mt-8 bg-gradient-to-r from-blue-600 to-green-600 text-white px-12 py-4 rounded-full text-lg font-bold hover:from-blue-700 hover:to-green-700 transition-all shadow-xl hover:shadow-2xl hover:scale-105"
       >
         🏠 홈으로 돌아가기
       </button>
