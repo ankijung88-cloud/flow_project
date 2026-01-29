@@ -92,7 +92,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
                     <img
                       src={`${import.meta.env.BASE_URL}${region.image}`}
                       alt={`${region.name} 아이콘`}
-                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md mix-blend-multiply"
                     />
                   </div>
                   <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-lg mb-2">{region.name}</h4>
