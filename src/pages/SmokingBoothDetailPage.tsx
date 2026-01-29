@@ -246,7 +246,7 @@ export default function SmokingBoothDetailPage() {
     <div className="w-full min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 overflow-x-hidden transition-colors duration-500">
       {/* 헤더 */}
       <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100 dark:border-slate-800 transition-colors duration-300">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 py-4">
+        <div className="w-full max-w-[1440px] mx-auto px-6 md:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -271,7 +271,7 @@ export default function SmokingBoothDetailPage() {
         </div>
       </header>
 
-      <main className="w-full max-w-7xl mx-auto px-6 md:px-12 py-8">
+      <main className="w-full max-w-[1440px] mx-auto px-6 md:px-12 py-8">
         {/* 실시간 표시 (모바일) */}
         <FadeInSection className="md:hidden mb-6">
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-2xl text-center">
@@ -531,7 +531,7 @@ export default function SmokingBoothDetailPage() {
       <div className="w-full flex justify-center mt-12 mb-16 px-4">
         <button
           onClick={() => navigate("/#section-location")}
-          className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-12 py-4 rounded-full font-bold text-xl hover:from-gray-900 hover:to-black transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
+          className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-12 py-4 rounded-full font-bold text-xl hover:from-blue-700 hover:to-green-700 transition-all shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95"
         >
           홈으로 돌아가기
         </button>
@@ -539,7 +539,7 @@ export default function SmokingBoothDetailPage() {
 
       {/* 푸터 */}
       <footer className="bg-gray-900 text-white py-8 mt-16">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-12 text-center">
+        <div className="w-full max-w-[1440px] mx-auto px-6 md:px-12 text-center">
           <p className="text-gray-500 font-medium">© 2024 Flow - 흡연부스 위치 안내 서비스</p>
         </div>
       </footer>
