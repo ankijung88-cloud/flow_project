@@ -138,7 +138,7 @@ export default function Navbar() {
         className={`
                 ${useDropdown
             ? "flex flex-col items-center py-6 gap-6 fixed top-[100px] right-8 w-64 bg-gray-900/95 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
-            : "flex items-center justify-center gap-[150px] absolute top-[60px] left-1/2 whitespace-nowrap"
+            : "flex items-center justify-center gap-[150px] absolute top-[55px] left-1/2 whitespace-nowrap"
           }
                 z-[99999]
               `}
