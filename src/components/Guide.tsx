@@ -73,14 +73,14 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
 
           <div className="grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
             {[
-              { name: "서울", emoji: "🏙️", color: "from-red-500/20 to-orange-500/20 border-red-300" },
-              { name: "경기", emoji: "🌆", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
-              { name: "인천", emoji: "⚓", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
-              { name: "부산", emoji: "🏖️", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
-              { name: "대구", emoji: "🏔️", color: "from-green-500/20 to-lime-500/20 border-green-300" },
-              { name: "광주", emoji: "🌳", color: "from-lime-500/20 to-yellow-500/20 border-lime-300" },
-              { name: "대전", emoji: "🏛️", color: "from-yellow-500/20 to-amber-500/20 border-yellow-300" },
-              { name: "제주", emoji: "🌺", color: "from-pink-500/20 to-rose-500/20 border-pink-300" },
+              { name: "서울", image: "/image/서울.png", color: "from-red-500/20 to-orange-500/20 border-red-300" },
+              { name: "경기", image: "/image/경기.jpg", color: "from-blue-500/20 to-cyan-500/20 border-blue-300" },
+              { name: "인천", image: "/image/인천.png", color: "from-cyan-500/20 to-teal-500/20 border-cyan-300" },
+              { name: "부산", image: "/image/부산.png", color: "from-teal-500/20 to-green-500/20 border-teal-300" },
+              { name: "대구", image: "/image/대구.png", color: "from-green-500/20 to-lime-500/20 border-green-300" },
+              { name: "광주", image: "/image/광주.png", color: "from-lime-500/20 to-yellow-500/20 border-lime-300" },
+              { name: "대전", image: "/image/대전.png", color: "from-yellow-500/20 to-amber-500/20 border-yellow-300" },
+              { name: "제주", image: "/image/제주.png", color: "from-pink-500/20 to-rose-500/20 border-pink-300" },
             ].map((region) => (
               <div
                 key={region.name}
@@ -88,7 +88,13 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
                 className={`bg-gradient-to-br ${region.color} backdrop-blur-md rounded-2xl p-6 md:p-8 4xl:p-12 border-2 hover:bg-white/30 transition-all duration-300 hover:scale-105 cursor-pointer`}
               >
                 <div className="text-center">
-                  <div className="text-4xl md:text-5xl 4xl:text-7xl 5xl:text-8xl mb-3 4xl:mb-6">{region.emoji}</div>
+                  <div className="mb-3 4xl:mb-6 flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+                    <img
+                      src={region.image}
+                      alt={`${region.name} 아이콘`}
+                      className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md"
+                    />
+                  </div>
                   <h4 className="text-xl md:text-2xl 4xl:text-4xl 5xl:text-5xl font-black text-gray-900 dark:text-white drop-shadow-lg mb-2">{region.name}</h4>
                   <p className="text-xs md:text-sm 4xl:text-xl 5xl:text-2xl text-gray-700 dark:text-gray-200 mt-2 4xl:mt-4">클릭하여 상세보기</p>
                 </div>
