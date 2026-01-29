@@ -381,209 +381,213 @@ export default function ServicePage() {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[1440px] mx-auto h-screen min-h-screen bg-gradient-to-br from-blue-50 to-green-50 overflow-x-hidden overflow-y-auto">
+    <div className="flex flex-col w-full max-w-[1920px] mx-auto h-screen min-h-screen bg-gradient-to-br from-blue-50 to-green-50 overflow-x-hidden overflow-y-auto">
       {/* ========== 섹션 1: 헤더 및 검색 영역 ========== */}
       <section className="w-full px-4 py-6 md:px-8 lg:px-16">
-        {/* 상단 헤더 */}
-        <MergeAnimation direction="left" className="mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                흡연부스 회피 네비게이션
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-2">
-                A* 알고리즘 기반 지능형 경로 탐색 시스템
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/#section-guide")}
-              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
-            >
-              홈으로
-            </button>
-          </div>
-        </MergeAnimation>
-
-        {/* 실시간 정보 카드 */}
-        <MergeAnimation direction="right" delay={0.1} className="mb-6">
-          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-              <div className="text-center sm:text-left">
-                <p className="text-xs sm:text-sm text-gray-500">실시간 정보</p>
-                <p className="text-lg sm:text-xl font-bold text-gray-800">
-                  {currentTime.toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    weekday: "long",
-                  })}
-                </p>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                  {currentTime.toLocaleTimeString("ko-KR")}
+        <div className="w-full max-w-[1400px] mx-auto">
+          {/* 상단 헤더 */}
+          <MergeAnimation direction="left" className="mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                  흡연부스 회피 네비게이션
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-2">
+                  A* 알고리즘 기반 지능형 경로 탐색 시스템
                 </p>
               </div>
-              {environmentData && (
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-500 mb-1">미세먼지</p>
-                    <p className="text-lg sm:text-2xl font-bold text-blue-600">
-                      {environmentData.airQuality.value}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {environmentData.airQuality.level}
-                    </p>
-                  </div>
-                  <div className="border-x border-gray-200 px-4">
-                    <p className="text-xs sm:text-sm text-gray-500 mb-1">날씨</p>
-                    <p className="text-lg sm:text-2xl font-bold text-green-600">
-                      {environmentData.weather.condition}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm text-gray-500 mb-1">기온</p>
-                    <p className="text-lg sm:text-2xl font-bold text-orange-600">
-                      {environmentData.weather.temp}°C
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </MergeAnimation>
-
-        {/* 검색 폼 */}
-        <MergeAnimation direction="left" delay={0.2} className="mb-6">
-          <form
-            onSubmit={handleSearch}
-            className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="출발지 (비워두면 현재 위치)"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-                  value={startKeyword}
-                  onChange={(e) => setStartKeyword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={handleUseCurrentLocation}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:text-blue-800"
-                >
-                  현재 위치
-                </button>
-              </div>
-              <input
-                type="text"
-                placeholder="목적지 (전국 어디든 검색 가능)"
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
-                value={destKeyword}
-                onChange={(e) => setDestKeyword(e.target.value)}
-              />
               <button
-                type="submit"
-                className="lg:col-span-2 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all text-sm sm:text-base"
+                onClick={() => navigate("/#section-guide")}
+                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg transition-all text-sm sm:text-base"
               >
-                흡연부스 회피 경로 탐색
+                홈으로
               </button>
             </div>
-          </form>
-        </MergeAnimation>
+          </MergeAnimation>
 
-        {/* 경로 정보 */}
-        {routeDistance && (
-          <MergeAnimation direction="right" delay={0.3}>
+          {/* 실시간 정보 카드 */}
+          <MergeAnimation direction="right" delay={0.1} className="mb-6">
             <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                 <div className="text-center sm:text-left">
-                  <p className="text-sm text-gray-500">예상 거리</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-600">
-                    {(routeDistance / 1000).toFixed(2)} km
+                  <p className="text-xs sm:text-sm text-gray-500">실시간 정보</p>
+                  <p className="text-lg sm:text-xl font-bold text-gray-800">
+                    {currentTime.toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      weekday: "long",
+                    })}
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                    {currentTime.toLocaleTimeString("ko-KR")}
                   </p>
                 </div>
-                <div className="text-center sm:text-right">
-                  <p className="text-sm text-gray-500">흡연부스 회피 경로</p>
-                  <p className="text-lg sm:text-xl font-semibold text-gray-700">
-                    최적 경로 적용됨
-                  </p>
-                </div>
+                {environmentData && (
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1">미세먼지</p>
+                      <p className="text-lg sm:text-2xl font-bold text-blue-600">
+                        {environmentData.airQuality.value}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {environmentData.airQuality.level}
+                      </p>
+                    </div>
+                    <div className="border-x border-gray-200 px-4">
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1">날씨</p>
+                      <p className="text-lg sm:text-2xl font-bold text-green-600">
+                        {environmentData.weather.condition}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-500 mb-1">기온</p>
+                      <p className="text-lg sm:text-2xl font-bold text-orange-600">
+                        {environmentData.weather.temp}°C
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </MergeAnimation>
-        )}
+
+          {/* 검색 폼 */}
+          <MergeAnimation direction="left" delay={0.2} className="mb-6">
+            <form
+              onSubmit={handleSearch}
+              className="bg-white rounded-2xl shadow-lg p-4 sm:p-6"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="출발지 (비워두면 현재 위치)"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                    value={startKeyword}
+                    onChange={(e) => setStartKeyword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleUseCurrentLocation}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:text-blue-800"
+                  >
+                    현재 위치
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="목적지 (전국 어디든 검색 가능)"
+                  className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  value={destKeyword}
+                  onChange={(e) => setDestKeyword(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="lg:col-span-2 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all text-sm sm:text-base"
+                >
+                  흡연부스 회피 경로 탐색
+                </button>
+              </div>
+            </form>
+          </MergeAnimation>
+
+          {/* 경로 정보 */}
+          {routeDistance && (
+            <MergeAnimation direction="right" delay={0.3}>
+              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <p className="text-sm text-gray-500">예상 거리</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-green-600">
+                      {(routeDistance / 1000).toFixed(2)} km
+                    </p>
+                  </div>
+                  <div className="text-center sm:text-right">
+                    <p className="text-sm text-gray-500">흡연부스 회피 경로</p>
+                    <p className="text-lg sm:text-xl font-semibold text-gray-700">
+                      최적 경로 적용됨
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </MergeAnimation>
+          )}
+        </div>
       </section>
 
       {/* ========== 섹션 2: 지도 영역 ========== */}
       <section className="flex-1 w-full px-4 pb-6 md:px-8 lg:px-16 min-h-[400px] md:min-h-[500px]">
-        <MergeAnimation direction="left" delay={0.4} className="h-full">
-          <div className="relative shadow-2xl border border-gray-200 rounded-2xl overflow-hidden h-full">
-            <div ref={mapContainerRef} className="w-full h-full min-h-[400px] md:min-h-[500px]" />
+        <div className="w-full max-w-[1400px] mx-auto h-full">
+          <MergeAnimation direction="left" delay={0.4} className="h-full">
+            <div className="relative shadow-2xl border border-gray-200 rounded-2xl overflow-hidden h-full">
+              <div ref={mapContainerRef} className="w-full h-full min-h-[400px] md:min-h-[500px]" />
 
-            {/* 진단 오버레이 */}
-            {(mapError || mapStatus !== "완료") && (
-              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
-                <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
-                {mapError && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
-                    <p className="text-xs text-red-500">{mapError}</p>
+              {/* 진단 오버레이 */}
+              {(mapError || mapStatus !== "완료") && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-50/90 backdrop-blur-sm p-6 text-center">
+                  <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-2">지도 진단 중...</h3>
+                  <p className="text-[11px] text-gray-600 mb-1">상태: <span className="font-mono text-blue-600">{mapStatus}</span></p>
+                  {mapError && (
+                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-xs font-bold text-red-600 mb-1">오류 발생</p>
+                      <p className="text-xs text-red-500">{mapError}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Custom Zoom Controls (Bottom Left) */}
+              <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
+                <button
+                  onClick={handleZoomIn}
+                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  title="확대"
+                >
+                  <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
+                </button>
+                <button
+                  onClick={handleZoomOut}
+                  className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
+                  title="축소"
+                >
+                  <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
+                </button>
+              </div>
+
+              {/* 거리별 흡연구역 수량 박스 (상시 또는 검색 결과) */}
+              <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-red-100 min-w-[180px]">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">📊</span>
+                  <h4 className="text-sm font-bold text-gray-900">흡연구역 통계</h4>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-red-700">반경 500m</span>
+                    <span className="text-sm font-black text-red-900">{nearbyInfo ? nearbyInfo.within500m : "-"}개</span>
                   </div>
-                )}
+                  <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-orange-700">반경 1km</span>
+                    <span className="text-sm font-black text-orange-900">{nearbyInfo ? nearbyInfo.within1km : "-"}개</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-[10px] font-bold text-gray-700">전국 합계</span>
+                    <span className="text-sm font-black text-gray-900">{nationalBooths.length}개</span>
+                  </div>
+                </div>
+                <p className="text-[9px] text-gray-400 mt-2 text-center">
+                  {nearbyInfo ? "목적지 주변 수량" : "전국 데이터 로드됨"}
+                </p>
               </div>
-            )}
-
-            {/* Custom Zoom Controls (Bottom Left) */}
-            <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2">
-              <button
-                onClick={handleZoomIn}
-                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-                title="확대"
-              >
-                <img src={`${import.meta.env.BASE_URL}image/zoom-in.png`} alt="확대" className="w-full h-full object-contain p-2" />
-              </button>
-              <button
-                onClick={handleZoomOut}
-                className="relative w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110 active:scale-95 z-30 !p-0 overflow-hidden"
-                title="축소"
-              >
-                <img src={`${import.meta.env.BASE_URL}image/zoom-out.png`} alt="축소" className="w-full h-full object-contain p-2" />
-              </button>
             </div>
-
-            {/* 거리별 흡연구역 수량 박스 (상시 또는 검색 결과) */}
-            <div className="absolute top-4 left-4 z-50 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-red-100 min-w-[180px]">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl">📊</span>
-                <h4 className="text-sm font-bold text-gray-900">흡연구역 통계</h4>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-                  <span className="text-[10px] font-bold text-red-700">반경 500m</span>
-                  <span className="text-sm font-black text-red-900">{nearbyInfo ? nearbyInfo.within500m : "-"}개</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
-                  <span className="text-[10px] font-bold text-orange-700">반경 1km</span>
-                  <span className="text-sm font-black text-orange-900">{nearbyInfo ? nearbyInfo.within1km : "-"}개</span>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                  <span className="text-[10px] font-bold text-gray-700">전국 합계</span>
-                  <span className="text-sm font-black text-gray-900">{nationalBooths.length}개</span>
-                </div>
-              </div>
-              <p className="text-[9px] text-gray-400 mt-2 text-center">
-                {nearbyInfo ? "목적지 주변 수량" : "전국 데이터 로드됨"}
-              </p>
-            </div>
-          </div>
-        </MergeAnimation>
+          </MergeAnimation>
+        </div>
       </section>
 
       {/* ========== 섹션 3: 안내 및 정보 영역 ========== */}
       <section className="w-full px-4 py-8 md:px-8 lg:px-16 bg-white">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full max-w-[1400px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <MergeAnimation direction="left" delay={0.5}>
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6">

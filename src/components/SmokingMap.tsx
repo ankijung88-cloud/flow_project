@@ -283,7 +283,7 @@ export default function SmokingMap({ onBack }: SmokingMapProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-[1440px] mx-auto min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-center w-full max-w-[1400px] mx-auto min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
       {/* 1. 상단 검색 바 영역 (지도 프레임 밖) */}
       <div className="w-full mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>

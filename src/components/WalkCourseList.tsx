@@ -246,7 +246,7 @@ export default function WalkCourseList({
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-green-50 via-white to-blue-50 z-[9999] overflow-y-auto overflow-x-hidden">
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 헤더 */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
