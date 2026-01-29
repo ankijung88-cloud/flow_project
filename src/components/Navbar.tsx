@@ -79,7 +79,7 @@ export default function Navbar() {
             >
               <div className="w-14 h-14 overflow-hidden rounded-full">
                 <img
-                  src={`${import.meta.env.BASE_URL}image/logo.png`}
+                  src={`${import.meta.env.BASE_URL}image/logo.png?v=restore`}
                   alt="FLOW 로고"
                   className="w-full h-full object-contain"
                 />

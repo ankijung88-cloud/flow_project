@@ -9,7 +9,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-2">
               <div className="w-6 h-6">
                 <img
-                  src={`${import.meta.env.BASE_URL}image/logo.png`}
+                  src={`${import.meta.env.BASE_URL}image/logo.png?v=restore`}
                   alt="AI Partner 로고"
                   className="w-full h-full object-contain"
                 />
