@@ -23,57 +23,106 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
           </p>
         </div>
 
-        {/* 서비스 특징 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 4xl:gap-12 5xl:gap-20 mb-16 4xl:mb-32 5xl:mb-40">
-          <div
-            onClick={onLocationServiceClick}
-            className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
-              <img
-                src={`${import.meta.env.BASE_URL}image/위치서비스.png`}
-                alt="위치 서비스 아이콘"
-                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
-              />
-            </div>
-            <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">위치 서비스</h3>
-            <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
-              전국 300개 이상의 흡연부스 위치를 실시간으로 확인하고 가장 가까운 곳을 찾아보세요
-            </p>
+        {/* 서비스 특징 카드 Section with Unified Background */}
+        <div className="relative rounded-[40px] p-8 md:p-12 overflow-hidden bg-gradient-to-br from-emerald-50/80 via-cyan-50/80 to-blue-50/80 dark:from-emerald-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 shadow-xl border border-white/40 dark:border-white/5 mb-16 4xl:mb-32 5xl:mb-40">
+          {/* Decorative Flow Patterns (Geometric Waves) */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <svg className="absolute w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="flowGradientFeature" x1="0%" y1="0%" x2="100%" y2="50%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" /> {/* Emerald */}
+                  <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" /> {/* Cyan */}
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" /> {/* Blue */}
+                </linearGradient>
+              </defs>
+              {/* Wave 1 - Large & Slow */}
+              <path
+                d="M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z"
+                fill="url(#flowGradientFeature)"
+                className="opacity-20 mix-blend-multiply dark:mix-blend-overlay"
+              >
+                <animate
+                  attributeName="d"
+                  dur="18s"
+                  repeatCount="indefinite"
+                  values="
+                      M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z;
+                      M0,600 C350,550 500,600 750,450 C950,300 1200,350 1200,350 L1200,800 L0,800 Z;
+                      M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z
+                    "
+                />
+              </path>
+              {/* Wave 2 - Medium & Offset */}
+              <path
+                d="M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z"
+                fill="url(#flowGradientFeature)"
+                className="opacity-30 mix-blend-multiply dark:mix-blend-overlay"
+              >
+                <animate
+                  attributeName="d"
+                  dur="12s"
+                  repeatCount="indefinite"
+                  values="
+                      M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z;
+                      M0,400 C450,350 550,550 950,250 C1050,150 1200,250 1200,250 L1200,800 L0,800 Z;
+                      M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z
+                    "
+                />
+              </path>
+            </svg>
           </div>
 
-          <div
-            onClick={onCongestionMonitoringClick}
-            className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
-              <img
-                src={`${import.meta.env.BASE_URL}image/혼잡도모니터링.png`}
-                alt="혼잡도 모니터링 아이콘"
-                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
-              />
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 4xl:gap-12 5xl:gap-20">
+            <div
+              onClick={onLocationServiceClick}
+              className="bg-white/30 dark:bg-black/20 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border border-white/50 dark:border-white/10 shadow-sm hover:shadow-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 cursor-pointer group"
+            >
+              <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
+                <img
+                  src={`${import.meta.env.BASE_URL}image/위치서비스.png`}
+                  alt="위치 서비스 아이콘"
+                  className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center text-gray-900 dark:text-white drop-shadow-sm">위치 서비스</h3>
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
+                전국 300개 이상의 흡연부스 위치를 실시간으로 확인하고 가장 가까운 곳을 찾아보세요
+              </p>
             </div>
-            <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">혼잡도 모니터링</h3>
-            <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
-              전국 주요 지역의 실시간 인구 밀집도를 확인하고 최적의 방문 시간을 계획하세요
-            </p>
-          </div>
 
-          <div
-            onClick={onWalkRecommendationClick}
-            className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
-              <img
-                src={`${import.meta.env.BASE_URL}image/산책코스추천.png`}
-                alt="산책 코스 추천 아이콘"
-                className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md"
-              />
+            <div
+              onClick={onCongestionMonitoringClick}
+              className="bg-white/30 dark:bg-black/20 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border border-white/50 dark:border-white/10 shadow-sm hover:shadow-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 cursor-pointer group"
+            >
+              <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
+                <img
+                  src={`${import.meta.env.BASE_URL}image/혼잡도모니터링.png`}
+                  alt="혼잡도 모니터링 아이콘"
+                  className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center text-gray-900 dark:text-white drop-shadow-sm">혼잡도 모니터링</h3>
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
+                전국 주요 지역의 실시간 인구 밀집도를 확인하고 최적의 방문 시간을 계획하세요
+              </p>
             </div>
-            <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">산책 코스 추천</h3>
-            <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
-              건강하고 쾌적한 산책 코스를 추천받아 여유로운 시간을 보내세요
-            </p>
+
+            <div
+              onClick={onWalkRecommendationClick}
+              className="bg-white/30 dark:bg-black/20 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border border-white/50 dark:border-white/10 shadow-sm hover:shadow-xl hover:bg-white/50 dark:hover:bg-white/10 transition-all duration-300 hover:scale-105 cursor-pointer group"
+            >
+              <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-32 md:h-40 4xl:h-56 5xl:h-64">
+                <img
+                  src={`${import.meta.env.BASE_URL}image/산책코스추천.png`}
+                  alt="산책 코스 추천 아이콘"
+                  className="w-24 h-24 md:w-32 md:h-32 4xl:w-48 4xl:h-48 5xl:w-56 5xl:h-56 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center text-gray-900 dark:text-white drop-shadow-sm">산책 코스 추천</h3>
+              <p className="text-gray-700 dark:text-gray-300 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
+                건강하고 쾌적한 산책 코스를 추천받아 여유로운 시간을 보내세요
+              </p>
+            </div>
           </div>
         </div>
 
