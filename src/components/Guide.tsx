@@ -40,7 +40,13 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
             onClick={onCongestionMonitoringClick}
             className="bg-white/40 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 md:p-10 4xl:p-14 5xl:p-20 border-2 border-white/30 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
           >
-            <div className="text-5xl 4xl:text-7xl 5xl:text-8xl mb-6 4xl:mb-10 text-center">📊</div>
+            <div className="mb-6 4xl:mb-10 text-center flex justify-center items-center h-16 md:h-20 4xl:h-28 5xl:h-32">
+              <img
+                src={`${import.meta.env.BASE_URL}image/혼잡도모니터링.png`}
+                alt="혼잡도 모니터링 아이콘"
+                className="w-12 h-12 md:w-16 md:h-16 4xl:w-24 4xl:h-24 5xl:w-28 5xl:h-28 object-contain drop-shadow-md mix-blend-multiply"
+              />
+            </div>
             <h3 className="text-2xl 4xl:text-4xl 5xl:text-5xl font-bold mb-4 4xl:mb-8 text-center">혼잡도 모니터링</h3>
             <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg 4xl:text-2xl 5xl:text-3xl text-center leading-relaxed">
               전국 주요 지역의 실시간 인구 밀집도를 확인하고 최적의 방문 시간을 계획하세요
