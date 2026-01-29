@@ -240,7 +240,7 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
         <div className="flex flex-col items-center text-center gap-5 4xl:gap-10 5xl:gap-16">
           <button
             onClick={onWalkClick}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-10 py-4 xs:px-12 xs:py-5 4xl:px-20 4xl:py-8 5xl:px-28 5xl:py-10 rounded-full text-lg xs:text-xl 3xl:text-2xl 4xl:text-4xl 5xl:text-5xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-110 transform"
+            className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-10 py-4 xs:px-12 xs:py-5 4xl:px-20 4xl:py-8 5xl:px-28 5xl:py-10 rounded-full text-lg xs:text-xl 3xl:text-2xl 4xl:text-4xl 5xl:text-5xl font-bold hover:from-blue-700 hover:to-green-700 transition-all duration-300 shadow-2xl hover:shadow-3xl hover:scale-110 transform"
           >
             🚶 산책 코스 신청하기
           </button>
