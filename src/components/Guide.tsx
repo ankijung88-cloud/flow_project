@@ -91,10 +91,67 @@ export default function Guide({ onWalkClick, onLocationServiceClick, onCongestio
 
           {/* Unified Flow Background Container */}
           <div className="relative rounded-[40px] p-8 md:p-12 overflow-hidden bg-gradient-to-br from-emerald-50/80 via-cyan-50/80 to-blue-50/80 dark:from-emerald-900/20 dark:via-cyan-900/20 dark:to-blue-900/20 shadow-xl border border-white/40 dark:border-white/5">
-            {/* Decorative Flow Patterns (Air/Wave effect) */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-              <div className="absolute top-[-50%] left-[-20%] w-[150%] h-[150%] bg-gradient-to-r from-transparent via-white/40 to-transparent rotate-45 blur-3xl opacity-50 dark:opacity-10 animate-pulse" style={{ animationDuration: '8s' }} />
-              <div className="absolute bottom-[-50%] right-[-20%] w-[150%] h-[150%] bg-gradient-to-l from-transparent via-blue-100/40 to-transparent rotate-45 blur-3xl opacity-50 dark:opacity-10" />
+            {/* Decorative Flow Patterns (Geometric Waves) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <svg className="absolute w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="50%">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" /> {/* Emerald */}
+                    <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" /> {/* Cyan */}
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" /> {/* Blue */}
+                  </linearGradient>
+                </defs>
+                {/* Wave 1 - Large & Slow */}
+                <path
+                  d="M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z"
+                  fill="url(#flowGradient)"
+                  className="opacity-20 mix-blend-multiply dark:mix-blend-overlay"
+                >
+                  <animate
+                    attributeName="d"
+                    dur="15s"
+                    repeatCount="indefinite"
+                    values="
+                      M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z;
+                      M0,600 C350,550 500,600 750,450 C950,300 1200,350 1200,350 L1200,800 L0,800 Z;
+                      M0,600 C300,500 400,700 800,400 C1000,250 1200,300 1200,300 L1200,800 L0,800 Z
+                    "
+                  />
+                </path>
+                {/* Wave 2 - Medium & Offset */}
+                <path
+                  d="M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z"
+                  fill="url(#flowGradient)"
+                  className="opacity-30 mix-blend-multiply dark:mix-blend-overlay"
+                >
+                  <animate
+                    attributeName="d"
+                    dur="10s"
+                    repeatCount="indefinite"
+                    values="
+                      M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z;
+                      M0,400 C450,350 550,550 950,250 C1050,150 1200,250 1200,250 L1200,800 L0,800 Z;
+                      M0,400 C400,300 600,600 900,300 C1100,100 1200,200 1200,200 L1200,800 L0,800 Z
+                    "
+                  />
+                </path>
+                {/* Wave 3 - High & Fast - Creates 'Air flow' lines */}
+                <path
+                  fill="none"
+                  stroke="url(#flowGradient)"
+                  strokeWidth="2"
+                  className="opacity-40"
+                  d="M0,200 C300,300 600,100 1200,200"
+                />
+                <path
+                  fill="none"
+                  stroke="url(#flowGradient)"
+                  strokeWidth="2"
+                  className="opacity-40"
+                  d="M0,250 C350,350 650,150 1200,250"
+                  style={{ transform: 'translateY(20px)' }}
+                />
+              </svg>
             </div>
 
             <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 4xl:grid-cols-8 gap-6 4xl:gap-10">
