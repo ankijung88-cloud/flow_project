@@ -3,12 +3,10 @@ import Home from "./pages/Home";
 import ServicePage from "./pages/ServicePage";
 import SmokingBoothDetailPage from "./pages/SmokingBoothDetailPage";
 import CrowdDetailPage from "./pages/CrowdDetailPage";
-import FlowBackground from "./components/FlowBackground";
 
 export default function App() {
   return (
     <>
-      <FlowBackground />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/service" element={<ServicePage />} />
