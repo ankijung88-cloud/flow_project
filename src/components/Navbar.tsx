@@ -125,10 +125,10 @@ export default function Navbar() {
               }}
               className={`
                 ${useDropdown
-                  ? "flex flex-col items-center py-6 gap-6 absolute top-[110px] right-8 w-64 bg-gray-900/90 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
+                  ? "flex flex-col items-center py-6 gap-6 fixed top-[100px] right-8 w-64 bg-gray-900/95 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
                   : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
                 }
-                z-40
+                z-[99999]
               `}
             >
               {menuItems.map((item, index) => (
