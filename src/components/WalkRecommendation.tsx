@@ -185,9 +185,9 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="text-center mb-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
             🚶 산책 코스 추천
@@ -199,7 +199,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       </div>
 
       {/* 통계 카드 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-xl">
             <p className="text-sm font-semibold mb-2">추천 코스</p>
@@ -221,7 +221,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       </div>
 
       {/* 필터 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="bg-white rounded-2xl shadow-xl border-2 border-green-200 p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-4">코스 필터</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -277,7 +277,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       </div>
 
       {/* 코스 목록 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-900">
             추천 코스 ({filteredCourses.length}개)
@@ -364,7 +364,7 @@ export default function WalkRecommendation({ onBack, onShowWalkList }: WalkRecom
       </div>
 
       {/* 하단 버튼 */}
-      <div className="mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <button
           onClick={() => {
             onBack();

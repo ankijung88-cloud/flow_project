@@ -249,9 +249,9 @@ export default function LocationService({ onBack }: LocationServiceProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="text-center mb-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
             🗺️ 위치 서비스
@@ -263,7 +263,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       </div>
 
       {/* 통계 카드 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
             <p className="text-sm font-semibold mb-2">전국 흡연부스</p>
@@ -291,7 +291,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       </div>
 
       {/* 지도 + 가까운 흡연부스 목록 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 지도 */}
           <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-200 p-6">
@@ -390,7 +390,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       </div>
 
       {/* 지역별 흡연부스 통계 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="bg-white rounded-2xl shadow-2xl border-2 border-purple-200 p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">지역별 흡연부스 분포</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -410,7 +410,7 @@ export default function LocationService({ onBack }: LocationServiceProps) {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <button
           onClick={() => {
             onBack();

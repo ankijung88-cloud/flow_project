@@ -43,7 +43,7 @@ async function main() {
     const files = fs.readdirSync(imageDir);
     for (const file of files) {
         // Process png and jpg
-        if (file.match(/\.(png|jpg|jpeg)$/i)) {
+        if (file.match(/\.(png|jpg|jpeg)$/i) && file !== 'logo.png') {
             await processImage(path.join(imageDir, file));
         }
     }

@@ -267,9 +267,9 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
   };
 
   return (
-    <div className="flex flex-col items-center justify-start w-screen min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col items-center justify-start w-full min-h-screen bg-transparent transition-colors duration-500 p-4 sm:p-6 md:p-8">
       {/* 헤더 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="text-center mb-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4">
             📊 혼잡도 모니터링
@@ -281,7 +281,7 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       </div>
 
       {/* 통계 카드 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
             <p className="text-sm font-semibold mb-2">모니터링 지역</p>
@@ -303,7 +303,7 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       </div>
 
       {/* 지도 + 선택된 지역 정보 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 지도 */}
           <div className="bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 p-6 relative group">
@@ -436,7 +436,7 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       </div>
 
       {/* 전체 지역 혼잡도 순위 */}
-      <div className="w-full w-full mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <div className="bg-white rounded-2xl shadow-2xl border-2 border-pink-200 p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">지역별 혼잡도 순위</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -470,7 +470,7 @@ export default function CongestionMonitoring({ onBack }: CongestionMonitoringPro
       </div>
 
       {/* 하단 버튼 */}
-      <div className="mb-8">
+      <div className="w-full max-w-7xl mb-8">
         <button
           onClick={() => {
             onBack();
