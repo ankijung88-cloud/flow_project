@@ -103,81 +103,7 @@ export default function Navbar() {
               </span>
             </div>
 
-            {/* 데스크탑/모바일 통합 메뉴 - 조건부 레이아웃 및 애니메이션 */}
-            <motion.ul
-              initial={useDropdown ? "closed" : "open"}
-              animate={menuOpen ? "open" : "closed"}
-              variants={{
-                open: {
-                  opacity: 1,
-                  scale: 1,
-                  x: useDropdown ? 0 : "-50%", // 데스크탑 Hero 모드에서만 중앙 정렬
-                  pointerEvents: "auto",
-                  transition: { duration: 0.3 }
-                },
-                closed: {
-                  opacity: useDropdown ? 0 : 1,
-                  scale: useDropdown ? 0.95 : 1,
-                  x: useDropdown ? 0 : "-50%",
-                  pointerEvents: useDropdown ? "none" : "auto",
-                  transition: { duration: 0.3 }
-                }
-              }}
-              className={`
-                ${useDropdown
-                  ? "flex flex-col items-center py-6 gap-6 fixed top-[100px] right-8 w-64 bg-gray-900/95 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
-                  : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
-                }
-                z-[99999]
-              `}
-            >
-              {menuItems.map((item, index) => (
-                <motion.li
-                  key={item.name}
-                  custom={index}
-                  initial={useDropdown ? "closed" : "open"}
-                  animate={menuOpen ? "open" : "closed"}
-                  variants={{
-                    open: (i: number) => ({
-                      opacity: 1,
-                      x: 0,
-                      y: 0,
-                      scale: 1,
-                      filter: "blur(0px)",
-                      transition: {
-                        type: "spring",
-                        stiffness: 180,
-                        damping: 24,
-                        delay: i * 0.04
-                      }
-                    }),
-                    closed: (i: number) => ({
-                      opacity: 0,
-                      // Dropdown 모드: 위쪽으로 사라짐 / Hero 모드: 중앙 버튼으로 모임
-                      x: useDropdown ? 0 : 600 - (i - 2) * 150,
-                      y: useDropdown ? -50 : 20,
-                      scale: 0,
-                      filter: "blur(12px)",
-                      transition: {
-                        duration: 0.3,
-                        ease: [0.32, 0, 0.67, 0],
-                        delay: (menuItems.length - 1 - i) * 0.03
-                      }
-                    }
-                    )
-                  }}
-                  onClick={() => handleScrollToSection(item.target)}
-                  className={`cursor-pointer transition font-bold text-2xl ${useDropdown ? "text-white" : "text-white"} hover:text-indigo-400 hover:scale-[1.1]`}
-                >
-                  <span className="relative inline-block group">
-                    {item.name}
-                    {!isMobile && (
-                      <span className="absolute left-0 bottom-0.5 w-full h-[3px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                    )}
-                  </span>
-                </motion.li>
-              ))}
-            </motion.ul>
+
 
             {/* Right side placeholder to maintain spacing if needed */}
             <div className="w-12 h-12"></div>
@@ -187,7 +113,83 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* 2. Permanent Fixed Buttons (Mode & Hamburger) */}
+      {/* 2. Menu Layer (Moved out of Nav for Fixed Positioning Context) */}
+      <motion.ul
+        initial={useDropdown ? "closed" : "open"}
+        animate={menuOpen ? "open" : "closed"}
+        variants={{
+          open: {
+            opacity: 1,
+            scale: 1,
+            x: useDropdown ? 0 : "-50%", // 데스크탑 Hero 모드에서만 중앙 정렬
+            pointerEvents: "auto",
+            transition: { duration: 0.3 }
+          },
+          closed: {
+            opacity: useDropdown ? 0 : 1,
+            scale: useDropdown ? 0.95 : 1,
+            x: useDropdown ? 0 : "-50%",
+            pointerEvents: useDropdown ? "none" : "auto",
+            transition: { duration: 0.3 }
+          }
+        }}
+        className={`
+                ${useDropdown
+            ? "flex flex-col items-center py-6 gap-6 fixed top-[100px] right-8 w-64 bg-gray-900/95 backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[30px]"
+            : "flex items-center justify-center gap-[150px] absolute left-1/2 whitespace-nowrap"
+          }
+                z-[99999]
+              `}
+      >
+        {menuItems.map((item, index) => (
+          <motion.li
+            key={item.name}
+            custom={index}
+            initial={useDropdown ? "closed" : "open"}
+            animate={menuOpen ? "open" : "closed"}
+            variants={{
+              open: (i: number) => ({
+                opacity: 1,
+                x: 0,
+                y: 0,
+                scale: 1,
+                filter: "blur(0px)",
+                transition: {
+                  type: "spring",
+                  stiffness: 180,
+                  damping: 24,
+                  delay: i * 0.04
+                }
+              }),
+              closed: (i: number) => ({
+                opacity: 0,
+                // Dropdown 모드: 위쪽으로 사라짐 / Hero 모드: 중앙 버튼으로 모임
+                x: useDropdown ? 0 : 600 - (i - 2) * 150,
+                y: useDropdown ? -50 : 20,
+                scale: 0,
+                filter: "blur(12px)",
+                transition: {
+                  duration: 0.3,
+                  ease: [0.32, 0, 0.67, 0],
+                  delay: (menuItems.length - 1 - i) * 0.03
+                }
+              }
+              )
+            }}
+            onClick={() => handleScrollToSection(item.target)}
+            className={`cursor-pointer transition font-bold text-2xl ${useDropdown ? "text-white" : "text-white"} hover:text-indigo-400 hover:scale-[1.1]`}
+          >
+            <span className="relative inline-block group">
+              {item.name}
+              {!isMobile && (
+                <span className="absolute left-0 bottom-0.5 w-full h-[3px] bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              )}
+            </span>
+          </motion.li>
+        ))}
+      </motion.ul>
+
+      {/* 3. Permanent Fixed Buttons (Mode & Hamburger) */}
       <div className="fixed top-[45px] right-8 flex items-center z-[100000]">
         {/* Theme Toggle Button - Fixed and Spaced */}
         <button
